@@ -24,7 +24,7 @@ class ZBuffer {
  private:
   int GetIndex(WidthT width, HeightT height) const;
 
-  int width_;
+  int width_ = 0;
   std::vector<Scalar> data_;
 };
 

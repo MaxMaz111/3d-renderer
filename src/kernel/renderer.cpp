@@ -23,6 +23,10 @@ void Renderer::ResetTo(Width width, Height height) {
   rasterizer_.ResetTo(width, height);
 }
 
+void Renderer::ToggleHDR() {
+  rasterizer_.ToggleHDR();
+}
+
 const Frame& Renderer::Render(const Scene& scene) {
   util::TimeAnchor anchor("Rendering frametime",
                           [](const std::string& name, double time) {
@@ -37,9 +41,9 @@ const Frame& Renderer::Render(const Scene& scene) {
   auto shadow_lights = scene.ShadowMapLights();
   shadow_lights = RotateAndMove(std::move(shadow_lights), camera);
   lights = RotateAndMove(std::move(lights), camera);
-  meshes = RotateAndMove(std::move(meshes), camera);
+  meshes = camera.RotateAndMove(std::move(meshes));
   meshes = Clipper::Clip(std::move(meshes), camera.PlanesForClipping());
-  meshes = Project(std::move(meshes), camera);
+  meshes = camera.Project(std::move(meshes));
   return Rasterize(std::move(meshes), camera, lights, shadow_lights);
 }
 
@@ -67,37 +71,6 @@ std::vector<ShadowMapLight> Renderer::RotateAndMove(
                       }
                     });
   return lights;
-}
-
-std::vector<Mesh> Renderer::RotateAndMove(std::vector<Mesh>&& meshes,
-                                          const Camera& camera) const {
-  Matrix3 mat = camera.RotationMatrix().transpose();
-  Point3 translation = -camera.Position();
-  for (auto& mesh : meshes) {
-    tbb::parallel_for(
-        tbb::blocked_range<size_t>(0, mesh.triangles.size(), 4096),
-        [&](const tbb::blocked_range<size_t>& range) {
-          for (size_t i = range.begin(); i < range.end(); ++i) {
-            mesh.triangles[i].RotateAndMove(mat, translation);
-          }
-        });
-  }
-  return meshes;
-}
-
-std::vector<Mesh> Renderer::Project(std::vector<Mesh>&& meshes,
-                                    const Camera& camera) const {
-  const Matrix4& mat = camera.ProjectionMatrix();
-  for (auto& mesh : meshes) {
-    tbb::parallel_for(
-        tbb::blocked_range<size_t>(0, mesh.triangles.size(), 4096),
-        [&](const tbb::blocked_range<size_t>& range) {
-          for (size_t i = range.begin(); i < range.end(); ++i) {
-            mesh.triangles[i].Project(mat);
-          }
-        });
-  }
-  return meshes;
 }
 
 const Frame& Renderer::Rasterize(

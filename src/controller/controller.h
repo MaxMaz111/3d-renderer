@@ -27,6 +27,7 @@ class State {
     DownArrow = 1 << 9,
     RightArrow = 1 << 10,
     L = 1 << 11,
+    H = 1 << 12,
   };
 
   class KeyIterator {

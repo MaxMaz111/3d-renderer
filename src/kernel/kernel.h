@@ -32,6 +32,7 @@ class Kernel {
   void SwivelRight();
   void SwapRenderingMode();
   void AddShadowLight();
+  void ToggleHDR();
   void NotifyView();
 
  private:

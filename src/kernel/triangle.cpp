@@ -5,10 +5,8 @@
 #include <array>
 #include <cmath>
 #include <limits>
+#include <tbb/parallel_for.h>
 
-#include "kernel/z_buffer.h"
-
-#include "color.h"
 #include "directional_light.h"
 #include "linalg.h"
 #include "shadow_map_light.h"
@@ -36,6 +34,11 @@ void Triangle::RotateAndMove(const Matrix3& rotation_matrix,
 void Triangle::Project(const Matrix4& projection_matrix) {
   for (auto& vertex : vertices_) {
     Point4 clip = projection_matrix * ToHomogeneous(vertex.point);
+    if (std::abs(clip.w()) < kEpsilon) {
+      vertex.inv_w = 0;
+      vertex.point = Point3(clip.x(), clip.y(), clip.z());
+      continue;
+    }
     vertex.inv_w = 1 / clip.w();
     vertex.point = Point3(clip.x() * vertex.inv_w, clip.y() * vertex.inv_w,
                           clip.z() * vertex.inv_w);
@@ -55,24 +58,28 @@ Scalar Triangle::InterpolateZ(XAxis x, YAxis y) const {
   return alpha * p0.z() + beta * p1.z() + gamma * p2.z();
 }
 
-QRgb Triangle::InterpolateColor(
+LightSample Triangle::InterpolateColor(
     XAxis x, YAxis y, const std::vector<DirectionalLight>& lights,
     const std::vector<ShadowMapLight>& shadow_lights,
     const Texture& diffuse_texture) const {
-  auto normal = InterpolateNormal(x, y);
-  auto tex_coord = InterpolateTexCoord(x, y);
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  if (!weights.has_value()) {
+    return {qRgb(0, 0, 0), 0};
+  }
+
+  auto normal = InterpolateNormal(*weights);
+  auto tex_coord = InterpolateTexCoord(*weights);
   auto base_color = diffuse_texture.Sample(tex_coord);
   Scalar ambient = 0;
   Scalar diffuse_intensity = ambient;
   for (const auto& light : lights) {
     diffuse_intensity += light.CalculateIntensity(normal);
   }
-  Point3 world_point = InterpolateWorldPoint(x, y);
+  Point3 world_point = InterpolateWorldPoint(*weights);
   for (const auto& shadow : shadow_lights) {
     diffuse_intensity += shadow.CalculateIntensity(normal, world_point);
   }
-  diffuse_intensity = std::clamp(diffuse_intensity, 0.0f, 1.0f);
-  return Color::ScaleColor(base_color, diffuse_intensity);
+  return {base_color, diffuse_intensity};
 }
 
 Scalar Triangle::GetMinX() const {
@@ -95,17 +102,17 @@ Scalar Triangle::GetMaxY() const {
       {vertices_[0].point.y(), vertices_[1].point.y(), vertices_[2].point.y()});
 }
 
-Triangle::BBox Triangle::GetBoundingBox(const ZBuffer& z_buffer) const {
+Triangle::BBox Triangle::GetBoundingBox(Width width, Height height) const {
+  int w = width, h = height;
   BBox bbox;
   bbox.min_x = std::floor(GetMinX());
-  bbox.min_x = std::max(bbox.min_x, static_cast<int16_t>(0));
+  bbox.min_x = std::max(bbox.min_x, 0);
   bbox.max_x = std::ceil(GetMaxX());
-  bbox.max_x = std::min(bbox.max_x, static_cast<int16_t>(z_buffer.Width() - 1));
+  bbox.max_x = std::min(bbox.max_x, w - 1);
   bbox.min_y = std::floor(GetMinY());
-  bbox.min_y = std::max(bbox.min_y, static_cast<int16_t>(0));
+  bbox.min_y = std::max(bbox.min_y, 0);
   bbox.max_y = std::ceil(GetMaxY());
-  bbox.max_y =
-      std::min(bbox.max_y, static_cast<int16_t>(z_buffer.Height() - 1));
+  bbox.max_y = std::min(bbox.max_y, h - 1);
   return bbox;
 }
 
@@ -171,30 +178,46 @@ std::optional<std::array<Scalar, 3>> Triangle::PerspectiveCorrectBarycentric(
 
 Point2 Triangle::InterpolateTexCoord(XAxis x, YAxis y) const {
   auto weights = PerspectiveCorrectBarycentric(x, y);
-  assert(weights.has_value());
-
-  const auto [alpha, beta, gamma] = *weights;
-
-  return alpha * vertices_[0].tex_coord + beta * vertices_[1].tex_coord +
-         gamma * vertices_[2].tex_coord;
+  if (!weights.has_value()) {
+    return Point2::Zero();
+  }
+  return InterpolateTexCoord(*weights);
 }
 
 Vector3 Triangle::InterpolateNormal(XAxis x, YAxis y) const {
   auto weights = PerspectiveCorrectBarycentric(x, y);
-  assert(weights.has_value());
+  if (!weights.has_value()) {
+    return Vector3{0, 0, 1};
+  }
+  return InterpolateNormal(*weights);
+}
 
-  const auto [alpha, beta, gamma] = *weights;
+Point3 Triangle::InterpolateWorldPoint(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  if (!weights.has_value()) {
+    return Point3::Zero();
+  }
+  return InterpolateWorldPoint(*weights);
+}
 
+Point2 Triangle::InterpolateTexCoord(
+    const std::array<Scalar, 3>& weights) const {
+  const auto [alpha, beta, gamma] = weights;
+  return alpha * vertices_[0].tex_coord + beta * vertices_[1].tex_coord +
+         gamma * vertices_[2].tex_coord;
+}
+
+Vector3 Triangle::InterpolateNormal(
+    const std::array<Scalar, 3>& weights) const {
+  const auto [alpha, beta, gamma] = weights;
   return (alpha * vertices_[0].normal + beta * vertices_[1].normal +
           gamma * vertices_[2].normal)
       .normalized();
 }
 
-Point3 Triangle::InterpolateWorldPoint(XAxis x, YAxis y) const {
-  auto weights = PerspectiveCorrectBarycentric(x, y);
-  assert(weights.has_value());
-
-  const auto [alpha, beta, gamma] = *weights;
+Point3 Triangle::InterpolateWorldPoint(
+    const std::array<Scalar, 3>& weights) const {
+  const auto [alpha, beta, gamma] = weights;
   return alpha * vertices_[0].world_point + beta * vertices_[1].world_point +
          gamma * vertices_[2].world_point;
 }

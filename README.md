@@ -1,6 +1,6 @@
 # 3d-renderer
 
-Qt6-based standalone C++ application for rendering 3d models using projective geometry.
+Qt6-based standalone C++ application for rendering 3D models using projective geometry.
 
 ## Demo
 
@@ -65,10 +65,14 @@ The app expects a scene JSON path as the first argument:
 - `path` (string, required)
 - `is_normalized` (bool, optional, fallbacks to `false`) — normalizes model to a
 	unit bounding box centered at origin
-- `position`(`[x, y, z]`, optional, fallbacks to `[0, 0, 0]`)
+- `position` (`[x, y, z]`, optional, falls back to `[0, 0, 0]`)
 
 `lights` is an array of objects with:
-- `direction`(`[x, y, z]`, optional, fallbacks to `[0, 0, -1]`)
+- `direction` (`[x, y, z]`, optional, falls back to `[0, 0, -1]`)
+
+Parsing behavior:
+- Missing required fields or invalid value formats throw an exception.
+- Missing optional `position`, `is_normalized`, or light `direction` uses defaults.
 
 Relative model paths are resolved from the JSON file directory.
 

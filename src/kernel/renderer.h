@@ -22,6 +22,7 @@ class Renderer {
   Renderer(Width width, Height height);
 
   void ResetTo(Width width, Height height);
+  void ToggleHDR();
   const Frame& Render(const Scene& scene);
 
  private:
@@ -29,10 +30,6 @@ class Renderer {
       std::vector<DirectionalLight>&& lights, const Camera& camera) const;
   std::vector<ShadowMapLight> RotateAndMove(
       std::vector<ShadowMapLight>&& lights, const Camera& camera) const;
-  std::vector<Mesh> RotateAndMove(std::vector<Mesh>&& meshes,
-                                  const Camera& camera) const;
-  std::vector<Mesh> Project(std::vector<Mesh>&& meshes,
-                            const Camera& camera) const;
   const Frame& Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
                          const std::vector<DirectionalLight>& lights,
                          const std::vector<ShadowMapLight>& shadow_lights);

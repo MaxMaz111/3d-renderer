@@ -20,6 +20,7 @@ class Color {
  public:
   static QRgb Get(Red r, Green g, Blue b);
   static QRgb ScaleColor(QRgb color, Scalar intensity);
+  static void AddColor(QRgb* base, QRgb new_color);
   static void Blend(QRgb* base, QRgb new_color, Scalar blend_factor);
 
  private:

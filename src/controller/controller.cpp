@@ -80,6 +80,8 @@ State::Key State::ConvertQtKey(int key) {
       return Key::RightArrow;
     case Qt::Key_L:
       return Key::L;
+    case Qt::Key_H:
+      return Key::H;
     default:
       return Key::None;
   }
@@ -155,6 +157,9 @@ void Controller::NotifyKernel(State::KeyRange range) const {
         break;
       case State::Key::L:
         kernel_ptr_->AddShadowLight();
+        break;
+      case State::Key::H:
+        kernel_ptr_->ToggleHDR();
         break;
       case State::Key::UpArrow:
         kernel_ptr_->RotateUp();

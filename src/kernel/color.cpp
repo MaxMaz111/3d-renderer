@@ -15,6 +15,13 @@ QRgb Color::ScaleColor(QRgb color, Scalar intensity) {
   return qRgb(r, g, b);
 }
 
+void Color::AddColor(QRgb* base, QRgb new_color) {
+  int r = ClampComponent(ExtractRed(*base) + ExtractRed(new_color));
+  int g = ClampComponent(ExtractGreen(*base) + ExtractGreen(new_color));
+  int b = ClampComponent(ExtractBlue(*base) + ExtractBlue(new_color));
+  *base = qRgb(r, g, b);
+}
+
 void Color::Blend(QRgb* base, QRgb new_color, Scalar blend_factor) {
   int r = ClampComponent(ExtractRed(*base) * (1 - blend_factor) +
                          ExtractRed(new_color) * blend_factor);

@@ -70,6 +70,10 @@ void Kernel::AddShadowLight() {
   scene_.AddShadowLight();
 }
 
+void Kernel::ToggleHDR() {
+  renderer_.ToggleHDR();
+}
+
 void Kernel::NotifyView() {
   observable_.Notify();
 }

@@ -3,13 +3,14 @@
 #include <tbb/enumerable_thread_specific.h>
 #include <tbb/parallel_for.h>
 
-#include "camera.h"
 #include "mesh.h"
 #include "plane.h"
 
 namespace renderer::kernel {
 
 class Clipper {
+  static constexpr int kGrainSize = 4096;
+
  public:
   struct Split {
     std::vector<Vertex> inside;
@@ -40,43 +41,43 @@ class Clipper {
   static std::vector<Triangle> ClipTriangles(
       std::vector<Triangle>&& triangles, const std::array<Plane, N>& planes) {
     tbb::enumerable_thread_specific<std::vector<Triangle>> tls_output;
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, triangles.size(), 4096),
-                      [&](const tbb::blocked_range<size_t>& range) {
-                        auto& output = tls_output.local();
-                        std::vector<Triangle> current;
-                        std::vector<Triangle> next;
-                        current.reserve(2);
-                        next.reserve(2);
-                        for (size_t i = range.begin(); i < range.end(); ++i) {
-                          if (triangles[i].IsInside(planes)) {
-                            output.push_back(std::move(triangles[i]));
-                            continue;
-                          }
-                          current.clear();
-                          current.push_back(std::move(triangles[i]));
-                          for (const Plane& plane : planes) {
-                            if (current.empty()) {
-                              break;
-                            }
-                            next.clear();
-                            for (const Triangle& tri : current) {
-                              ClipTriangleByPlane(tri, plane);
-                              std::ranges::move(cache.clipped_triangles,
-                                                std::back_inserter(next));
-                            }
-                            current.swap(next);
-                          }
-                          std::ranges::move(current,
-                                            std::back_inserter(output));
-                        }
-                      });
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, triangles.size(), kGrainSize),
+        [&](const tbb::blocked_range<size_t>& range) {
+          auto& output = tls_output.local();
+          std::vector<Triangle> current;
+          std::vector<Triangle> next;
+          current.reserve(2);
+          next.reserve(2);
+          for (size_t i = range.begin(); i < range.end(); ++i) {
+            if (triangles[i].IsInside(planes)) {
+              output.push_back(std::move(triangles[i]));
+              continue;
+            }
+            current.clear();
+            current.push_back(std::move(triangles[i]));
+            for (const Plane& plane : planes) {
+              if (current.empty()) {
+                break;
+              }
+              next.clear();
+              for (const Triangle& tri : current) {
+                ClipTriangleByPlane(tri, plane);
+                std::ranges::move(cache.clipped_triangles,
+                                  std::back_inserter(next));
+              }
+              current.swap(next);
+            }
+            std::ranges::move(current, std::back_inserter(output));
+          }
+        });
+    size_t total = 0;
+    for (const auto& local : tls_output) {
+      total += std::size(local);
+    }
 
     std::vector<Triangle> result;
-    size_t total_triangles = 0;
-    for (auto& local : tls_output) {
-      total_triangles += local.size();
-    }
-    result.reserve(total_triangles);
+    result.reserve(total);
 
     for (auto& local : tls_output) {
       result.insert(result.end(), std::make_move_iterator(local.begin()),
