@@ -5,23 +5,10 @@ project(renderer VERSION 1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include(FetchContent)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui)
+find_package(Eigen3 3.3 REQUIRED)
 
-FetchContent_Declare(
-  Qt
-  GIT_REPOSITORY https://github.com/qt/qtbase.git
-  GIT_TAG v6.8.1
-)
+add_executable(renderer src/main.cpp)
 
-FetchContent_MakeAvailable(Qt)
-
-set(SOURCES
-    src/main.cpp
-)
-
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
-
-set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC ON)
+target_link_libraries(renderer PRIVATE Qt6::Widgets Qt6::Core Qt6::Gui)
+target_include_directories(${PROJECT_NAME} PRIVATE ${EIGEN3_INCLUDE_DIRS})
