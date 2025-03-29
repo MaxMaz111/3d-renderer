@@ -34,4 +34,6 @@
 # Build folders
 build
 asan_build
+build_debug
+build_release
 .cache

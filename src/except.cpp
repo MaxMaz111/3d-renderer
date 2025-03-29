@@ -1,18 +1,18 @@
 #include "except.h"
 
+#include <QDebug>
 #include <exception>
-#include <iostream>
 
 namespace except {
-void React() {
+
+void React() noexcept {
   try {
     throw;
   } catch (std::exception& e) {
-    std::cerr << "A known exception was caught, with a message: " << e.what()
-              << std::endl;
+    qDebug() << "A known exception was caught, with a message: " << e.what();
   } catch (...) {
-    std::cerr << "An unknown exception was caught" << std::endl;
-    throw;
+    qDebug() << "An unknown exception was caught";
   }
 }
+
 }  // namespace except

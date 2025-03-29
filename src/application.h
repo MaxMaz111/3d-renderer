@@ -1,16 +1,19 @@
 #pragma once
 
-#include <QApplication>
-
-#include "render_window.h"
+#include "controller/controller.h"
+#include "kernel/kernel.h"
+#include "view/main_window.h"
 
 namespace renderer {
-class Application : public QApplication {
+
+class Application {
  public:
-  Application(int argc, char* argv[]);
-  int Run();
+  Application();
 
  private:
-  RenderWindow render_window_;
+  MainWindow render_window_;
+  Kernel kernel_;
+  Controller controller_;
 };
+
 }  // namespace renderer

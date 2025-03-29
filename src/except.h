@@ -2,6 +2,6 @@
 
 namespace except {
 
-void React();
+void React() noexcept;
 
 }  // namespace except
