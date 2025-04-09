@@ -2,25 +2,29 @@
 
 #include <vector>
 
+#include "triangle.h"
+
 namespace renderer {
 
 Scene::Scene(const std::vector<Camera>& cameras,
-             const std::vector<Triangle>& triangles,
-             const std::vector<LightSource>& light_sources)
-    : cameras_(cameras), triangles_(triangles), light_sources_(light_sources) {}
+             const std::vector<Triangle>& triangles)
+    : cameras_(cameras), triangles_(triangles) {}
 
-std::vector<Triangle> Scene::Clip() const {
-  std::vector<Triangle> clipped_triangles;
-  for (const Triangle& triangle : triangles_) {
-    auto new_triangles = ClipTriangle(triangle);
-  }
-  return clipped_triangles;
+Scene::Scene(const std::vector<Triangle>& triangles)
+    : triangles_(triangles), cameras_(1), cur_camera_index_(0) {}
+
+const std::vector<Triangle>& Scene::GetTriangles() const {
+  return triangles_;
 }
 
-std::vector<Triangle> Scene::ClipTriangle(const Triangle& triangle) const {
-  std::vector<Triangle> clipped_triangle;
+void Scene::SetScreenDimensions(Width width, Height height) {
+  for (auto& camera : cameras_) {
+    camera.SetScreenDimensions(width, height);
+  }
+}
 
-  return clipped_triangle;
+const Camera& Scene::GetCamera() const {
+  return cameras_.at(cur_camera_index_);
 }
 
 }  // namespace renderer

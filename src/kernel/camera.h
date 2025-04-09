@@ -1,31 +1,37 @@
 #pragma once
 
-#include "../constants.h"
+#include "../size.h"
 #include "linalg.h"
+#include "plane.h"
 
 namespace renderer {
 
 class Camera {
+  static constexpr int kNumberOfPlanes = 6;
+
  public:
   Camera();
-
-  Camera(const Point3& pos, Scalar depth);
+  Camera(Scalar near, Scalar far, Scalar screen_width, Scalar screen_height);
+  void SetScreenDimensions(Width width, Height height);
+  void SetNear(Scalar near);
+  void SetFar(Scalar far);
+  const std::array<Plane, kNumberOfPlanes>& GetPlanesForClipping() const;
+  Matrix4 GetProjectionMatrix() const;
+  Matrix3 GetRotationMatrix() const;
+  int GetWidth() const;
+  int GetHeight() const;
 
  private:
-  void InitPlanesForClipping();
+  std::array<Plane, kNumberOfPlanes> BuildClippingPlanes();
 
-  Point3 pos_ = {0, 0, -800};
-  const Point3 left_down_{-constants::kWindowWidth / 2,
-                          -constants::kWindowHeight / 2, 0};
-  const Point3 left_up_{-constants::kWindowWidth / 2,
-                        constants::kWindowHeight / 2, 0};
-  const Point3 right_up_{constants::kWindowWidth / 2,
-                         constants::kWindowHeight / 2, 0};
-  const Point3 right_down_{constants::kWindowWidth / 2,
-                           -constants::kWindowHeight / 2, 0};
-  Scalar depth_ = 10000;
+  Scalar screen_width_;
+  Scalar screen_height_;
+  Scalar near_;
+  Scalar far_;
 
-  std::vector<Plane3> planes_for_clipping_;
+  Matrix3 rotation_matrix_;
+
+  std::array<Plane, kNumberOfPlanes> planes_;
 };
 
 }  // namespace renderer

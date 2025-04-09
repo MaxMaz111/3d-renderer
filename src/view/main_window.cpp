@@ -1,12 +1,11 @@
 #include "main_window.h"
-#include "../constants.h"
 
 namespace renderer {
 
-MainWindow::MainWindow() : view_(&window_) {
-  window_.setGeometry(0, 0, constants::kWindowWidth, constants::kWindowHeight);
+MainWindow::MainWindow(Width width, Height height) : view_(&window_) {
+  window_.setGeometry(0, 0, static_cast<int>(width), static_cast<int>(height));
   window_.setWindowTitle("renderer");
-  window_.setCentralWidget(MainWindow::GetView());
+  window_.setCentralWidget(GetView());
   window_.show();
 }
 

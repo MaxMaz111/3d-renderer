@@ -6,9 +6,10 @@ CLEAN_BUILD=false
 BUILD_DIR="build"
 SOURCE_DIR=".."
 BUILD_TARGET=""
+RUN_ARGS=""
 
 show_help() {
-    echo "Usage: $0 [options]"
+    echo "Usage: $0 [options] [-- executable_arguments]"
     echo "Options:"
     echo "  -t, --type TYPE       Build type (Debug or Release)"
     echo "  -r, --run             Run the executable after building"
@@ -17,11 +18,23 @@ show_help() {
     echo "  -s, --source-dir DIR  Specify source directory (default: ..)"
     echo "  -T, --target TARGET   Specify build target"
     echo "  -h, --help            Show this help message"
+    echo ""
+    echo "Arguments after -- will be passed to the executable when using --run"
     exit 0
 }
 
+# Process options until we see -- or run out of arguments
 while [[ $# -gt 0 ]]; do
     key="$1"
+
+    # Check if we've reached the argument separator
+    if [[ "$key" == "--" ]]; then
+        shift
+        # Collect all remaining arguments for the executable
+        RUN_ARGS="$@"
+        break
+    fi
+
     case $key in
         -t|--type)
             BUILD_TYPE="$2"
@@ -79,9 +92,9 @@ cmake -DCMAKE_BUILD_TYPE="$BUILD_TYPE" "$SOURCE_DIR"
 
 echo "Building project..."
 if [ -n "$BUILD_TARGET" ]; then
-    cmake --build . --config "$BUILD_TYPE" --target "$BUILD_TARGET"
+    cmake --build . --config "$BUILD_TYPE" --target "$BUILD_TARGET" -j 8
 else
-    cmake --build . --config "$BUILD_TYPE"
+    cmake --build . --config "$BUILD_TYPE" -j 8
 fi
 
 if [ $? -ne 0 ]; then
@@ -96,8 +109,8 @@ if [ "$RUN_AFTER_BUILD" = true ]; then
     if [ -f "CMakeCache.txt" ]; then
         PROJECT_NAME=$(grep "CMAKE_PROJECT_NAME" CMakeCache.txt | cut -d'=' -f2)
         if [ -n "$PROJECT_NAME" ] && [ -x "$PROJECT_NAME" ]; then
-            echo "Running $PROJECT_NAME..."
-            ./"$PROJECT_NAME"
+            echo "Running $PROJECT_NAME with args: $RUN_ARGS"
+            ./"$PROJECT_NAME" $RUN_ARGS
             exit 0
         fi
     fi
@@ -106,8 +119,8 @@ if [ "$RUN_AFTER_BUILD" = true ]; then
         if [ -d "$dir" ]; then
             EXECUTABLE=$(find "$dir" -type f -executable -not -name "*.sh" -not -name "*.cmake" | head -n 1)
             if [ -n "$EXECUTABLE" ]; then
-                echo "Running $EXECUTABLE..."
-                "$EXECUTABLE"
+                echo "Running $EXECUTABLE with args: $RUN_ARGS"
+                "$EXECUTABLE" $RUN_ARGS
                 exit 0
             fi
         fi

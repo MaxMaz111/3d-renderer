@@ -38,7 +38,7 @@ class Observer {
 
   bool IsSubscribed() const { return observable_; }
 
-  static void DoNothing() {}
+  static void DoNothing(T) {}
 
  private:
   void SetObservable(Observable* observable) { observable_ = observable; }

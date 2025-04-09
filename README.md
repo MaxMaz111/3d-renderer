@@ -77,34 +77,10 @@ Once all dependencies are installed:
    cd 3d-renderer
    ```
 
-2. Create a build directory and navigate into it:
+2. Run a bash script to build and run the code:
 
    ```bash
-   mkdir build
-   cd build
-   ```
-
-3. Run CMake:
-
-   ```bash
-   cmake ..
-   ```
-
-   - If CMake has trouble finding Qt on macOS, ensure you have exported Qt’s paths, for example:
-     ```bash
-     export CMAKE_PREFIX_PATH="/usr/local/opt/qt:"$CMAKE_PREFIX_PATH
-     ```
-     (adjust for your Qt install path if needed).
-
-4. Compile the project:
-
-   ```bash
-   make renderer
-   ```
-
-5. Run the compiled executable (e.g., “renderer”):
-   ```bash
-   ./renderer
+   ./run.sh -r
    ```
 
 ---

@@ -8,7 +8,7 @@ namespace renderer {
 
 class Application {
  public:
-  Application();
+  Application(int argc, char* argv[]);
 
  private:
   MainWindow render_window_;

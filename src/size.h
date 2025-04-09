@@ -2,6 +2,7 @@
 
 namespace renderer {
 
-class LightSource {};
+enum class Width : int {};
+enum class Height : int {};
 
 }  // namespace renderer

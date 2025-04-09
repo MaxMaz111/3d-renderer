@@ -1,21 +1,21 @@
 #pragma once
 
+#include "../observer.hpp"
+#include "../size.h"
 #include "renderer.h"
 #include "scene.h"
-
-#include "../observer.hpp"
 
 namespace renderer {
 
 class Kernel {
-  using SentData = QPixmap;
-  using Observable = Observable<SentData>;
-  using Observer = Observer<SentData>;
+  using Observable = Observable<QPixmap>;
+  using Observer = Observer<QPixmap>;
 
  public:
-  Kernel();
-
+  Kernel() = delete;
+  Kernel(const std::string& filename);
   void Subscribe(Observer* observer);
+  void SetScreenDimensions(Width width, Height height);
 
  private:
   Renderer renderer_;
