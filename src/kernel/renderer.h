@@ -22,9 +22,6 @@ class Renderer {
       const std::vector<Triangle>& triangles, const Camera& camera) const;
   std::vector<Triangle> GetProjectedTriangles(
       const std::vector<Triangle>& triangles, const Camera& camera) const;
-  std::vector<Point3> ClipPolygonByPlane(const std::vector<Point3>& vertices,
-                                         const Plane& plane,
-                                         const Color& color) const;
   std::vector<Scalar> z_buffer_;
   QImage to_return_;
 };

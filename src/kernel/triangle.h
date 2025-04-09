@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "color.h"
 #include "linalg.h"
 

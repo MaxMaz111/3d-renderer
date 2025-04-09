@@ -58,61 +58,89 @@ std::vector<Triangle> Renderer::GetClippedTriangles(
 
 std::vector<Triangle> Renderer::ClipTriangle(const Triangle& triangle,
                                              const Camera& camera) const {
-  std::vector<Point3> vertices = {triangle.GetPoints()[0],
-                                  triangle.GetPoints()[1],
-                                  triangle.GetPoints()[2]};
-
+  std::vector<Triangle> clipped_triangle = {triangle};
   for (const Plane& plane : camera.GetPlanesForClipping()) {
-    vertices = ClipPolygonByPlane(vertices, plane, triangle.GetColor());
-    if (vertices.empty()) {
-      return {};
+    std::vector<Triangle> new_clipped_triangle;
+    for (const Triangle& triangle : clipped_triangle) {
+      auto new_triangles = ClipTriangleByPlane(triangle, plane);
+      new_clipped_triangle.insert(new_clipped_triangle.end(),
+                                  new_triangles.begin(), new_triangles.end());
     }
+    clipped_triangle = std::move(new_clipped_triangle);
   }
-
-  std::vector<Triangle> result;
-  if (vertices.size() >= 3) {
-    for (size_t i = 1; i < vertices.size() - 1; ++i) {
-      result.push_back(Triangle(vertices[0], vertices[i], vertices[i + 1]));
-    }
-  }
-
-  return result;
+  return clipped_triangle;
 }
 
-std::vector<Point3> Renderer::ClipPolygonByPlane(
-    const std::vector<Point3>& vertices, const Plane& plane,
-    const Color& color) const {
-  if (vertices.empty()) {
-    return {};
+std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
+                                                    const Plane& plane) const {
+  std::vector<Triangle> result;
+
+  // Get triangle points
+  const auto& points = triangle.GetPoints();
+
+  // Classify each vertex: is it on the same side as the plane normal?
+  bool sides[3];
+  for (int i = 0; i < 3; i++) {
+    sides[i] = plane.IsOnTheSameSideAsNormal(points[i]);
   }
 
-  std::vector<Point3> result;
+  // Case 1: Triangle is completely on the normal side - keep it
+  if (sides[0] && sides[1] && sides[2]) {
+    result.push_back(triangle);
+    return result;
+  }
 
-  // Implement Sutherland-Hodgman clipping algorithm
-  Point3 prev_vertex = vertices.back();  // Start with the last vertex
-  bool prev_inside = plane.IsOnTheSameSideAsNormal(prev_vertex);
+  // Case 2: Triangle is completely on the opposite side - clip it
+  if (!sides[0] && !sides[1] && !sides[2]) {
+    return result;  // Empty vector
+  }
 
-  for (const Point3& curr_vertex : vertices) {
-    bool curr_inside = plane.IsOnTheSameSideAsNormal(curr_vertex);
+  // Case 3: Triangle intersects the plane - we need to split it
+  std::vector<Point3> kept_vertices;
+  std::vector<Point3> intersection_points;
 
-    // If there's a transition between inside and outside, calculate the intersection
-    if (curr_inside != prev_inside) {
-      Vector3 direction = curr_vertex - prev_vertex;
-      auto intersection = plane.LineIntersection(prev_vertex, direction);
+  // Process each edge
+  for (int i = 0; i < 3; i++) {
+    int j = (i + 1) % 3;
 
-      if (intersection.has_value()) {
-        result.push_back(intersection.value());
+    // Keep vertices on the normal side
+    if (sides[i]) {
+      kept_vertices.push_back(points[i]);
+    }
+
+    // If edge crosses the plane, compute intersection point
+    if (sides[i] != sides[j]) {
+      Vector3 edge_dir = points[j] - points[i];
+      auto intersection = plane.LineIntersection(points[i], edge_dir);
+      if (intersection) {
+        intersection_points.push_back(points[i] + *intersection);
       }
     }
+  }
 
-    // If the current vertex is inside, add it to the result
-    if (curr_inside) {
-      result.push_back(curr_vertex);
-    }
+  // Should have exactly 2 intersection points for a valid case
+  if (intersection_points.size() != 2) {
+    return result;
+  }
 
-    // Update previous vertex for next iteration
-    prev_vertex = curr_vertex;
-    prev_inside = curr_inside;
+  // Create the new triangles based on how many vertices were kept
+  if (kept_vertices.size() == 1) {
+    // Create one triangle with the kept vertex and two intersection points
+    Triangle new_triangle(kept_vertices[0], intersection_points[0],
+                          intersection_points[1]);
+    new_triangle.SetColor(triangle.GetColor());
+    result.push_back(new_triangle);
+  } else if (kept_vertices.size() == 2) {
+    // Create two triangles from the quad
+    Triangle t1(kept_vertices[0], kept_vertices[1], intersection_points[0]);
+    Triangle t2(kept_vertices[0], intersection_points[0],
+                intersection_points[1]);
+
+    t1.SetColor(triangle.GetColor());
+    t2.SetColor(triangle.GetColor());
+
+    result.push_back(t1);
+    result.push_back(t2);
   }
 
   return result;
