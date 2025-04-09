@@ -23,7 +23,27 @@ void Scene::SetScreenDimensions(Width width, Height height) {
   }
 }
 
+void Scene::RotateLeft() {
+  GetCamera().RotateLeft();
+}
+
+void Scene::RotateRight() {
+  GetCamera().RotateRight();
+}
+
+void Scene::RotateUp() {
+  GetCamera().RotateUp();
+}
+
+void Scene::RotateDown() {
+  GetCamera().RotateDown();
+}
+
 const Camera& Scene::GetCamera() const {
+  return cameras_.at(cur_camera_index_);
+}
+
+Camera& Scene::GetCamera() {
   return cameras_.at(cur_camera_index_);
 }
 

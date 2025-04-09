@@ -18,4 +18,24 @@ void Kernel::SetScreenDimensions(Width width, Height height) {
   observable_.Notify();
 }
 
+void Kernel::RotateLeft() {
+  scene_.RotateLeft();
+  observable_.Notify();
+}
+
+void Kernel::RotateRight() {
+  scene_.RotateRight();
+  observable_.Notify();
+}
+
+void Kernel::RotateUp() {
+  scene_.RotateUp();
+  observable_.Notify();
+}
+
+void Kernel::RotateDown() {
+  scene_.RotateDown();
+  observable_.Notify();
+}
+
 }  // namespace renderer

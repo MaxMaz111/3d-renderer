@@ -13,12 +13,16 @@ Controller::Controller(Kernel* kernel_ptr)
 void Controller::HandleSignal(ViewSignalData signal_data) {
   switch (signal_data.signal) {
     case ViewSignals::LEFT_ARROW:
+      kernel_ptr_->RotateLeft();
       break;
     case ViewSignals::UP_ARROW:
+      kernel_ptr_->RotateUp();
       break;
     case ViewSignals::RIGHT_ARROW:
+      kernel_ptr_->RotateRight();
       break;
     case ViewSignals::DOWN_ARROW:
+      kernel_ptr_->RotateDown();
       break;
     case ViewSignals::A_KEY:
       break;

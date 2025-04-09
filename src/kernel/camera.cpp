@@ -8,7 +8,7 @@ namespace renderer {
 
 Camera::Camera()
     : near_(100),
-      far_(1000),
+      far_(10000),
       screen_width_(800),
       screen_height_(600),
       planes_(BuildClippingPlanes()),
@@ -71,6 +71,22 @@ int Camera::GetWidth() const {
 
 int Camera::GetHeight() const {
   return static_cast<int>(screen_height_);
+}
+
+void Camera::RotateLeft() {
+  rotation_matrix_ = AngleAxis(M_PI / 10, Vector3{0, 1, 0}) * rotation_matrix_;
+}
+
+void Camera::RotateRight() {
+  rotation_matrix_ = AngleAxis(-M_PI / 10, Vector3{0, 1, 0}) * rotation_matrix_;
+}
+
+void Camera::RotateUp() {
+  rotation_matrix_ = AngleAxis(M_PI / 10, Vector3{1, 0, 0}) * rotation_matrix_;
+}
+
+void Camera::RotateDown() {
+  rotation_matrix_ = AngleAxis(-M_PI / 10, Vector3{1, 0, 0}) * rotation_matrix_;
 }
 
 std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildClippingPlanes() {

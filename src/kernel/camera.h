@@ -20,6 +20,10 @@ class Camera {
   Matrix3 GetRotationMatrix() const;
   int GetWidth() const;
   int GetHeight() const;
+  void RotateLeft();
+  void RotateRight();
+  void RotateUp();
+  void RotateDown();
 
  private:
   std::array<Plane, kNumberOfPlanes> BuildClippingPlanes();

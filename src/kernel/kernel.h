@@ -16,6 +16,10 @@ class Kernel {
   Kernel(const std::string& filename);
   void Subscribe(Observer* observer);
   void SetScreenDimensions(Width width, Height height);
+  void RotateLeft();
+  void RotateRight();
+  void RotateUp();
+  void RotateDown();
 
  private:
   Renderer renderer_;

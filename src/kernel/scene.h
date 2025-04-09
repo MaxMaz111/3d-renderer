@@ -16,7 +16,12 @@ class Scene {
         const std::vector<Triangle>& triangles);
   const std::vector<Triangle>& GetTriangles() const;
   void SetScreenDimensions(Width width, Height height);
+  void RotateLeft();
+  void RotateRight();
+  void RotateUp();
+  void RotateDown();
   const Camera& GetCamera() const;
+  Camera& GetCamera();
 
  private:
   std::vector<Camera> cameras_;

@@ -1,8 +1,10 @@
 #include "renderer.h"
 
-#include <QDebug>
+#include <cmath>
+#include <optional>
 #include <vector>
 
+#include "linalg.h"
 #include "triangle.h"
 
 namespace renderer {
@@ -11,10 +13,7 @@ QPixmap Renderer::Render(const Scene& scene) {
   const std::vector<Triangle>& triangles = scene.GetTriangles();
   const Camera& camera = scene.GetCamera();
   auto rotated_triangles = GetRotatedTriangles(triangles, camera);
-  qDebug() << rotated_triangles.size();
-  rotated_triangles[0].Print();
   auto clipped_triangles = GetClippedTriangles(rotated_triangles, camera);
-  qDebug() << clipped_triangles.size();
   auto projected_triangles = GetProjectedTriangles(clipped_triangles, camera);
   int width = static_cast<int>(camera.GetWidth());
   int height = static_cast<int>(camera.GetHeight());
@@ -36,10 +35,10 @@ QPixmap Renderer::Render(const Scene& scene) {
         continue;
       }
       to_return_.setPixelColor(
-          x, y,
+          i % width, i / width,
           {triangle.GetColor().GetRed(), triangle.GetColor().GetGreen(),
            triangle.GetColor().GetBlue()});
-      z_buffer_[i] = z.value();
+      z_buffer_.at(i) = z.value();
     }
   }
   return QPixmap::fromImage(to_return_);
@@ -73,77 +72,53 @@ std::vector<Triangle> Renderer::ClipTriangle(const Triangle& triangle,
 
 std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
                                                     const Plane& plane) const {
-  std::vector<Triangle> result;
-
-  // Get triangle points
-  const auto& points = triangle.GetPoints();
-
-  // Classify each vertex: is it on the same side as the plane normal?
-  bool sides[3];
-  for (int i = 0; i < 3; i++) {
-    sides[i] = plane.IsOnTheSameSideAsNormal(points[i]);
+  std::array<bool, 3> is_inside;
+  int is_inside_cnt = 0;
+  for (int i = 0; i < 3; ++i) {
+    is_inside[i] = plane.IsOnTheSameSideAsNormal(triangle.GetPoints()[i]);
+    is_inside_cnt += is_inside[i];
   }
-
-  // Case 1: Triangle is completely on the normal side - keep it
-  if (sides[0] && sides[1] && sides[2]) {
-    result.push_back(triangle);
-    return result;
+  if (is_inside_cnt == 0) {
+    return {};
+  } else if (is_inside_cnt == 3) {
+    return {triangle};
   }
-
-  // Case 2: Triangle is completely on the opposite side - clip it
-  if (!sides[0] && !sides[1] && !sides[2]) {
-    return result;  // Empty vector
-  }
-
-  // Case 3: Triangle intersects the plane - we need to split it
-  std::vector<Point3> kept_vertices;
-  std::vector<Point3> intersection_points;
-
-  // Process each edge
-  for (int i = 0; i < 3; i++) {
-    int j = (i + 1) % 3;
-
-    // Keep vertices on the normal side
-    if (sides[i]) {
-      kept_vertices.push_back(points[i]);
-    }
-
-    // If edge crosses the plane, compute intersection point
-    if (sides[i] != sides[j]) {
-      Vector3 edge_dir = points[j] - points[i];
-      auto intersection = plane.LineIntersection(points[i], edge_dir);
-      if (intersection) {
-        intersection_points.push_back(points[i] + *intersection);
-      }
+  std::vector<Point3> inside, outside;
+  for (int i = 0; i < 3; ++i) {
+    if (is_inside[i]) {
+      inside.push_back(triangle.GetPoints()[i]);
+    } else {
+      outside.push_back(triangle.GetPoints()[i]);
     }
   }
-
-  // Should have exactly 2 intersection points for a valid case
-  if (intersection_points.size() != 2) {
-    return result;
+  if (is_inside_cnt == 1) {
+    auto intersect1 = plane.LineIntersection(inside[0], outside[0] - inside[0]);
+    auto intersect2 = plane.LineIntersection(inside[0], outside[1] - inside[0]);
+    assert(intersect1.has_value() && intersect2.has_value());
+    if (intersect1 == std::nullopt) {
+      intersect1 = outside[0];
+    }
+    if (intersect2 == std::nullopt) {
+      intersect2 = outside[1];
+    }
+    return {{intersect1.value(), intersect2.value(), inside[0]}};
+  } else if (is_inside_cnt == 2) {
+    auto intersect1 =
+        plane.LineIntersection(outside[0], inside[0] - outside[0]);
+    auto intersect2 =
+        plane.LineIntersection(outside[0], inside[1] - outside[0]);
+    assert(intersect1.has_value() && intersect2.has_value());
+    if (intersect1 == std::nullopt) {
+      intersect1 = inside[0];
+    }
+    if (intersect2 == std::nullopt) {
+      intersect2 = inside[1];
+    }
+    return {{intersect1.value(), intersect2.value(), inside[0]},
+            {inside[0], inside[1], intersect2.value()}};
   }
 
-  // Create the new triangles based on how many vertices were kept
-  if (kept_vertices.size() == 1) {
-    // Create one triangle with the kept vertex and two intersection points
-    Triangle new_triangle(kept_vertices[0], intersection_points[0],
-                          intersection_points[1]);
-    new_triangle.SetColor(triangle.GetColor());
-    result.push_back(new_triangle);
-  } else if (kept_vertices.size() == 2) {
-    // Create two triangles from the quad
-    Triangle t1(kept_vertices[0], kept_vertices[1], intersection_points[0]);
-    Triangle t2(kept_vertices[0], intersection_points[0],
-                intersection_points[1]);
-
-    t1.SetColor(triangle.GetColor());
-    t2.SetColor(triangle.GetColor());
-
-    result.push_back(t1);
-    result.push_back(t2);
-  }
-
-  return result;
+  return {triangle};
 }
 
 std::vector<Triangle> Renderer::GetRotatedTriangles(
@@ -151,7 +126,7 @@ std::vector<Triangle> Renderer::GetRotatedTriangles(
   std::vector<Triangle> rotated_triangles;
   rotated_triangles.reserve(triangles.size());
 
-  const auto& mat = camera.GetRotationMatrix().inverse();
+  Matrix3 mat = camera.GetRotationMatrix().inverse();
 
   for (const auto& triangle : triangles) {
     rotated_triangles.push_back(triangle.GetRotatedTriangle(mat));
@@ -163,7 +138,7 @@ std::vector<Triangle> Renderer::GetProjectedTriangles(
     const std::vector<Triangle>& triangles, const Camera& camera) const {
   std::vector<Triangle> projected_triangles;
   projected_triangles.reserve(triangles.size());
-  const auto& mat = camera.GetProjectionMatrix();
+  Matrix4 mat = camera.GetProjectionMatrix();
   for (const auto& triangle : triangles) {
     projected_triangles.push_back(triangle.GetProjectedTriangle(mat));
   }
