@@ -38,4 +38,24 @@ void Kernel::RotateDown() {
   observable_.Notify();
 }
 
+void Kernel::MoveLeft() {
+  scene_.MoveLeft();
+  observable_.Notify();
+}
+
+void Kernel::MoveRight() {
+  scene_.MoveRight();
+  observable_.Notify();
+}
+
+void Kernel::MoveForward() {
+  scene_.MoveForward();
+  observable_.Notify();
+}
+
+void Kernel::MoveBackward() {
+  scene_.MoveBackward();
+  observable_.Notify();
+}
+
 }  // namespace renderer

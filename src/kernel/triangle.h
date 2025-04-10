@@ -12,7 +12,8 @@ class Triangle {
   Triangle(const Point3& p0, const Point3& p1, const Point3& p2);
   const std::array<Point3, 3>& GetPoints() const;
   Point3 GetPoint(size_t index) const;
-  Triangle GetRotatedTriangle(const Matrix3& rotation_matrix) const;
+  Triangle GetRotatedAndMovedTriangle(const Matrix3& rotation_matrix,
+                                      const Point3& translation) const;
   Triangle GetProjectedTriangle(const Matrix4& projection_matrix) const;
   std::optional<Scalar> GetZ(const Point3& point) const;
   Color GetColor() const;

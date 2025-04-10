@@ -1,18 +1,20 @@
 #include "camera.h"
 
 #include <cassert>
+#include <iostream>
 
 #include "linalg.h"
 
 namespace renderer {
 
 Camera::Camera()
-    : near_(100),
+    : near_(150),
       far_(10000),
       screen_width_(800),
       screen_height_(600),
       planes_(BuildClippingPlanes()),
-      rotation_matrix_(Matrix3::Identity()) {}
+      rotation_matrix_(Matrix3::Identity()),
+      position_(0, 0, 0) {}
 
 Camera::Camera(Scalar near, Scalar far, Scalar screen_width,
                Scalar screen_height)
@@ -65,6 +67,10 @@ Matrix3 Camera::GetRotationMatrix() const {
   return rotation_matrix_;
 }
 
+Point3 Camera::GetPosition() const {
+  return position_;
+}
+
 int Camera::GetWidth() const {
   return static_cast<int>(screen_width_);
 }
@@ -74,19 +80,43 @@ int Camera::GetHeight() const {
 }
 
 void Camera::RotateLeft() {
-  rotation_matrix_ = AngleAxis(M_PI / 10, Vector3{0, 1, 0}) * rotation_matrix_;
+  rotation_matrix_ =
+      AngleAxis(-kRotationSpeed, rotation_matrix_.col(1)) * rotation_matrix_;
 }
 
 void Camera::RotateRight() {
-  rotation_matrix_ = AngleAxis(-M_PI / 10, Vector3{0, 1, 0}) * rotation_matrix_;
+  rotation_matrix_ =
+      AngleAxis(kRotationSpeed, rotation_matrix_.col(1)) * rotation_matrix_;
 }
 
 void Camera::RotateUp() {
-  rotation_matrix_ = AngleAxis(M_PI / 10, Vector3{1, 0, 0}) * rotation_matrix_;
+  rotation_matrix_ =
+      AngleAxis(kRotationSpeed, rotation_matrix_.col(0)) * rotation_matrix_;
 }
 
 void Camera::RotateDown() {
-  rotation_matrix_ = AngleAxis(-M_PI / 10, Vector3{1, 0, 0}) * rotation_matrix_;
+  rotation_matrix_ =
+      AngleAxis(-kRotationSpeed, rotation_matrix_.col(0)) * rotation_matrix_;
+}
+
+void Camera::MoveLeft() {
+  position_ -= rotation_matrix_.col(0) * kMoveSpeed;
+  std::cout << position_ << '\n';
+}
+
+void Camera::MoveRight() {
+  position_ += rotation_matrix_.col(0) * kMoveSpeed;
+  std::cout << position_ << '\n';
+}
+
+void Camera::MoveForward() {
+  position_ += rotation_matrix_.col(2) * kMoveSpeed;
+  std::cout << position_ << '\n';
+}
+
+void Camera::MoveBackward() {
+  position_ -= rotation_matrix_.col(2) * kMoveSpeed;
+  std::cout << position_ << '\n';
 }
 
 std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildClippingPlanes() {

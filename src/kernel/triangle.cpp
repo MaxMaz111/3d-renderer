@@ -17,12 +17,14 @@ Point3 Triangle::GetPoint(size_t index) const {
   return points_[index];
 }
 
-Triangle Triangle::GetRotatedTriangle(const Matrix3& rotation_matrix) const {
+Triangle Triangle::GetRotatedAndMovedTriangle(const Matrix3& rotation_matrix,
+                                              const Point3& translation) const {
   assert((rotation_matrix.determinant() - 1) < kEpsilon);
+  assert(false);
   assert((rotation_matrix * rotation_matrix.transpose()).isIdentity(kEpsilon));
   Triangle rotated_triangle(points_[0], points_[1], points_[2]);
   for (auto& point : rotated_triangle.points_) {
-    point = rotation_matrix * point;
+    point = rotation_matrix * (point + translation);
   }
   return rotated_triangle;
 }

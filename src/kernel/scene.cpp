@@ -39,6 +39,22 @@ void Scene::RotateDown() {
   GetCamera().RotateDown();
 }
 
+void Scene::MoveLeft() {
+  GetCamera().MoveLeft();
+}
+
+void Scene::MoveRight() {
+  GetCamera().MoveRight();
+}
+
+void Scene::MoveForward() {
+  GetCamera().MoveForward();
+}
+
+void Scene::MoveBackward() {
+  GetCamera().MoveBackward();
+}
+
 const Camera& Scene::GetCamera() const {
   return cameras_.at(cur_camera_index_);
 }

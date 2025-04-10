@@ -25,12 +25,16 @@ void Controller::HandleSignal(ViewSignalData signal_data) {
       kernel_ptr_->RotateDown();
       break;
     case ViewSignals::A_KEY:
+      kernel_ptr_->MoveLeft();
       break;
     case ViewSignals::W_KEY:
+      kernel_ptr_->MoveForward();
       break;
     case ViewSignals::D_KEY:
+      kernel_ptr_->MoveRight();
       break;
     case ViewSignals::S_KEY:
+      kernel_ptr_->MoveBackward();
       break;
     case ViewSignals::RESIZE:
       assert(signal_data.size != std::nullopt);

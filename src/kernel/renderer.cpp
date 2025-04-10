@@ -1,6 +1,5 @@
 #include "renderer.h"
 
-#include <cmath>
 #include <optional>
 #include <vector>
 
@@ -127,9 +126,11 @@ std::vector<Triangle> Renderer::GetRotatedTriangles(
   rotated_triangles.reserve(triangles.size());
 
   Matrix3 mat = camera.GetRotationMatrix().inverse();
+  Point3 translation = -camera.GetPosition();
 
   for (const auto& triangle : triangles) {
-    rotated_triangles.push_back(triangle.GetRotatedTriangle(mat));
+    rotated_triangles.push_back(
+        triangle.GetRotatedAndMovedTriangle(mat, translation));
   }
   return rotated_triangles;
 }

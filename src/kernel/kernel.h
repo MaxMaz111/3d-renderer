@@ -20,6 +20,10 @@ class Kernel {
   void RotateRight();
   void RotateUp();
   void RotateDown();
+  void MoveLeft();
+  void MoveRight();
+  void MoveForward();
+  void MoveBackward();
 
  private:
   Renderer renderer_;

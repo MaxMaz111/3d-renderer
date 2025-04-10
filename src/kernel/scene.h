@@ -20,6 +20,10 @@ class Scene {
   void RotateRight();
   void RotateUp();
   void RotateDown();
+  void MoveLeft();
+  void MoveRight();
+  void MoveForward();
+  void MoveBackward();
   const Camera& GetCamera() const;
   Camera& GetCamera();
 

@@ -8,6 +8,8 @@ namespace renderer {
 
 class Camera {
   static constexpr int kNumberOfPlanes = 6;
+  static constexpr Scalar kMoveSpeed = 5;
+  static constexpr Scalar kRotationSpeed = M_PI / 15;
 
  public:
   Camera();
@@ -18,12 +20,18 @@ class Camera {
   const std::array<Plane, kNumberOfPlanes>& GetPlanesForClipping() const;
   Matrix4 GetProjectionMatrix() const;
   Matrix3 GetRotationMatrix() const;
+  Point3 GetPosition() const;
   int GetWidth() const;
   int GetHeight() const;
   void RotateLeft();
   void RotateRight();
   void RotateUp();
   void RotateDown();
+  void OrthonormalizeRotationMatrix();
+  void MoveLeft();
+  void MoveRight();
+  void MoveForward();
+  void MoveBackward();
 
  private:
   std::array<Plane, kNumberOfPlanes> BuildClippingPlanes();
@@ -34,8 +42,11 @@ class Camera {
   Scalar far_;
 
   Matrix3 rotation_matrix_;
+  Point3 position_;
 
   std::array<Plane, kNumberOfPlanes> planes_;
 };
+
+;
 
 }  // namespace renderer
