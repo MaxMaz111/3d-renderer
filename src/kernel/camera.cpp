@@ -8,24 +8,24 @@
 namespace renderer {
 
 Camera::Camera()
-    : near_(700),
-      far_(10000),
-      screen_width_(800),
+    : screen_width_(800),
       screen_height_(600),
-      planes_(BuildPlanesForClipping()),
+      near_(700),
+      far_(10000),
       rotation_matrix_(Matrix3::Identity()),
-      position_(0, 0, 0) {
+      position_(0, 0, 0),
+      planes_(BuildPlanesForClipping()) {
   BuildProjectionMatrix();
 }
 
 Camera::Camera(Scalar near, Scalar far, Scalar screen_width,
                Scalar screen_height)
-    : near_(near),
-      far_(far),
-      screen_width_(screen_width),
+    : screen_width_(screen_width),
       screen_height_(screen_height),
-      planes_(BuildPlanesForClipping()),
-      rotation_matrix_(Matrix3::Identity()) {
+      near_(near),
+      far_(far),
+      rotation_matrix_(Matrix3::Identity()),
+      planes_(BuildPlanesForClipping()) {
   assert(near > 0 && far > 0);
   assert(far > near);
   assert(screen_width > 0);

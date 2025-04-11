@@ -11,7 +11,7 @@ Scene::Scene(const std::vector<Camera>& cameras,
     : cameras_(cameras), triangles_(triangles) {}
 
 Scene::Scene(const std::vector<Triangle>& triangles)
-    : triangles_(triangles), cameras_(1), cur_camera_index_(0) {}
+    : cameras_(1), cur_camera_index_(0), triangles_(triangles) {}
 
 const std::vector<Triangle>& Scene::GetTriangles() const {
   return triangles_;

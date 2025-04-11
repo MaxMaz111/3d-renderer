@@ -6,8 +6,8 @@
 
 namespace renderer {
 
-using Scalar = float;
-static constexpr Scalar kEpsilon = 1e-6;
+using Scalar = double;
+static constexpr Scalar kEpsilon = 1e-5;
 static_assert(std::is_same_v<Scalar, double> || std::is_same_v<Scalar, float>);
 using Vector3 = Eigen::Vector3<Scalar>;
 using Vector4 = Eigen::Vector4<Scalar>;

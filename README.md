@@ -77,10 +77,13 @@ Once all dependencies are installed:
    cd 3d-renderer
    ```
 
-2. Run a bash script to build and run the code:
+2. Use CMake to build the project:
 
    ```bash
-   ./run.sh -r
+   mkdir build && cd build
+   cmake ..
+   make renderer
+   ./renderer *your .obj file*
    ```
 
 ---

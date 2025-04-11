@@ -5,8 +5,8 @@
 namespace renderer {
 
 Kernel::Kernel(const std::string& filename)
-    : observable_([this]() { return renderer_.Render(scene_); }),
-      scene_(ObjReader::ReadFromFile(filename)) {}
+    : scene_(ObjReader::ReadFromFile(filename)),
+      observable_([this]() { return renderer_.Render(scene_); }) {}
 
 void Kernel::Subscribe(Kernel::Observer* observer) {
   assert(observer);

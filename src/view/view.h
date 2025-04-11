@@ -18,7 +18,7 @@ class View : public QLabel {
   void keyPressEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
   void SetData(const QPixmap& pixmap);
-  ViewSignalData KeyToSignal(int key) const;
+  static ViewSignalData KeyToSignal(int key);
   Observer* GetObserver();
   Observable* GetObservable();
 

@@ -24,7 +24,7 @@ void View::keyPressEvent(QKeyEvent* event) {
   }
 }
 
-void View::resizeEvent(QResizeEvent* event) {
+void View::resizeEvent(QResizeEvent*) {
   cur_signal_data_ = {RESIZE, size()};
   observable_.Notify();
   // update();
@@ -37,7 +37,7 @@ void View::SetData(const QPixmap& pixmap) {
   // ^ maybe needed on higher fps?
 }
 
-ViewSignalData View::KeyToSignal(int key) const {
+ViewSignalData View::KeyToSignal(int key) {
   switch (key) {
     case Qt::Key_Left:
       return {ViewSignals::LEFT_ARROW};
