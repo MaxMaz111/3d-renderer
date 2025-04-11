@@ -37,3 +37,6 @@ asan_build
 build_debug
 build_release
 .cache
+
+# MacOS cache
+.DS_Store
