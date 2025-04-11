@@ -25,9 +25,9 @@ class View : public QLabel {
  private:
   void SetAndNotify(ViewSignalData signal);
 
-  static constexpr std::array<int, 8> kAvailableKeys = {
-      Qt::Key_Left, Qt::Key_Up, Qt::Key_Right, Qt::Key_Down,
-      Qt::Key_A,    Qt::Key_W,  Qt::Key_D,     Qt::Key_S};
+  static constexpr std::array<int, 10> kAvailableKeys = {
+      Qt::Key_Left, Qt::Key_Up, Qt::Key_Right, Qt::Key_Down, Qt::Key_A,
+      Qt::Key_W,    Qt::Key_D,  Qt::Key_S,     Qt::Key_Q,    Qt::Key_E};
 
   Observer observer_;
   Observable observable_;

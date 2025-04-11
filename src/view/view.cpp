@@ -55,6 +55,10 @@ ViewSignalData View::KeyToSignal(int key) const {
       return {ViewSignals::D_KEY};
     case Qt::Key_S:
       return {ViewSignals::S_KEY};
+    case Qt::Key_Q:
+      return {ViewSignals::Q_KEY};
+    case Qt::Key_E:
+      return {ViewSignals::E_KEY};
     default:
       return {ViewSignals::NONE};
   }

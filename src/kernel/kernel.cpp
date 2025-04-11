@@ -58,4 +58,14 @@ void Kernel::MoveBackward() {
   observable_.Notify();
 }
 
+void Kernel::SwivelLeft() {
+  scene_.SwivelLeft();
+  observable_.Notify();
+}
+
+void Kernel::SwivelRight() {
+  scene_.SwivelRight();
+  observable_.Notify();
+}
+
 }  // namespace renderer

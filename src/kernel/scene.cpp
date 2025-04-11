@@ -55,6 +55,14 @@ void Scene::MoveBackward() {
   GetCamera().MoveBackward();
 }
 
+void Scene::SwivelLeft() {
+  GetCamera().SwivelLeft();
+}
+
+void Scene::SwivelRight() {
+  GetCamera().SwivelRight();
+}
+
 const Camera& Scene::GetCamera() const {
   return cameras_.at(cur_camera_index_);
 }

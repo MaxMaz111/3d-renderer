@@ -1,5 +1,6 @@
 #include "triangle.h"
 
+#include <algorithm>
 #include <iostream>
 
 #include "linalg.h"
@@ -9,6 +10,10 @@ namespace renderer {
 Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2)
     : points_({p0, p1, p2}) {}
 
+Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
+                   const Color& color)
+    : points_({p0, p1, p2}), triangle_color_(color) {}
+
 const std::array<Point3, 3>& Triangle::GetPoints() const {
   return points_;
 }
@@ -17,25 +22,19 @@ Point3 Triangle::GetPoint(size_t index) const {
   return points_[index];
 }
 
-Triangle Triangle::GetRotatedAndMovedTriangle(const Matrix3& rotation_matrix,
-                                              const Point3& translation) const {
+void Triangle::RotateAndMove(const Matrix3& rotation_matrix,
+                             const Point3& translation) {
   assert((rotation_matrix.determinant() - 1) < kEpsilon);
-  assert(false);
   assert((rotation_matrix * rotation_matrix.transpose()).isIdentity(kEpsilon));
-  Triangle rotated_triangle(points_[0], points_[1], points_[2]);
-  for (auto& point : rotated_triangle.points_) {
+  for (auto& point : points_) {
     point = rotation_matrix * (point + translation);
   }
-  return rotated_triangle;
 }
 
-Triangle Triangle::GetProjectedTriangle(
-    const Matrix4& projection_matrix) const {
-  Triangle projected_triangle(points_[0], points_[1], points_[2]);
-  for (auto& point : projected_triangle.points_) {
+void Triangle::Project(const Matrix4& projection_matrix) {
+  for (auto& point : points_) {
     point = FromHomogeneous(projection_matrix * ToHomogeneous(point));
   }
-  return projected_triangle;
 }
 
 std::optional<Scalar> Triangle::GetZ(const Point3& point) const {
@@ -76,6 +75,22 @@ void Triangle::Print() const {
   std::cout << points_[0] << '\n';
   std::cout << points_[1] << '\n';
   std::cout << points_[2] << '\n';
+}
+
+Scalar Triangle::GetMinX() const {
+  return std::min({points_[0].x(), points_[1].x(), points_[2].x()});
+}
+
+Scalar Triangle::GetMaxX() const {
+  return std::max({points_[0].x(), points_[1].x(), points_[2].x()});
+}
+
+Scalar Triangle::GetMinY() const {
+  return std::min({points_[0].y(), points_[1].y(), points_[2].y()});
+}
+
+Scalar Triangle::GetMaxY() const {
+  return std::max({points_[0].y(), points_[1].y(), points_[2].y()});
 }
 
 Point3 Triangle::FromHomogeneous(const Point4& point) const {

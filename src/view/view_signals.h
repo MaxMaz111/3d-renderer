@@ -14,6 +14,8 @@ enum ViewSignals {
   W_KEY,
   D_KEY,
   S_KEY,
+  Q_KEY,
+  E_KEY,
   RESIZE,
   NONE
 };

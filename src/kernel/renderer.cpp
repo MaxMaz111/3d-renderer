@@ -9,35 +9,34 @@
 namespace renderer {
 
 QPixmap Renderer::Render(const Scene& scene) {
-  const std::vector<Triangle>& triangles = scene.GetTriangles();
+  std::vector<Triangle> triangles = scene.GetTriangles();
   const Camera& camera = scene.GetCamera();
-  auto rotated_triangles = GetRotatedTriangles(triangles, camera);
-  auto clipped_triangles = GetClippedTriangles(rotated_triangles, camera);
-  auto projected_triangles = GetProjectedTriangles(clipped_triangles, camera);
+  RotateTriangles(triangles, camera);
+  triangles = GetClippedTriangles(triangles, camera);
+  ProjectTriangles(triangles, camera);
   int width = static_cast<int>(camera.GetWidth());
   int height = static_cast<int>(camera.GetHeight());
-  int z_buffer_size = width * height;
-  if (z_buffer_.size() != z_buffer_size) {
-    z_buffer_.resize(z_buffer_size);
-  }
-  std::fill(z_buffer_.begin(), z_buffer_.end(), 1);
+  z_buffer_.assign(width * height, 1);
   to_return_ = QImage(width, height, QImage::Format_RGB32);
   to_return_.fill(Qt::black);
-  for (int i = 0; i < z_buffer_size; ++i) {
-    Scalar x = i % width;
-    Scalar y = i / width;
-    x += 0.5;
-    y += 0.5;
-    for (const auto& triangle : projected_triangles) {
-      auto z = triangle.GetZ({x, y, 0});
-      if (z == std::nullopt || z.value() > z_buffer_[i]) {
-        continue;
+  for (const Triangle& triangle : triangles) {
+    int min_x = std::floor(triangle.GetMinX());
+    int max_x = std::ceil(triangle.GetMaxX());
+    int min_y = std::floor(triangle.GetMinY());
+    int max_y = std::ceil(triangle.GetMaxY());
+    for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
+      for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
+        auto z = triangle.GetZ({i, j, 0});
+        if (z == std::nullopt || z.value() > z_buffer_[j * width + i]) {
+          continue;
+        }
+        z_buffer_[j * width + i] = z.value();
+        to_return_.setPixelColor(
+            i, j,
+            {triangle.GetColor().GetRed(), triangle.GetColor().GetGreen(),
+             triangle.GetColor().GetBlue()});
+        z_buffer_.at(j * width + i) = z.value();
       }
-      to_return_.setPixelColor(
-          i % width, i / width,
-          {triangle.GetColor().GetRed(), triangle.GetColor().GetGreen(),
-           triangle.GetColor().GetBlue()});
-      z_buffer_.at(i) = z.value();
     }
   }
   return QPixmap::fromImage(to_return_);
@@ -100,7 +99,8 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
     if (intersect2 == std::nullopt) {
       intersect2 = outside[1];
     }
-    return {{intersect1.value(), intersect2.value(), inside[0]}};
+    return {{intersect1.value(), intersect2.value(), inside[0],
+             triangle.GetColor()}};
   } else if (is_inside_cnt == 2) {
     auto intersect1 =
         plane.LineIntersection(outside[0], inside[0] - outside[0]);
@@ -113,37 +113,29 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
     if (intersect2 == std::nullopt) {
       intersect2 = inside[1];
     }
-    return {{intersect1.value(), intersect2.value(), inside[0]},
-            {inside[0], inside[1], intersect2.value()}};
+    return {{intersect1.value(), intersect2.value(), inside[0],
+             triangle.GetColor()},
+            {inside[0], inside[1], intersect2.value(), triangle.GetColor()}};
   }
 
   return {triangle};
 }
 
-std::vector<Triangle> Renderer::GetRotatedTriangles(
-    const std::vector<Triangle>& triangles, const Camera& camera) const {
-  std::vector<Triangle> rotated_triangles;
-  rotated_triangles.reserve(triangles.size());
-
+void Renderer::RotateTriangles(std::vector<Triangle>& triangles,
+                               const Camera& camera) {
   Matrix3 mat = camera.GetRotationMatrix().inverse();
   Point3 translation = -camera.GetPosition();
-
-  for (const auto& triangle : triangles) {
-    rotated_triangles.push_back(
-        triangle.GetRotatedAndMovedTriangle(mat, translation));
+  for (auto& triangle : triangles) {
+    triangle.RotateAndMove(mat, translation);
   }
-  return rotated_triangles;
 }
 
-std::vector<Triangle> Renderer::GetProjectedTriangles(
-    const std::vector<Triangle>& triangles, const Camera& camera) const {
-  std::vector<Triangle> projected_triangles;
-  projected_triangles.reserve(triangles.size());
+void Renderer::ProjectTriangles(std::vector<Triangle>& triangles,
+                                const Camera& camera) {
   Matrix4 mat = camera.GetProjectionMatrix();
-  for (const auto& triangle : triangles) {
-    projected_triangles.push_back(triangle.GetProjectedTriangle(mat));
+  for (auto& triangle : triangles) {
+    triangle.Project(mat);
   }
-  return projected_triangles;
 }
 
 }  // namespace renderer

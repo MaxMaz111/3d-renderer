@@ -8,13 +8,15 @@
 namespace renderer {
 
 Camera::Camera()
-    : near_(150),
+    : near_(700),
       far_(10000),
       screen_width_(800),
       screen_height_(600),
-      planes_(BuildClippingPlanes()),
+      planes_(BuildPlanesForClipping()),
       rotation_matrix_(Matrix3::Identity()),
-      position_(0, 0, 0) {}
+      position_(0, 0, 0) {
+  BuildProjectionMatrix();
+}
 
 Camera::Camera(Scalar near, Scalar far, Scalar screen_width,
                Scalar screen_height)
@@ -22,7 +24,7 @@ Camera::Camera(Scalar near, Scalar far, Scalar screen_width,
       far_(far),
       screen_width_(screen_width),
       screen_height_(screen_height),
-      planes_(BuildClippingPlanes()),
+      planes_(BuildPlanesForClipping()),
       rotation_matrix_(Matrix3::Identity()) {
   assert(near > 0 && far > 0);
   assert(far > near);
@@ -33,21 +35,24 @@ Camera::Camera(Scalar near, Scalar far, Scalar screen_width,
 void Camera::SetScreenDimensions(Width width, Height height) {
   screen_width_ = static_cast<Scalar>(width);
   screen_height_ = static_cast<Scalar>(height);
-  planes_ = BuildClippingPlanes();
+  planes_ = BuildPlanesForClipping();
+  BuildProjectionMatrix();
 }
 
 void Camera::SetNear(Scalar near) {
   assert(near > 0);
   assert(far_ > near);
   near_ = near;
-  planes_ = BuildClippingPlanes();
+  planes_ = BuildPlanesForClipping();
+  BuildProjectionMatrix();
 }
 
 void Camera::SetFar(Scalar far) {
   assert(far > 0);
   assert(far > near_);
   far_ = far;
-  planes_ = BuildClippingPlanes();
+  planes_ = BuildPlanesForClipping();
+  BuildProjectionMatrix();
 }
 
 const std::array<Plane, Camera::kNumberOfPlanes>& Camera::GetPlanesForClipping()
@@ -55,12 +60,17 @@ const std::array<Plane, Camera::kNumberOfPlanes>& Camera::GetPlanesForClipping()
   return planes_;
 }
 
-Matrix4 Camera::GetProjectionMatrix() const {
+void Camera::BuildProjectionMatrix() {
   assert((far_ - near_) > kEpsilon);
-  return Matrix4{{near_, 0, screen_width_ / 2, 0},
-                 {0, near_, screen_height_ / 2, 0},
-                 {0, 0, far_ / (far_ - near_), -far_ * near_ / (far_ - near_)},
-                 {0, 0, 1, 0}};
+  projection_matrix_ =
+      Matrix4{{near_, 0, screen_width_ / 2, 0},
+              {0, near_, screen_height_ / 2, 0},
+              {0, 0, far_ / (far_ - near_), -far_ * near_ / (far_ - near_)},
+              {0, 0, 1, 0}};
+}
+
+const Matrix4& Camera::GetProjectionMatrix() const {
+  return projection_matrix_;
 }
 
 Matrix3 Camera::GetRotationMatrix() const {
@@ -119,7 +129,17 @@ void Camera::MoveBackward() {
   std::cout << position_ << '\n';
 }
 
-std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildClippingPlanes() {
+void Camera::SwivelLeft() {
+  rotation_matrix_ =
+      AngleAxis(-kRotationSpeed, rotation_matrix_.col(2)) * rotation_matrix_;
+}
+
+void Camera::SwivelRight() {
+  rotation_matrix_ =
+      AngleAxis(kRotationSpeed, rotation_matrix_.col(2)) * rotation_matrix_;
+}
+
+std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping() {
   Plane near(Vector3{0, 0, 1}, near_);
   Plane far(Vector3{0, 0, -1}, far_);
   Plane left(Vector3{-near_, 0, screen_width_ / 2}, 0);

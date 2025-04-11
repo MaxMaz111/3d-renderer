@@ -24,6 +24,8 @@ class Scene {
   void MoveRight();
   void MoveForward();
   void MoveBackward();
+  void SwivelLeft();
+  void SwivelRight();
   const Camera& GetCamera() const;
   Camera& GetCamera();
 

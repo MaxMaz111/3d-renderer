@@ -18,10 +18,8 @@ class Renderer {
                                      const Camera& camera) const;
   std::vector<Triangle> ClipTriangleByPlane(const Triangle& triangle,
                                             const Plane& plane) const;
-  std::vector<Triangle> GetRotatedTriangles(
-      const std::vector<Triangle>& triangles, const Camera& camera) const;
-  std::vector<Triangle> GetProjectedTriangles(
-      const std::vector<Triangle>& triangles, const Camera& camera) const;
+  void RotateTriangles(std::vector<Triangle>& triangles, const Camera& camera);
+  void ProjectTriangles(std::vector<Triangle>& triangles, const Camera& camera);
   std::vector<Scalar> z_buffer_;
   QImage to_return_;
 };

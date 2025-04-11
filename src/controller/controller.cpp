@@ -36,6 +36,12 @@ void Controller::HandleSignal(ViewSignalData signal_data) {
     case ViewSignals::S_KEY:
       kernel_ptr_->MoveBackward();
       break;
+    case ViewSignals::Q_KEY:
+      kernel_ptr_->SwivelLeft();
+      break;
+    case ViewSignals::E_KEY:
+      kernel_ptr_->SwivelRight();
+      break;
     case ViewSignals::RESIZE:
       assert(signal_data.size != std::nullopt);
       kernel_ptr_->SetScreenDimensions(Width{signal_data.size->width()},
