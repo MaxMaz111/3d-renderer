@@ -17,7 +17,7 @@ class Triangle {
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
   std::optional<Scalar> GetZ(const Point3& point) const;
-  Color GetColor() const;
+  const Color& GetColor() const;
   void SetColor(const Color& color);
   void Print() const;
   Scalar GetMinX() const;

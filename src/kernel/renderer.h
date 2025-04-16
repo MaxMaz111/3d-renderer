@@ -14,8 +14,6 @@ class Renderer {
  private:
   std::vector<Triangle> GetClippedTriangles(
       const std::vector<Triangle>& triangles, const Camera& camera) const;
-  std::vector<Triangle> ClipTriangle(const Triangle& triangle,
-                                     const Camera& camera) const;
   std::vector<Triangle> ClipTriangleByPlane(const Triangle& triangle,
                                             const Plane& plane) const;
   void RotateTriangles(std::vector<Triangle>& triangles, const Camera& camera);

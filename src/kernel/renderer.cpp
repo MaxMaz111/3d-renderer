@@ -1,14 +1,17 @@
 #include "renderer.h"
 
+#include <QDebug>
 #include <optional>
 #include <vector>
 
 #include "linalg.h"
+#include "../timer.h"
 #include "triangle.h"
 
 namespace renderer {
 
 QPixmap Renderer::Render(const Scene& scene) {
+  Timer render_timer("Render timer");
   std::vector<Triangle> triangles = scene.GetTriangles();
   const Camera& camera = scene.GetCamera();
   RotateTriangles(triangles, camera);
@@ -44,28 +47,51 @@ QPixmap Renderer::Render(const Scene& scene) {
 
 std::vector<Triangle> Renderer::GetClippedTriangles(
     const std::vector<Triangle>& triangles, const Camera& camera) const {
-  std::vector<Triangle> clipped_triangles;
-  for (const Triangle& triangle : triangles) {
-    auto new_triangles = ClipTriangle(triangle, camera);
-    clipped_triangles.insert(clipped_triangles.end(), new_triangles.begin(),
-                             new_triangles.end());
-  }
-  return clipped_triangles;
-}
+  const auto& planes = camera.GetPlanesForClipping();
 
-std::vector<Triangle> Renderer::ClipTriangle(const Triangle& triangle,
-                                             const Camera& camera) const {
-  std::vector<Triangle> clipped_triangle = {triangle};
-  for (const Plane& plane : camera.GetPlanesForClipping()) {
-    std::vector<Triangle> new_clipped_triangle;
-    for (const Triangle& triangle : clipped_triangle) {
-      auto new_triangles = ClipTriangleByPlane(triangle, plane);
-      new_clipped_triangle.insert(new_clipped_triangle.end(),
-                                  new_triangles.begin(), new_triangles.end());
+  std::vector<Triangle> result;
+  result.reserve(triangles.size() * 2);
+
+  std::vector<Triangle> current_buffer;
+  std::vector<Triangle> next_buffer;
+  current_buffer.reserve(8);
+  next_buffer.reserve(16);
+
+  for (const Triangle& triangle : triangles) {
+    current_buffer.clear();
+    current_buffer.push_back(triangle);
+    bool visible = true;
+    for (const Plane& plane : planes) {
+      if (current_buffer.empty()) {
+        visible = false;
+        break;
+      }
+      next_buffer.clear();
+      for (const Triangle& current_triangle : current_buffer) {
+        auto clipped_triangles = ClipTriangleByPlane(current_triangle, plane);
+        if (!clipped_triangles.empty()) {
+          if (next_buffer.size() + clipped_triangles.size() >
+              next_buffer.capacity()) {
+            next_buffer.reserve(next_buffer.size() + clipped_triangles.size());
+          }
+          next_buffer.insert(next_buffer.end(),
+                             std::make_move_iterator(clipped_triangles.begin()),
+                             std::make_move_iterator(clipped_triangles.end()));
+        }
+      }
+      current_buffer.swap(next_buffer);
     }
-    clipped_triangle = std::move(new_clipped_triangle);
+
+    if (visible && !current_buffer.empty()) {
+      if (result.size() + current_buffer.size() > result.capacity()) {
+        result.reserve(result.size() + current_buffer.size());
+      }
+      result.insert(result.end(),
+                    std::make_move_iterator(current_buffer.begin()),
+                    std::make_move_iterator(current_buffer.end()));
+    }
   }
-  return clipped_triangle;
+  return result;
 }
 
 std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,

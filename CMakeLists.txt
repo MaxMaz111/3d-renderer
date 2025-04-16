@@ -25,13 +25,13 @@ set(SOURCES
     src/kernel/plane.cpp
     src/kernel/renderer.cpp
     src/kernel/scene.cpp
-    src/kernel/timer.cpp
     src/kernel/triangle.cpp
     src/view/main_window.cpp
     src/view/view.cpp
     src/application.cpp
     src/except.cpp
     src/main.cpp
+    src/timer.cpp
 )
 
 add_executable(renderer ${SOURCES})

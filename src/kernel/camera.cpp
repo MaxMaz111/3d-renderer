@@ -1,7 +1,6 @@
 #include "camera.h"
 
 #include <cassert>
-#include <iostream>
 
 #include "linalg.h"
 
@@ -10,8 +9,9 @@ namespace renderer {
 Camera::Camera()
     : screen_width_(800),
       screen_height_(600),
-      near_(700),
-      far_(10000),
+
+      near_(300),
+      far_(1000),
       rotation_matrix_(Matrix3::Identity()),
       position_(0, 0, 0),
       planes_(BuildPlanesForClipping()) {
@@ -111,22 +111,18 @@ void Camera::RotateDown() {
 
 void Camera::MoveLeft() {
   position_ -= rotation_matrix_.col(0) * kMoveSpeed;
-  std::cout << position_ << '\n';
 }
 
 void Camera::MoveRight() {
   position_ += rotation_matrix_.col(0) * kMoveSpeed;
-  std::cout << position_ << '\n';
 }
 
 void Camera::MoveForward() {
   position_ += rotation_matrix_.col(2) * kMoveSpeed;
-  std::cout << position_ << '\n';
 }
 
 void Camera::MoveBackward() {
   position_ -= rotation_matrix_.col(2) * kMoveSpeed;
-  std::cout << position_ << '\n';
 }
 
 void Camera::SwivelLeft() {

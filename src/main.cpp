@@ -1,10 +1,11 @@
 #include <QApplication>
+#include <QProcess>
 
 #include "application.h"
 #include "except.h"
 
 int main(int argc, char* argv[]) {
-  // assert(false);
+  QProcess::execute("xset r rate 10 1000");
   QApplication runtime(argc, argv);
   try {
     renderer::Application app(argc, argv);

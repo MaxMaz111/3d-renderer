@@ -6,66 +6,66 @@ namespace renderer {
 
 Kernel::Kernel(const std::string& filename)
     : scene_(ObjReader::ReadFromFile(filename)),
-      observable_([this]() { return renderer_.Render(scene_); }) {}
+      observable_(renderer_.Render(scene_)) {}
 
-void Kernel::Subscribe(Kernel::Observer* observer) {
+void Kernel::Subscribe(Observer<QPixmap>* observer) {
   assert(observer);
   observable_.Subscribe(observer);
 }
 
 void Kernel::SetScreenDimensions(Width width, Height height) {
   scene_.SetScreenDimensions(width, height);
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::RotateLeft() {
   scene_.RotateLeft();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::RotateRight() {
   scene_.RotateRight();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::RotateUp() {
   scene_.RotateUp();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::RotateDown() {
   scene_.RotateDown();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::MoveLeft() {
   scene_.MoveLeft();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::MoveRight() {
   scene_.MoveRight();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::MoveForward() {
   scene_.MoveForward();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::MoveBackward() {
   scene_.MoveBackward();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::SwivelLeft() {
   scene_.SwivelLeft();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::SwivelRight() {
   scene_.SwivelRight();
-  observable_.Notify();
+  observable_.Set(renderer_.Render(scene_));
 }
 
 }  // namespace renderer

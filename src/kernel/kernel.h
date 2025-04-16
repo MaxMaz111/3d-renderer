@@ -8,13 +8,10 @@
 namespace renderer {
 
 class Kernel {
-  using Observable = Observable<QPixmap>;
-  using Observer = Observer<QPixmap>;
-
  public:
   Kernel() = delete;
   Kernel(const std::string& filename);
-  void Subscribe(Observer* observer);
+  void Subscribe(Observer<QPixmap>* observer);
   void SetScreenDimensions(Width width, Height height);
   void RotateLeft();
   void RotateRight();
@@ -32,7 +29,7 @@ class Kernel {
   Renderer renderer_;
   Scene scene_;
 
-  Observable observable_;
+  ObservableData<QPixmap> observable_;
 };
 
 }  // namespace renderer

@@ -9,17 +9,15 @@
 namespace renderer {
 
 class Controller {
-  using Observer = Observer<ViewSignalData>;
-
  public:
   Controller() = delete;
   Controller(Kernel* kernel_ptr);
   void HandleSignal(ViewSignalData signal);
-  Observer* GetObserver();
+  ColdInput<ViewSignalData>* GetObserver();
 
  private:
   Kernel* kernel_ptr_;
-  Observer observer_;
+  ColdInput<ViewSignalData> observer_;
 };
 
 }  // namespace renderer

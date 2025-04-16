@@ -63,7 +63,7 @@ std::optional<Scalar> Triangle::GetZ(const Point3& point) const {
   return z;
 }
 
-Color Triangle::GetColor() const {
+const Color& Triangle::GetColor() const {
   return triangle_color_;
 }
 

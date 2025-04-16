@@ -9,28 +9,20 @@
 namespace renderer {
 
 class View : public QLabel {
-  using Observer = Observer<QPixmap>;
-  using Observable = Observable<ViewSignalData>;
-
  public:
   View() = delete;
   View(QWidget* parent);
   void keyPressEvent(QKeyEvent* event) override;
+  void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
-  void SetData(const QPixmap& pixmap);
-  static ViewSignalData KeyToSignal(int key);
-  Observer* GetObserver();
-  Observable* GetObservable();
+  void SetData(QPixmap pixmap);
+  static ViewSignals KeyToSignal(int key);
+  HotInput<QPixmap>* GetObserver();
+  ObservableData<ViewSignalData>* GetObservable();
 
  private:
-  void SetAndNotify(ViewSignalData signal);
-
-  static constexpr std::array<int, 10> kAvailableKeys = {
-      Qt::Key_Left, Qt::Key_Up, Qt::Key_Right, Qt::Key_Down, Qt::Key_A,
-      Qt::Key_W,    Qt::Key_D,  Qt::Key_S,     Qt::Key_Q,    Qt::Key_E};
-
-  Observer observer_;
-  Observable observable_;
+  HotInput<QPixmap> observer_;
+  ObservableData<ViewSignalData> observable_;
   ViewSignalData cur_signal_data_;
 };
 
