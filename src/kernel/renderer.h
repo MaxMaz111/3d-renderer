@@ -2,6 +2,7 @@
 
 #include <QPixmap>
 
+#include "frame.h"
 #include "scene.h"
 #include "triangle.h"
 
@@ -9,7 +10,7 @@ namespace renderer {
 
 class Renderer {
  public:
-  QPixmap Render(const Scene& scene);
+  Frame Render(const Scene& scene);
 
  private:
   std::vector<Triangle> GetClippedTriangles(
@@ -18,8 +19,9 @@ class Renderer {
                                             const Plane& plane) const;
   void RotateTriangles(std::vector<Triangle>& triangles, const Camera& camera);
   void ProjectTriangles(std::vector<Triangle>& triangles, const Camera& camera);
-  std::vector<Scalar> z_buffer_;
-  QImage to_return_;
+  static QColor ConvertColor(const Color& color);
+
+  std::vector<std::vector<Scalar>> z_buffer_;
 };
 
 }  // namespace renderer

@@ -7,12 +7,13 @@
 
 namespace renderer {
 
-Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2)
-    : points_({p0, p1, p2}) {}
+Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
+                   const Vector3& normal)
+    : points_({p0, p1, p2}), normal_(normal) {}
 
 Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-                   const Color& color)
-    : points_({p0, p1, p2}), triangle_color_(color) {}
+                   const Vector3& normal, const Color& color)
+    : points_({p0, p1, p2}), normal_(normal), triangle_color_(color) {}
 
 const std::array<Point3, 3>& Triangle::GetPoints() const {
   return points_;
@@ -20,6 +21,10 @@ const std::array<Point3, 3>& Triangle::GetPoints() const {
 
 Point3 Triangle::GetPoint(size_t index) const {
   return points_[index];
+}
+
+Vector3 Triangle::GetNormal() const {
+  return normal_;
 }
 
 void Triangle::RotateAndMove(const Matrix3& rotation_matrix,

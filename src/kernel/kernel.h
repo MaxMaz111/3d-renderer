@@ -2,6 +2,7 @@
 
 #include "../observer.hpp"
 #include "../size.h"
+#include "kernel/frame.h"
 #include "renderer.h"
 #include "scene.h"
 
@@ -11,7 +12,7 @@ class Kernel {
  public:
   Kernel() = delete;
   Kernel(const std::string& filename);
-  void Subscribe(Observer<QPixmap>* observer);
+  void Subscribe(Observer<Frame>* observer);
   void SetScreenDimensions(Width width, Height height);
   void RotateLeft();
   void RotateRight();
@@ -25,11 +26,13 @@ class Kernel {
   void SwivelLeft();
   void SwivelRight();
 
+  void SetCurrentCamera(int camera_index);
+
  private:
   Renderer renderer_;
   Scene scene_;
 
-  ObservableData<QPixmap> observable_;
+  ObservableData<Frame> observable_;
 };
 
 }  // namespace renderer

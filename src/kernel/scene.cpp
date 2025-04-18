@@ -11,7 +11,7 @@ Scene::Scene(const std::vector<Camera>& cameras,
     : cameras_(cameras), triangles_(triangles) {}
 
 Scene::Scene(const std::vector<Triangle>& triangles)
-    : cameras_(1), cur_camera_index_(0), triangles_(triangles) {}
+    : cameras_(4), cur_camera_index_(0), triangles_(triangles) {}
 
 const std::vector<Triangle>& Scene::GetTriangles() const {
   return triangles_;
@@ -61,6 +61,13 @@ void Scene::SwivelLeft() {
 
 void Scene::SwivelRight() {
   GetCamera().SwivelRight();
+}
+
+void Scene::SetCurrentCamera(int camera_index) {
+  assert(camera_index >= 0);
+  if (static_cast<size_t>(camera_index) < cameras_.size()) {
+    cur_camera_index_ = camera_index;
+  }
 }
 
 const Camera& Scene::GetCamera() const {

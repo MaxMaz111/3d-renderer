@@ -5,6 +5,7 @@
 namespace renderer {
 
 Timer::Timer(const std::string& name) : label_(name) {
+  system("clear");
   start_time_ = std::chrono::high_resolution_clock::now();
   std::cout << label_ << " started" << std::endl;
 }
@@ -15,6 +16,7 @@ Timer::~Timer() {
       end_time - start_time_);
   std::cout << label_ << " ended - Elapsed time: " << duration.count() / 1000.0
             << " ms" << std::endl;
+  std::cout << "FPS: " << 1000000.0 / duration.count() << std::endl;
 }
 
 double Timer::Elapsed() const {

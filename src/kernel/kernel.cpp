@@ -8,7 +8,7 @@ Kernel::Kernel(const std::string& filename)
     : scene_(ObjReader::ReadFromFile(filename)),
       observable_(renderer_.Render(scene_)) {}
 
-void Kernel::Subscribe(Observer<QPixmap>* observer) {
+void Kernel::Subscribe(Observer<Frame>* observer) {
   assert(observer);
   observable_.Subscribe(observer);
 }
@@ -65,6 +65,11 @@ void Kernel::SwivelLeft() {
 
 void Kernel::SwivelRight() {
   scene_.SwivelRight();
+  observable_.Set(renderer_.Render(scene_));
+}
+
+void Kernel::SetCurrentCamera(int camera_index) {
+  scene_.SetCurrentCamera(camera_index);
   observable_.Set(renderer_.Render(scene_));
 }
 

@@ -20,7 +20,9 @@ set(SOURCES
     src/controller/controller.cpp
     src/kernel/camera.cpp
     src/kernel/color.cpp
+    src/kernel/frame.cpp
     src/kernel/kernel.cpp
+    src/kernel/light_source.cpp
     src/kernel/obj_reader.cpp
     src/kernel/plane.cpp
     src/kernel/renderer.cpp

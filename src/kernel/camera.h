@@ -13,7 +13,7 @@ class Camera {
 
  public:
   Camera();
-  Camera(Scalar near, Scalar far, Scalar screen_width, Scalar screen_height);
+  Camera(Scalar near, Scalar far, Width screen_width, Height screen_height);
   void SetScreenDimensions(Width width, Height height);
   void SetNear(Scalar near);
   void SetFar(Scalar far);
@@ -22,8 +22,8 @@ class Camera {
   const Matrix4& GetProjectionMatrix() const;
   Matrix3 GetRotationMatrix() const;
   Point3 GetPosition() const;
-  int GetWidth() const;
-  int GetHeight() const;
+  Width GetWidth() const;
+  Height GetHeight() const;
   void RotateLeft();
   void RotateRight();
   void RotateUp();
@@ -38,8 +38,8 @@ class Camera {
  private:
   std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping();
 
-  Scalar screen_width_;
-  Scalar screen_height_;
+  Width screen_width_;
+  Height screen_height_;
   Scalar near_;
   Scalar far_;
 

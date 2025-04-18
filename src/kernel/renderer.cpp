@@ -4,13 +4,13 @@
 #include <optional>
 #include <vector>
 
-#include "linalg.h"
 #include "../timer.h"
+#include "linalg.h"
 #include "triangle.h"
 
 namespace renderer {
 
-QPixmap Renderer::Render(const Scene& scene) {
+Frame Renderer::Render(const Scene& scene) {
   Timer render_timer("Render timer");
   std::vector<Triangle> triangles = scene.GetTriangles();
   const Camera& camera = scene.GetCamera();
@@ -19,30 +19,25 @@ QPixmap Renderer::Render(const Scene& scene) {
   ProjectTriangles(triangles, camera);
   int width = static_cast<int>(camera.GetWidth());
   int height = static_cast<int>(camera.GetHeight());
-  z_buffer_.assign(width * height, 1);
-  to_return_ = QImage(width, height, QImage::Format_RGB32);
-  to_return_.fill(Qt::black);
+  z_buffer_.assign(height, std::vector<Scalar>(width, 1));
+  Frame frame(camera.GetWidth(), camera.GetHeight());
   for (const Triangle& triangle : triangles) {
     int min_x = std::floor(triangle.GetMinX());
     int max_x = std::ceil(triangle.GetMaxX());
     int min_y = std::floor(triangle.GetMinY());
     int max_y = std::ceil(triangle.GetMaxY());
-    for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
-      for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
+    for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
+      for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
         auto z = triangle.GetZ({i, j, 0});
-        if (z == std::nullopt || z.value() > z_buffer_[j * width + i]) {
+        if (z == std::nullopt || z.value() > z_buffer_[j][i]) {
           continue;
         }
-        z_buffer_[j * width + i] = z.value();
-        to_return_.setPixelColor(
-            i, j,
-            {triangle.GetColor().GetRed(), triangle.GetColor().GetGreen(),
-             triangle.GetColor().GetBlue()});
-        z_buffer_.at(j * width + i) = z.value();
+        z_buffer_[j][i] = z.value();
+        frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
       }
     }
   }
-  return QPixmap::fromImage(to_return_);
+  return frame;
 }
 
 std::vector<Triangle> Renderer::GetClippedTriangles(
@@ -126,7 +121,7 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
       intersect2 = outside[1];
     }
     return {{intersect1.value(), intersect2.value(), inside[0],
-             triangle.GetColor()}};
+             triangle.GetNormal(), triangle.GetColor()}};
   } else if (is_inside_cnt == 2) {
     auto intersect1 =
         plane.LineIntersection(outside[0], inside[0] - outside[0]);
@@ -140,8 +135,9 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
       intersect2 = inside[1];
     }
     return {{intersect1.value(), intersect2.value(), inside[0],
-             triangle.GetColor()},
-            {inside[0], inside[1], intersect2.value(), triangle.GetColor()}};
+             triangle.GetNormal(), triangle.GetColor()},
+            {inside[0], inside[1], intersect2.value(), triangle.GetNormal(),
+             triangle.GetColor()}};
   }
 
   return {triangle};
@@ -162,6 +158,10 @@ void Renderer::ProjectTriangles(std::vector<Triangle>& triangles,
   for (auto& triangle : triangles) {
     triangle.Project(mat);
   }
+}
+
+QColor Renderer::ConvertColor(const Color& color) {
+  return {color.GetRed(), color.GetGreen(), color.GetBlue()};
 }
 
 }  // namespace renderer

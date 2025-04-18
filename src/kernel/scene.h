@@ -26,12 +26,13 @@ class Scene {
   void MoveBackward();
   void SwivelLeft();
   void SwivelRight();
+  void SetCurrentCamera(int camera_index);
   const Camera& GetCamera() const;
   Camera& GetCamera();
 
  private:
   std::vector<Camera> cameras_;
-  ssize_t cur_camera_index_;
+  int cur_camera_index_;
   std::vector<Triangle> triangles_;
 };
 

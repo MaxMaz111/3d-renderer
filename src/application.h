@@ -11,9 +11,9 @@ class Application {
   Application(int argc, char* argv[]);
 
  private:
-  MainWindow render_window_;
+  MainWindow render_window_1_, render_window_2_;
   Kernel kernel_;
-  Controller controller_;
+  Controller controller_1_, controller_2_;
 };
 
 }  // namespace renderer

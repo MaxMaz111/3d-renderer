@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QMouseEvent>
 
+#include "../kernel/frame.h"
 #include "../observer.hpp"
 #include "view_signals.h"
 
@@ -15,13 +16,17 @@ class View : public QLabel {
   void keyPressEvent(QKeyEvent* event) override;
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
-  void SetData(QPixmap pixmap);
+  void SetFrame(Frame frame);
   static ViewSignals KeyToSignal(int key);
-  HotInput<QPixmap>* GetObserver();
+  HotInput<Frame>* GetObserver();
   ObservableData<ViewSignalData>* GetObservable();
 
  private:
-  HotInput<QPixmap> observer_;
+  static void SetSignal(ViewSignalData& data, ViewSignals signal);
+
+  static void ClearSignal(ViewSignalData& data, ViewSignals signal);
+
+  HotInput<Frame> observer_;
   ObservableData<ViewSignalData> observable_;
   ViewSignalData cur_signal_data_;
 };

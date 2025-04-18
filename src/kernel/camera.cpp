@@ -7,9 +7,8 @@
 namespace renderer {
 
 Camera::Camera()
-    : screen_width_(800),
-      screen_height_(600),
-
+    : screen_width_(Width{800}),
+      screen_height_(Height{600}),
       near_(300),
       far_(1000),
       rotation_matrix_(Matrix3::Identity()),
@@ -18,8 +17,8 @@ Camera::Camera()
   BuildProjectionMatrix();
 }
 
-Camera::Camera(Scalar near, Scalar far, Scalar screen_width,
-               Scalar screen_height)
+Camera::Camera(Scalar near, Scalar far, Width screen_width,
+               Height screen_height)
     : screen_width_(screen_width),
       screen_height_(screen_height),
       near_(near),
@@ -28,13 +27,13 @@ Camera::Camera(Scalar near, Scalar far, Scalar screen_width,
       planes_(BuildPlanesForClipping()) {
   assert(near > 0 && far > 0);
   assert(far > near);
-  assert(screen_width > 0);
-  assert(screen_height > 0);
+  assert(screen_width > Width{0});
+  assert(screen_height > Height{0});
 }
 
 void Camera::SetScreenDimensions(Width width, Height height) {
-  screen_width_ = static_cast<Scalar>(width);
-  screen_height_ = static_cast<Scalar>(height);
+  screen_width_ = width;
+  screen_height_ = height;
   planes_ = BuildPlanesForClipping();
   BuildProjectionMatrix();
 }
@@ -63,8 +62,8 @@ const std::array<Plane, Camera::kNumberOfPlanes>& Camera::GetPlanesForClipping()
 void Camera::BuildProjectionMatrix() {
   assert((far_ - near_) > kEpsilon);
   projection_matrix_ =
-      Matrix4{{near_, 0, screen_width_ / 2, 0},
-              {0, near_, screen_height_ / 2, 0},
+      Matrix4{{near_, 0, static_cast<Scalar>(screen_width_) / 2, 0},
+              {0, near_, static_cast<Scalar>(screen_height_) / 2, 0},
               {0, 0, far_ / (far_ - near_), -far_ * near_ / (far_ - near_)},
               {0, 0, 1, 0}};
 }
@@ -81,12 +80,12 @@ Point3 Camera::GetPosition() const {
   return position_;
 }
 
-int Camera::GetWidth() const {
-  return static_cast<int>(screen_width_);
+Width Camera::GetWidth() const {
+  return Width{screen_width_};
 }
 
-int Camera::GetHeight() const {
-  return static_cast<int>(screen_height_);
+Height Camera::GetHeight() const {
+  return Height{screen_height_};
 }
 
 void Camera::RotateLeft() {
@@ -138,10 +137,10 @@ void Camera::SwivelRight() {
 std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping() {
   Plane near(Vector3{0, 0, 1}, near_);
   Plane far(Vector3{0, 0, -1}, far_);
-  Plane left(Vector3{-near_, 0, screen_width_ / 2}, 0);
-  Plane right(Vector3{near_, 0, screen_width_ / 2}, 0);
-  Plane up(Vector3{0, -near_, screen_height_ / 2}, 0);
-  Plane down(Vector3{0, near_, screen_height_ / 2}, 0);
+  Plane left(Vector3{-near_, 0, static_cast<int>(screen_width_) / 2}, 0);
+  Plane right(Vector3{near_, 0, static_cast<int>(screen_width_) / 2}, 0);
+  Plane up(Vector3{0, -near_, static_cast<int>(screen_height_) / 2}, 0);
+  Plane down(Vector3{0, near_, static_cast<int>(screen_height_) / 2}, 0);
   return {near, far, left, right, up, down};
 }
 

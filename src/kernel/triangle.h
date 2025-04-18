@@ -9,11 +9,13 @@ namespace renderer {
 
 class Triangle {
  public:
-  Triangle(const Point3& p0, const Point3& p1, const Point3& p2);
   Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-           const Color& color);
+           const Vector3& normal);
+  Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
+           const Vector3& normal, const Color& color);
   const std::array<Point3, 3>& GetPoints() const;
   Point3 GetPoint(size_t index) const;
+  Vector3 GetNormal() const;
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
   std::optional<Scalar> GetZ(const Point3& point) const;
@@ -30,6 +32,7 @@ class Triangle {
   Point4 ToHomogeneous(const Point3& point) const;
 
   std::array<Point3, 3> points_;
+  Vector3 normal_;
 
   Color triangle_color_ = Color::GetRandomColor();
 };
