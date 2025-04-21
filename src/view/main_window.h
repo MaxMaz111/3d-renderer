@@ -11,6 +11,7 @@ namespace renderer {
 class MainWindow {
  public:
   MainWindow(Width width, Height height);
+  void Show();
   View* GetView();
 
  private:

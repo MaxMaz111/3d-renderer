@@ -26,6 +26,11 @@ void Frame::SetColor(Width x, Height y, Color color) {
   frame_data_[static_cast<int>(y)][static_cast<int>(x)] = color;
 }
 
+void Frame::BlendColor(Width x, Height y, Color color) {
+  assert(CheckBounds(x, y));
+  frame_data_[static_cast<int>(y)][static_cast<int>(x)].Blend(color);
+}
+
 const Color& Frame::GetColor(Width x, Height y) const {
   assert(CheckBounds(x, y));
   return frame_data_[static_cast<int>(y)][static_cast<int>(x)];

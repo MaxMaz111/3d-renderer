@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "../size.h"
-#include "kernel/color.h"
+#include "color.h"
 
 namespace renderer {
 
@@ -13,6 +13,7 @@ class Frame {
   Width GetWidth() const;
   Height GetHeight() const;
   void SetColor(Width x, Height y, Color color);
+  void BlendColor(Width x, Height y, Color color);
   const Color& GetColor(Width x, Height y) const;
 
  private:

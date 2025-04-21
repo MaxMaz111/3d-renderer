@@ -57,6 +57,9 @@ void Controller::HandleSignal(ViewSignalData signal_data) {
   if (signal_data.signal & ViewSignals::KEY_4) {
     kernel_ptr_->SetCurrentCamera(3);
   }
+  if (signal_data.signal & ViewSignals::KEY_B) {
+    kernel_ptr_->SwapTransparency();
+  }
 }
 
 ColdInput<ViewSignalData>* Controller::GetObserver() {

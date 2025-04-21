@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "linalg.h"
+
 namespace renderer {
 
 class Color {
@@ -15,7 +17,7 @@ class Color {
   void SetGreen(int green);
   void SetBlue(int blue);
   Color Invert() const;
-  Color Blend(const Color& other, float factor = 0.5f) const;
+  void Blend(const Color& other, Scalar factor = 0.2);
   bool operator==(const Color& other) const;
   bool operator!=(const Color& other) const;
   static Color GetRandomColor();

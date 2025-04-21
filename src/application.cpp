@@ -13,11 +13,12 @@ Application::Application(int, char* argv[])
       controller_1_(&kernel_),
       controller_2_(&kernel_) {
   kernel_.Subscribe(render_window_1_.GetView()->GetObserver());
-  render_window_1_.GetView()->GetObservable()->Subscribe(
-      controller_1_.GetObserver());
+  render_window_1_.GetView()->Subscribe(controller_1_.GetObserver());
   kernel_.Subscribe(render_window_2_.GetView()->GetObserver());
-  render_window_2_.GetView()->GetObservable()->Subscribe(
-      controller_2_.GetObserver());
+  render_window_2_.GetView()->Subscribe(controller_2_.GetObserver());
+
+  render_window_1_.Show();
+  render_window_2_.Show();
 }
 
 }  // namespace renderer

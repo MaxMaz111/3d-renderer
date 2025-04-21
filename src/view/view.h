@@ -19,7 +19,7 @@ class View : public QLabel {
   void SetFrame(Frame frame);
   static ViewSignals KeyToSignal(int key);
   HotInput<Frame>* GetObserver();
-  ObservableData<ViewSignalData>* GetObservable();
+  void Subscribe(Observer<ViewSignalData>* observable);
 
  private:
   static void SetSignal(ViewSignalData& data, ViewSignals signal);

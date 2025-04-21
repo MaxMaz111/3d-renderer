@@ -75,6 +75,8 @@ ViewSignals View::KeyToSignal(int key) {
       return ViewSignals::KEY_3;
     case Qt::Key_4:
       return ViewSignals::KEY_4;
+    case Qt::Key_B:
+      return ViewSignals::KEY_B;
     default:
       return ViewSignals::NONE;
   }
@@ -84,8 +86,8 @@ HotInput<Frame>* View::GetObserver() {
   return &observer_;
 }
 
-ObservableData<ViewSignalData>* View::GetObservable() {
-  return &observable_;
+void View::Subscribe(Observer<ViewSignalData>* observer) {
+  observable_.Subscribe(observer);
 }
 
 void View::SetSignal(ViewSignalData& data, ViewSignals signal) {

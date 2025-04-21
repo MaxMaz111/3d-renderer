@@ -28,6 +28,8 @@ class Kernel {
 
   void SetCurrentCamera(int camera_index);
 
+  void SwapTransparency();
+
  private:
   Renderer renderer_;
   Scene scene_;

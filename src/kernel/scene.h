@@ -27,13 +27,16 @@ class Scene {
   void SwivelLeft();
   void SwivelRight();
   void SetCurrentCamera(int camera_index);
+  void SwapTransparency();
   const Camera& GetCamera() const;
   Camera& GetCamera();
+  bool Transapent() const;
 
  private:
   std::vector<Camera> cameras_;
   int cur_camera_index_;
   std::vector<Triangle> triangles_;
+  bool transparent_ = false;
 };
 
 }  // namespace renderer

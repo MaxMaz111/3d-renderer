@@ -20,7 +20,8 @@ enum ViewSignals : uint32_t {
   KEY_2 = 1 << 11,
   KEY_3 = 1 << 12,
   KEY_4 = 1 << 13,
-  RESIZE = 1 << 14,
+  KEY_B = 1 << 14,
+  RESIZE = 1 << 15,
   NONE = 0
 };
 

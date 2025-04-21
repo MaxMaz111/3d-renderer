@@ -1,6 +1,5 @@
 #include "renderer.h"
 
-#include <QDebug>
 #include <optional>
 #include <vector>
 
@@ -29,14 +28,19 @@ Frame Renderer::Render(const Scene& scene) {
     for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
       for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
         auto z = triangle.GetZ({i, j, 0});
-        if (z == std::nullopt || z.value() > z_buffer_[j][i]) {
+        if (z == std::nullopt) {
           continue;
         }
-        z_buffer_[j][i] = z.value();
-        frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
+        if (scene.Transapent()) {
+          frame.BlendColor(Width{i}, Height{j}, triangle.GetColor());
+        } else if (z_buffer_[j][i] > z.value()) {
+          z_buffer_[j][i] = z.value();
+          frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
+        }
       }
     }
   }
+
   return frame;
 }
 

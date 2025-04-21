@@ -37,12 +37,10 @@ Color Color::Invert() const {
   return Color(255 - r_, 255 - g_, 255 - b_);
 }
 
-Color Color::Blend(const Color& other, float factor) const {
-  factor = std::max(0.0f, std::min(1.0f, factor));
-  int new_red = static_cast<int>(r_ * (1 - factor) + other.r_ * factor);
-  int new_green = static_cast<int>(g_ * (1 - factor) + other.g_ * factor);
-  int new_blue = static_cast<int>(b_ * (1 - factor) + other.b_ * factor);
-  return Color(new_red, new_green, new_blue);
+void Color::Blend(const Color& other, Scalar factor) {
+  r_ += other.GetRed() * factor;
+  g_ += other.GetGreen() * factor;
+  b_ += other.GetBlue() * factor;
 }
 
 bool Color::operator==(const Color& other) const {

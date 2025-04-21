@@ -8,7 +8,7 @@ namespace renderer {
 
 class Camera {
   static constexpr int kNumberOfPlanes = 6;
-  static constexpr Scalar kMoveSpeed = 0.05;
+  static constexpr Scalar kMoveSpeed = 0.1;
   static constexpr Scalar kRotationSpeed = M_PI / 180;
 
  public:

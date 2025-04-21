@@ -70,12 +70,20 @@ void Scene::SetCurrentCamera(int camera_index) {
   }
 }
 
+void Scene::SwapTransparency() {
+  transparent_ = !transparent_;
+}
+
 const Camera& Scene::GetCamera() const {
   return cameras_.at(cur_camera_index_);
 }
 
 Camera& Scene::GetCamera() {
   return cameras_.at(cur_camera_index_);
+}
+
+bool Scene::Transapent() const {
+  return transparent_;
 }
 
 }  // namespace renderer

@@ -73,4 +73,9 @@ void Kernel::SetCurrentCamera(int camera_index) {
   observable_.Set(renderer_.Render(scene_));
 }
 
+void Kernel::SwapTransparency() {
+  scene_.SwapTransparency();
+  observable_.Set(renderer_.Render(scene_));
+}
+
 }  // namespace renderer

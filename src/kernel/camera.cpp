@@ -1,6 +1,7 @@
 #include "camera.h"
 
 #include <cassert>
+#include <iostream>
 
 #include "linalg.h"
 
@@ -9,10 +10,11 @@ namespace renderer {
 Camera::Camera()
     : screen_width_(Width{800}),
       screen_height_(Height{600}),
-      near_(300),
-      far_(1000),
-      rotation_matrix_(Matrix3::Identity()),
-      position_(0, 0, 0),
+      near_(500),
+      far_(10000),
+      rotation_matrix_(AngleAxis(M_PI, Vector3::UnitX()) *
+                       AngleAxis(-M_PI / 2, Vector3::UnitY())),
+      position_(15, 0, 0),
       planes_(BuildPlanesForClipping()) {
   BuildProjectionMatrix();
 }
