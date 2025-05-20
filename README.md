@@ -4,6 +4,12 @@ This project uses CMake (version ≥ 3.16), Qt6 (Widgets, Core, Gui), and Eigen 
 
 ---
 
+## Demo
+
+https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
+
+---
+
 ## 1. Prerequisites
 
 - C++20-compatible compiler (e.g., g++ ≥ 10, clang ≥ 10, or Apple Clang ≥ 12)
