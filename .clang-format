@@ -51,14 +51,16 @@ EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex: '^<.*>$'         # Системные заголовки (stdlib.h, iostream и т. д.)
+  - Regex: '^<.*>$'
     Priority: 1
-  - Regex: '"mylib/.*"'     # Заголовки из библиотеки проекта
+  - Regex: '"kernel/.*"'
     Priority: 2
-  - Regex: '"third_party/.*"' # Сторонние библиотеки
+  - Regex: '"view/.*"'
     Priority: 3
-  - Regex: '".*"'           # Остальные пользовательские заголовки
+  - Regex: '"controller/.*"'
     Priority: 4
+  - Regex: '".*"'
+    Priority: 5
 IndentCaseLabels: true
 IndentPPDirectives: None
 IndentWidth: 2

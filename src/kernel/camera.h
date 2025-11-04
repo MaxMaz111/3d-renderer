@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../size.h"
 #include "linalg.h"
 #include "plane.h"
+#include "size.h"
 
 namespace renderer {
 
@@ -14,6 +14,7 @@ class Camera {
  public:
   Camera();
   Camera(Scalar near, Scalar far, Width screen_width, Height screen_height);
+
   void SetScreenDimensions(Width width, Height height);
   void SetNear(Scalar near);
   void SetFar(Scalar far);

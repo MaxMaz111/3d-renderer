@@ -3,8 +3,8 @@
 #include <optional>
 #include <vector>
 
-#include "../timer.h"
 #include "linalg.h"
+#include "timer.h"
 #include "triangle.h"
 
 namespace renderer {
@@ -16,8 +16,8 @@ Frame Renderer::Render(const Scene& scene) {
   RotateTriangles(triangles, camera);
   triangles = GetClippedTriangles(triangles, camera);
   ProjectTriangles(triangles, camera);
-  int width = static_cast<int>(camera.GetWidth());
-  int height = static_cast<int>(camera.GetHeight());
+  int width = camera.GetWidth();
+  int height = camera.GetHeight();
   z_buffer_.assign(height, std::vector<Scalar>(width, 1));
   Frame frame(camera.GetWidth(), camera.GetHeight());
   for (const Triangle& triangle : triangles) {
@@ -27,7 +27,7 @@ Frame Renderer::Render(const Scene& scene) {
     int max_y = std::ceil(triangle.GetMaxY());
     for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
       for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
-        auto z = triangle.GetZ({i, j, 0});
+        auto z = triangle.GetZ(Point3(i, j, 0));
         if (z == std::nullopt) {
           continue;
         }

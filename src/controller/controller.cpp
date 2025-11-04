@@ -1,6 +1,6 @@
 #include "controller.h"
 
-#include "../size.h"
+#include "size.h"
 
 namespace renderer {
 

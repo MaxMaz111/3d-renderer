@@ -3,16 +3,17 @@
 #include <QLabel>
 #include <QMouseEvent>
 
-#include "../kernel/frame.h"
-#include "../observer.hpp"
+#include "kernel/frame.h"
+
+#include "observer.hpp"
 #include "view_signals.h"
 
 namespace renderer {
 
 class View : public QLabel {
  public:
-  View() = delete;
   View(QWidget* parent);
+
   void keyPressEvent(QKeyEvent* event) override;
   void keyReleaseEvent(QKeyEvent* event) override;
   void resizeEvent(QResizeEvent* event) override;
@@ -23,7 +24,6 @@ class View : public QLabel {
 
  private:
   static void SetSignal(ViewSignalData& data, ViewSignals signal);
-
   static void ClearSignal(ViewSignalData& data, ViewSignals signal);
 
   HotInput<Frame> observer_;

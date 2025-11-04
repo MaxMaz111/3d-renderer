@@ -1,7 +1,6 @@
 #include "camera.h"
 
 #include <cassert>
-#include <iostream>
 
 #include "linalg.h"
 
@@ -139,10 +138,10 @@ void Camera::SwivelRight() {
 std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping() {
   Plane near(Vector3{0, 0, 1}, near_);
   Plane far(Vector3{0, 0, -1}, far_);
-  Plane left(Vector3{-near_, 0, static_cast<int>(screen_width_) / 2}, 0);
-  Plane right(Vector3{near_, 0, static_cast<int>(screen_width_) / 2}, 0);
-  Plane up(Vector3{0, -near_, static_cast<int>(screen_height_) / 2}, 0);
-  Plane down(Vector3{0, near_, static_cast<int>(screen_height_) / 2}, 0);
+  Plane left(Vector3(-near_, 0, screen_width_ / 2), 0);
+  Plane right(Vector3(near_, 0, screen_width_ / 2), 0);
+  Plane up(Vector3(0, -near_, screen_height_ / 2), 0);
+  Plane down(Vector3(0, near_, screen_height_ / 2), 0);
   return {near, far, left, right, up, down};
 }
 

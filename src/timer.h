@@ -9,6 +9,7 @@ class Timer {
  public:
   Timer(const std::string& name = "Timer");
   ~Timer();
+
   double Elapsed() const;
   void Reset();
 

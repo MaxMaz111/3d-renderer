@@ -1,17 +1,18 @@
 #pragma once
 
-#include "../observer.hpp"
-#include "../size.h"
 #include "kernel/frame.h"
+
+#include "observer.hpp"
 #include "renderer.h"
 #include "scene.h"
+#include "size.h"
 
 namespace renderer {
 
 class Kernel {
  public:
-  Kernel() = delete;
   Kernel(const std::string& filename);
+
   void Subscribe(Observer<Frame>* observer);
   void SetScreenDimensions(Width width, Height height);
   void RotateLeft();

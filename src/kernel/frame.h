@@ -2,14 +2,15 @@
 
 #include <vector>
 
-#include "../size.h"
 #include "color.h"
+#include "size.h"
 
 namespace renderer {
 
 class Frame {
  public:
   Frame(Width width, Height height);
+
   Width GetWidth() const;
   Height GetHeight() const;
   void SetColor(Width x, Height y, Color color);

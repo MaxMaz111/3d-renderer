@@ -1,9 +1,8 @@
 #pragma once
 
-#include <QLabel>
 #include <QMainWindow>
 
-#include "../size.h"
+#include "size.h"
 #include "view.h"
 
 namespace renderer {
@@ -11,6 +10,7 @@ namespace renderer {
 class MainWindow {
  public:
   MainWindow(Width width, Height height);
+
   void Show();
   View* GetView();
 
