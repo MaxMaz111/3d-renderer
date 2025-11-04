@@ -1,6 +1,5 @@
 #pragma once
 
-#include <Eigen/Dense>
 #include <Eigen/Geometry>
 #include <type_traits>
 

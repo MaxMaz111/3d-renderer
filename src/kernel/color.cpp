@@ -4,8 +4,6 @@
 
 namespace renderer {
 
-Color::Color() : r_(0), g_(0), b_(0) {}
-
 Color::Color(int red, int green, int blue)
     : r_(Clamp(red)), g_(Clamp(green)), b_(Clamp(blue)) {}
 
@@ -37,7 +35,7 @@ Color Color::Invert() const {
   return Color(255 - r_, 255 - g_, 255 - b_);
 }
 
-void Color::Blend(const Color& other, Scalar factor) {
+void Color::Blend(const Color& other, float factor) {
   r_ += other.GetRed() * factor;
   g_ += other.GetGreen() * factor;
   b_ += other.GetBlue() * factor;
@@ -56,7 +54,7 @@ Color Color::GetRandomColor() {
 }
 
 uint8_t Color::Clamp(int value) {
-  return static_cast<uint8_t>(std::max(0, std::min(255, value)));
+  return std::clamp(value, 0, 255);
 }
 
 }  // namespace renderer

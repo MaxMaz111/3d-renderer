@@ -33,10 +33,9 @@ void View::resizeEvent(QResizeEvent*) {
 }
 
 void View::SetFrame(Frame frame) {
-  QImage image(static_cast<int>(frame.GetWidth()),
-               static_cast<int>(frame.GetHeight()), QImage::Format_RGB32);
-  for (int x = 0; x < static_cast<int>(frame.GetWidth()); ++x) {
-    for (int y = 0; y < static_cast<int>(frame.GetHeight()); ++y) {
+  QImage image(frame.GetWidth(), frame.GetHeight(), QImage::Format_RGB32);
+  for (int x = 0; x < frame.GetWidth(); ++x) {
+    for (int y = 0; y < frame.GetHeight(); ++y) {
       Color color = frame.GetColor(Width{x}, Height{y});
       image.setPixel(x, y,
                      qRgb(color.GetRed(), color.GetGreen(), color.GetBlue()));

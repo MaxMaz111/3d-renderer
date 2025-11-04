@@ -2,7 +2,8 @@
 
 namespace renderer {
 
-enum class Width : int {};
-enum class Height : int {};
+enum Width : int {};
+
+enum Height : int {};
 
 }  // namespace renderer

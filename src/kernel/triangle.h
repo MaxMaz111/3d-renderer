@@ -13,6 +13,7 @@ class Triangle {
            const Vector3& normal);
   Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
            const Vector3& normal, const Color& color);
+
   const std::array<Point3, 3>& GetPoints() const;
   Point3 GetPoint(size_t index) const;
   Vector3 GetNormal() const;
@@ -21,7 +22,6 @@ class Triangle {
   std::optional<Scalar> GetZ(const Point3& point) const;
   const Color& GetColor() const;
   void SetColor(const Color& color);
-  void Print() const;
   Scalar GetMinX() const;
   Scalar GetMaxX() const;
   Scalar GetMinY() const;

@@ -1,17 +1,15 @@
 #pragma once
 
-#include <QMouseEvent>
-#include <QObject>
+#include "kernel/kernel.h"
 
-#include "../kernel/kernel.h"
-#include "../view/view_signals.h"
+#include "view/view_signals.h"
 
 namespace renderer {
 
 class Controller {
  public:
-  Controller() = delete;
   Controller(Kernel* kernel_ptr);
+
   void HandleSignal(ViewSignalData signal);
   ColdInput<ViewSignalData>* GetObserver();
 

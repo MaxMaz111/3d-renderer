@@ -3,9 +3,7 @@
 namespace renderer {
 
 Plane::Plane(const Vector3& normal, const Point3& point)
-    : normal_(normal.normalized()) {
-  d_ = -normal_.dot(point);
-}
+    : normal_(normal.normalized()), d_(-normal_.dot(point)) {}
 
 Plane::Plane(const Vector3& normal, Scalar distance)
     : normal_(normal.normalized()), d_(distance) {}

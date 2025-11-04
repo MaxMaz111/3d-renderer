@@ -3,7 +3,7 @@
 namespace renderer {
 
 MainWindow::MainWindow(Width width, Height height) : view_(&window_) {
-  window_.setGeometry(0, 0, static_cast<int>(width), static_cast<int>(height));
+  window_.setGeometry(0, 0, width, height);
   window_.setWindowTitle("renderer");
   window_.setCentralWidget(GetView());
 }

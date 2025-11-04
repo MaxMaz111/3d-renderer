@@ -76,12 +76,6 @@ void Triangle::SetColor(const Color& color) {
   triangle_color_ = color;
 }
 
-void Triangle::Print() const {
-  std::cout << points_[0] << '\n';
-  std::cout << points_[1] << '\n';
-  std::cout << points_[2] << '\n';
-}
-
 Scalar Triangle::GetMinX() const {
   return std::min({points_[0].x(), points_[1].x(), points_[2].x()});
 }

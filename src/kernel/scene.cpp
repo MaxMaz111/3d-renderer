@@ -8,7 +8,7 @@ namespace renderer {
 
 Scene::Scene(const std::vector<Camera>& cameras,
              const std::vector<Triangle>& triangles)
-    : cameras_(cameras), triangles_(triangles) {}
+    : cameras_(cameras), cur_camera_index_(0), triangles_(triangles) {}
 
 Scene::Scene(const std::vector<Triangle>& triangles)
     : cameras_(4), cur_camera_index_(0), triangles_(triangles) {}

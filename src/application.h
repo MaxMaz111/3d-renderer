@@ -1,8 +1,10 @@
 #pragma once
 
-#include "controller/controller.h"
 #include "kernel/kernel.h"
+
 #include "view/main_window.h"
+
+#include "controller/controller.h"
 
 namespace renderer {
 
