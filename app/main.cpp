@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QProcess>
 
 #include "application.h"
 #include "except.h"
