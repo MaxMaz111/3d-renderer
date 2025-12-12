@@ -1,7 +1,7 @@
 #include "obj_reader.h"
 
+#include <QDebug>
 #include <fstream>
-#include <iostream>
 #include <sstream>
 
 namespace renderer {
@@ -12,7 +12,7 @@ std::vector<Triangle> ObjReader::ReadFromFile(const std::string& filepath) {
   std::vector<Vector3> normals;
   std::ifstream file(filepath);
   if (!file.is_open()) {
-    std::cerr << "Error: Failed to open file: " << filepath << std::endl;
+    qDebug() << "Error: Failed to open file: " << filepath;
     return triangles;
   }
   std::string line;
@@ -42,8 +42,7 @@ Point3 ObjReader::ParseVertex(const std::string& line) {
   Scalar x, y, z;
   iss >> token;
   if (!(iss >> x >> y >> z)) {
-    std::cerr << "Error: Could not parse vertex coordinates from: " << line
-              << std::endl;
+    qDebug() << "Error: Could not parse vertex coordinates from: " << line;
     return Point3{0, 0, 0};
   }
   return Point3{x, y, z};
@@ -55,8 +54,7 @@ Vector3 ObjReader::ParseNormal(const std::string& line) {
   Scalar x, y, z;
   iss >> token;
   if (!(iss >> x >> y >> z)) {
-    std::cerr << "Error: Could not parse normal vector from: " << line
-              << std::endl;
+    qDebug() << "Error: Could not parse normal vector from: " << line;
     return Vector3{0, 0, 0};
   }
   return Vector3{x, y, z};
@@ -85,8 +83,8 @@ std::vector<Triangle> ObjReader::ParseFace(
       int vertex_index = std::stoi(vertex_index_str) - 1;
       face_vertex_indices.push_back(vertex_index);
     } catch (const std::exception& e) {
-      std::cerr << "Error: Failed to parse face vertex index from token: "
-                << token << " in line: " << line << std::endl;
+      qDebug() << "Error: Failed to parse face vertex index from token: "
+               << token << " in line: " << line;
       continue;
     }
 
@@ -102,16 +100,16 @@ std::vector<Triangle> ObjReader::ParseFace(
         face_normal_indices.push_back(normal_index);
         has_normals = true;
       } catch (const std::exception& e) {
-        std::cerr << "Error: Failed to parse face normal index from token: "
-                  << token << " in line: " << line << std::endl;
+        qDebug() << "Error: Failed to parse face normal index from token: "
+                 << token << " in line: " << line;
       }
     }
   }
 
   for (int idx : face_vertex_indices) {
     if (idx < 0 || static_cast<size_t>(idx) >= vertices.size()) {
-      std::cerr << "Error: Face vertex index " << idx + 1
-                << " out of range in line: " << line << std::endl;
+      qDebug() << "Error: Face vertex index " << idx + 1
+               << " out of range in line: " << line;
       return result;
     }
   }
@@ -119,8 +117,8 @@ std::vector<Triangle> ObjReader::ParseFace(
   if (has_normals) {
     for (int idx : face_normal_indices) {
       if (idx < 0 || static_cast<size_t>(idx) >= normals.size()) {
-        std::cerr << "Error: Face normal index " << idx + 1
-                  << " out of range in line: " << line << std::endl;
+        qDebug() << "Error: Face normal index " << idx + 1
+                 << " out of range in line: " << line;
         has_normals = false;
         break;
       }
