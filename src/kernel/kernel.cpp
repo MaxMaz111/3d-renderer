@@ -2,13 +2,13 @@
 
 #include "obj_reader.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
-Kernel::Kernel(const std::string& filename)
+Kernel::Kernel(const std::filesystem::path& filename)
     : scene_(ObjReader::ReadFromFile(filename)),
       observable_(renderer_.Render(scene_)) {}
 
-void Kernel::Subscribe(Observer<Frame>* observer) {
+void Kernel::Subscribe(util::Observer<Frame>* observer) {
   assert(observer);
   observable_.Subscribe(observer);
 }
@@ -78,4 +78,4 @@ void Kernel::SwapTransparency() {
   observable_.Set(renderer_.Render(scene_));
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

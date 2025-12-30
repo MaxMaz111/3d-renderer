@@ -2,10 +2,11 @@
 
 #include <vector>
 
-#include "color.h"
-#include "size.h"
+#include "util/size.h"
 
-namespace renderer {
+#include "color.h"
+
+namespace renderer::kernel {
 
 class Frame {
  public:
@@ -25,4 +26,4 @@ class Frame {
   std::vector<std::vector<Color>> frame_data_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

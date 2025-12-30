@@ -1,3 +1,3 @@
 #include "light_source.h"
 
-namespace renderer {}  // namespace renderer
+namespace renderer::kernel {}  // namespace renderer::kernel

@@ -5,7 +5,7 @@
 
 #include "linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
                    const Vector3& normal)
@@ -102,4 +102,4 @@ Point4 Triangle::ToHomogeneous(const Point3& point) const {
   return Point4(point.x(), point.y(), point.z(), 1);
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

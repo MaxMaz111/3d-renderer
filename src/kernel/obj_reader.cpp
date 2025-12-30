@@ -4,15 +4,15 @@
 #include <fstream>
 #include <sstream>
 
-namespace renderer {
+namespace renderer::kernel {
 
-std::vector<Triangle> ObjReader::ReadFromFile(const std::string& filepath) {
+std::vector<Triangle> ObjReader::ReadFromFile(const std::filesystem::path& filepath) {
   std::vector<Triangle> triangles;
   std::vector<Point3> vertices;
   std::vector<Vector3> normals;
   std::ifstream file(filepath);
   if (!file.is_open()) {
-    qDebug() << "Error: Failed to open file: " << filepath;
+    qDebug() << "Error: Failed to open file: " << filepath.c_str();
     return triangles;
   }
   std::string line;
@@ -169,4 +169,4 @@ std::vector<Triangle> ObjReader::ParseFace(
   return result;
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

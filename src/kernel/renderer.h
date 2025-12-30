@@ -6,7 +6,7 @@
 #include "scene.h"
 #include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Renderer {
  public:

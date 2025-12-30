@@ -1,15 +1,16 @@
 #pragma once
 
+#include <__filesystem/filesystem_error.h>
 #include <string>
 #include <vector>
 
 #include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class ObjReader {
  public:
-  static std::vector<Triangle> ReadFromFile(const std::string& filepath);
+  static std::vector<Triangle> ReadFromFile(const std::filesystem::path& filepath);
 
  private:
   static Point3 ParseVertex(const std::string& line);

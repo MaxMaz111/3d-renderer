@@ -4,7 +4,7 @@
 
 #include "linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 Camera::Camera()
     : screen_width_(Width{800}),
@@ -145,4 +145,4 @@ std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping() {
   return {near, far, left, right, up, down};
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

@@ -25,6 +25,7 @@ target_include_directories(renderer PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src/controller
         ${CMAKE_CURRENT_SOURCE_DIR}/src/kernel
         ${CMAKE_CURRENT_SOURCE_DIR}/src/view
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/util
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")

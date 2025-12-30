@@ -3,12 +3,12 @@
 #include <chrono>
 #include <string>
 
-namespace renderer {
+namespace renderer::util {
 
-class Timer {
+class TimeAnchor {
  public:
-  Timer(const std::string& name = "Timer");
-  ~Timer();
+  TimeAnchor(const std::string& name = "Timer");
+  ~TimeAnchor();
 
   double Elapsed() const;
   void Reset();
@@ -18,4 +18,4 @@ class Timer {
   std::string label_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::util

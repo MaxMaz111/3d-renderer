@@ -1,6 +1,6 @@
 #include "main_window.h"
 
-namespace renderer {
+namespace renderer::view {
 
 MainWindow::MainWindow(Width width, Height height) : view_(&window_) {
   window_.setGeometry(0, 0, width, height);
@@ -16,4 +16,4 @@ View* MainWindow::GetView() {
   return &view_;
 }
 
-}  // namespace renderer
+}  // namespace renderer::view
