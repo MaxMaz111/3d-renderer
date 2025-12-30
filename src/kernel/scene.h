@@ -2,11 +2,12 @@
 
 #include <vector>
 
+#include "util/size.h"
+
 #include "camera.h"
-#include "size.h"
 #include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Scene {
  public:
@@ -39,4 +40,4 @@ class Scene {
   bool transparent_ = false;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

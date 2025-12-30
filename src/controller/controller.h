@@ -6,16 +6,20 @@
 
 namespace renderer {
 
+namespace controller {
+
 class Controller {
  public:
-  Controller(Kernel* kernel_ptr);
+  Controller(kernel::Kernel* kernel_ptr);
 
-  void HandleSignal(ViewSignalData signal);
-  ColdInput<ViewSignalData>* GetObserver();
+  void HandleSignal(view::ViewSignalData signal) const;
+  util::ColdInput<view::ViewSignalData>* GetObserver();
 
  private:
-  Kernel* kernel_ptr_;
-  ColdInput<ViewSignalData> observer_;
+  kernel::Kernel* kernel_ptr_;
+  util::ColdInput<view::ViewSignalData> observer_;
 };
+
+}  // namespace controller
 
 }  // namespace renderer

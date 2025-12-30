@@ -2,7 +2,7 @@
 
 #include "kernel/linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class LightSource {
  public:

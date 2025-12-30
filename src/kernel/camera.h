@@ -1,10 +1,10 @@
 #pragma once
 
+#include "util/size.h"
 #include "linalg.h"
 #include "plane.h"
-#include "size.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Camera {
   static constexpr int kNumberOfPlanes = 6;
@@ -51,6 +51,4 @@ class Camera {
   std::array<Plane, kNumberOfPlanes> planes_;
 };
 
-;
-
-}  // namespace renderer
+}  // namespace renderer::kernel

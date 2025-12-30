@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-namespace renderer {
+namespace renderer::kernel {
 
 Frame::Frame(Width width, Height height)
     : width_(width),
@@ -39,4 +39,4 @@ bool Frame::CheckBounds(Width x, Height y) const {
   return Width{0} <= x && x < width_ && Height{0} <= y && y < height_;
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

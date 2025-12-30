@@ -3,14 +3,15 @@
 #include <optional>
 #include <vector>
 
+#include "util/time_anchor.h"
+
 #include "linalg.h"
-#include "timer.h"
 #include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 Frame Renderer::Render(const Scene& scene) {
-  Timer render_timer("Render timer");
+  util::TimeAnchor render_timer("Render timer");
   std::vector<Triangle> triangles = scene.GetTriangles();
   const Camera& camera = scene.GetCamera();
   RotateTriangles(triangles, camera);
@@ -168,4 +169,4 @@ QColor Renderer::ConvertColor(const Color& color) {
   return {color.GetRed(), color.GetGreen(), color.GetBlue()};
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

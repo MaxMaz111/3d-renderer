@@ -1,7 +1,7 @@
 #include <QApplication>
 
+#include "../src/util/except.h"
 #include "application.h"
-#include "except.h"
 
 int main(int argc, char* argv[]) {
   QApplication runtime(argc, argv);
@@ -9,7 +9,7 @@ int main(int argc, char* argv[]) {
     renderer::Application app(argc, argv);
     return runtime.exec();
   } catch (...) {
-    except::React();
+    renderer::util::React();
     return 0;
   }
 }

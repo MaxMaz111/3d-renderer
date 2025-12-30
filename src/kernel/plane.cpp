@@ -1,6 +1,6 @@
 #include "plane.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 Plane::Plane(const Vector3& normal, const Point3& point)
     : normal_(normal.normalized()), d_(-normal_.dot(point)) {}

@@ -3,7 +3,7 @@
 #include <Eigen/Geometry>
 #include <type_traits>
 
-namespace renderer {
+namespace renderer::kernel {
 
 using Scalar = float;
 static constexpr Scalar kEpsilon = 1e-5;
@@ -19,4 +19,4 @@ using Matrix4 = Eigen::Matrix4<Scalar>;
 using AngleAxis = Eigen::AngleAxis<Scalar>;
 using Index = Eigen::Index;
 
-}  // namespace renderer
+}  // namespace renderer::kernel

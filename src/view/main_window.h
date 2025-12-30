@@ -2,10 +2,11 @@
 
 #include <QMainWindow>
 
-#include "size.h"
+#include "util/size.h"
+
 #include "view.h"
 
-namespace renderer {
+namespace renderer::view {
 
 class MainWindow {
  public:
@@ -19,4 +20,4 @@ class MainWindow {
   View view_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::view

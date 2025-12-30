@@ -4,7 +4,7 @@
 
 #include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 Scene::Scene(const std::vector<Camera>& cameras,
              const std::vector<Triangle>& triangles)

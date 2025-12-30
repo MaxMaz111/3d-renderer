@@ -1,34 +1,29 @@
-#include "timer.h"
+#include "time_anchor.h"
 
 #include <QDebug>
 
-namespace renderer {
+namespace renderer::util {
 
-Timer::Timer(const std::string& name) : label_(name) {
-  system("clear");
+TimeAnchor::TimeAnchor(const std::string& name) : label_(name) {
   start_time_ = std::chrono::high_resolution_clock::now();
-  qDebug() << label_ << " started";
 }
 
-Timer::~Timer() {
+TimeAnchor::~TimeAnchor() {
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
       end_time - start_time_);
-  qDebug() << label_ << " ended - Elapsed time: " << duration.count() / 1000.0
-           << " ms";
-  qDebug() << "FPS: " << 1000000.0 / duration.count();
+  qDebug() << "\rFPS: " << 1000000.0 / duration.count();
 }
 
-double Timer::Elapsed() const {
+double TimeAnchor::Elapsed() const {
   auto current_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
       current_time - start_time_);
   return duration.count() / 1000.0;
 }
 
-void Timer::Reset() {
+void TimeAnchor::Reset() {
   start_time_ = std::chrono::high_resolution_clock::now();
-  qDebug() << label_ << " reset";
 }
 
-}  // namespace renderer
+}  // namespace renderer::util

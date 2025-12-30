@@ -5,7 +5,7 @@
 #include "color.h"
 #include "linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Triangle {
  public:
@@ -37,4 +37,4 @@ class Triangle {
   Color triangle_color_ = Color::GetRandomColor();
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

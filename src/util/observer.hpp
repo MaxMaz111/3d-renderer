@@ -5,7 +5,7 @@
 #include <list>
 #include <type_traits>
 
-namespace renderer {
+namespace renderer::util {
 
 namespace observer {
 
@@ -43,7 +43,7 @@ struct DataSentByImpl<Data, ByReference> {
 };
 
 template <class Data, class SendBy>
-using DataSentBy = typename DataSentByImpl<Data, SendBy>::Type;
+using DataSentBy = DataSentByImpl<Data, SendBy>::Type;
 
 template <bool Flag>
 struct AutoSendByImpl;
@@ -196,8 +196,7 @@ void Observer<Data, SendBy>::Unsubscribe() {
 }
 
 template <class Data, class SendBy>
-typename Observer<Data, SendBy>::DataSentBy Observer<Data, SendBy>::GetData()
-    const {
+Observer<Data, SendBy>::DataSentBy Observer<Data, SendBy>::GetData() const {
   assert(observable_);
   return observable_->GetData();
 }
@@ -242,17 +241,19 @@ namespace observer {
 
 template <class Data, class SendBy,
           template <class T1, class T2> class Observable>
-class ObservableDataImpl : protected observer::Storage<Data>,
+class ObservableDataImpl : protected Storage<Data>,
                            public Observable<Data, SendBy> {
-  using StorageBase = observer::Storage<Data>;
+  using StorageBase = Storage<Data>;
   using ObservableBase = Observable<Data, SendBy>;
 
  public:
   template <class... Args>
   explicit ObservableDataImpl(Args&&... args)
       : StorageBase(std::forward<Args>(args)...),
-        ObservableBase([&data = StorageBase::data_]() ->
-                       typename ObservableBase::Return { return data; }) {}
+        ObservableBase(
+            [&data = StorageBase::data_]() -> ObservableBase::Return {
+              return data;
+            }) {}
 
   template <class... Args>
   void Set(Args&&... args) {
@@ -300,4 +301,4 @@ class ColdInput : public Observer<Data, SendBy> {
       : Base(Base::DoNothing, std::forward<T>(action), Base::DoNothing) {}
 };
 
-}  // namespace renderer
+}  // namespace renderer::util

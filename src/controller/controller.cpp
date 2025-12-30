@@ -1,69 +1,74 @@
 #include "controller.h"
 
-#include "size.h"
+#include "util/size.h"
 
 namespace renderer {
 
-Controller::Controller(Kernel* kernel_ptr)
-    : kernel_ptr_(kernel_ptr), observer_([this](ViewSignalData signal_data) {
+namespace controller {
+
+Controller::Controller(kernel::Kernel* kernel_ptr)
+    : kernel_ptr_(kernel_ptr),
+      observer_([this](view::ViewSignalData signal_data) {
         HandleSignal(signal_data);
       }) {}
 
-void Controller::HandleSignal(ViewSignalData signal_data) {
-  if (signal_data.signal & ViewSignals::RESIZE) {
+void Controller::HandleSignal(view::ViewSignalData signal_data) const {
+  if (HasSignal(signal_data.signal, view::ViewSignals::resize)) {
     assert(signal_data.size != std::nullopt);
     kernel_ptr_->SetScreenDimensions(Width{signal_data.size->width()},
                                      Height{signal_data.size->height()});
   }
-  if (signal_data.signal & ViewSignals::LEFT_ARROW) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::left_arrow)) {
     kernel_ptr_->RotateLeft();
   }
-  if (signal_data.signal & ViewSignals::UP_ARROW) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::up_arrow)) {
     kernel_ptr_->RotateUp();
   }
-  if (signal_data.signal & ViewSignals::RIGHT_ARROW) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::right_arrow)) {
     kernel_ptr_->RotateRight();
   }
-  if (signal_data.signal & ViewSignals::DOWN_ARROW) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::down_arrow)) {
     kernel_ptr_->RotateDown();
   }
-  if (signal_data.signal & ViewSignals::KEY_A) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_a)) {
     kernel_ptr_->MoveLeft();
   }
-  if (signal_data.signal & ViewSignals::KEY_W) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_w)) {
     kernel_ptr_->MoveForward();
   }
-  if (signal_data.signal & ViewSignals::KEY_D) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_d)) {
     kernel_ptr_->MoveRight();
   }
-  if (signal_data.signal & ViewSignals::KEY_S) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_s)) {
     kernel_ptr_->MoveBackward();
   }
-  if (signal_data.signal & ViewSignals::KEY_Q) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_q)) {
     kernel_ptr_->SwivelLeft();
   }
-  if (signal_data.signal & ViewSignals::KEY_E) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_e)) {
     kernel_ptr_->SwivelRight();
   }
-  if (signal_data.signal & ViewSignals::KEY_1) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_1)) {
     kernel_ptr_->SetCurrentCamera(0);
   }
-  if (signal_data.signal & ViewSignals::KEY_2) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_2)) {
     kernel_ptr_->SetCurrentCamera(1);
   }
-  if (signal_data.signal & ViewSignals::KEY_3) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_3)) {
     kernel_ptr_->SetCurrentCamera(2);
   }
-  if (signal_data.signal & ViewSignals::KEY_4) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_4)) {
     kernel_ptr_->SetCurrentCamera(3);
   }
-  if (signal_data.signal & ViewSignals::KEY_B) {
+  if (HasSignal(signal_data.signal, view::ViewSignals::key_b)) {
     kernel_ptr_->SwapTransparency();
   }
 }
 
-ColdInput<ViewSignalData>* Controller::GetObserver() {
+util::ColdInput<view::ViewSignalData>* Controller::GetObserver() {
   return &observer_;
 }
+
+}  // namespace controller
 
 }  // namespace renderer

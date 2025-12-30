@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Color {
  public:
@@ -28,4 +28,5 @@ class Color {
   uint8_t g_ = 0;
   uint8_t b_ = 0;
 };
-}  // namespace renderer
+
+}  // namespace renderer::kernel

@@ -4,7 +4,7 @@
 
 #include "linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Plane {
  public:

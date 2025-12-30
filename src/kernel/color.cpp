@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-namespace renderer {
+namespace renderer::kernel {
 
 Color::Color(int red, int green, int blue)
     : r_(Clamp(red)), g_(Clamp(green)), b_(Clamp(blue)) {}
@@ -57,4 +57,4 @@ uint8_t Color::Clamp(int value) {
   return std::clamp(value, 0, 255);
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel
