@@ -33,7 +33,6 @@ class Triangle {
 
   std::array<Point3, 3> points_;
   Vector3 normal_;
-
   Color triangle_color_ = Color::GetRandomColor();
 };
 

@@ -82,7 +82,7 @@ Camera& Scene::GetCamera() {
   return cameras_.at(cur_camera_index_);
 }
 
-bool Scene::Transapent() const {
+bool Scene::Transparent() const {
   return transparent_;
 }
 

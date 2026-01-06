@@ -19,6 +19,7 @@ class Color {
   void Blend(const Color& other, float factor = 0.2);
   bool operator==(const Color& other) const;
   bool operator!=(const Color& other) const;
+
   static Color GetRandomColor();
 
  private:

@@ -32,7 +32,7 @@ Frame Renderer::Render(const Scene& scene) {
         if (z == std::nullopt) {
           continue;
         }
-        if (scene.Transapent()) {
+        if (scene.Transparent()) {
           frame.BlendColor(Width{i}, Height{j}, triangle.GetColor());
         } else if (z_buffer_[j][i] > z.value()) {
           z_buffer_[j][i] = z.value();

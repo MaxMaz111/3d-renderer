@@ -135,7 +135,8 @@ void Camera::SwivelRight() {
       AngleAxis(kRotationSpeed, rotation_matrix_.col(2)) * rotation_matrix_;
 }
 
-std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping() {
+std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping()
+    const {
   Plane near(Vector3{0, 0, 1}, near_);
   Plane far(Vector3{0, 0, -1}, far_);
   Plane left(Vector3(-near_, 0, screen_width_ / 2), 0);

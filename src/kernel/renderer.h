@@ -19,9 +19,10 @@ class Renderer {
                                             const Plane& plane) const;
   void RotateTriangles(std::vector<Triangle>& triangles, const Camera& camera);
   void ProjectTriangles(std::vector<Triangle>& triangles, const Camera& camera);
+
   static QColor ConvertColor(const Color& color);
 
   std::vector<std::vector<Scalar>> z_buffer_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel
