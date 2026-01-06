@@ -2,17 +2,17 @@
 
 namespace renderer::view {
 
-MainWindow::MainWindow(Width width, Height height) : view_(&window_) {
+MainWindow::MainWindow(Width width, Height height) {
   window_.setGeometry(0, 0, width, height);
   window_.setWindowTitle("renderer");
-  window_.setCentralWidget(GetView());
+  window_.setCentralWidget(View()->Label());
 }
 
 void MainWindow::Show() {
   window_.show();
 }
 
-View* MainWindow::GetView() {
+View* MainWindow::View() {
   return &view_;
 }
 

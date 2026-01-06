@@ -13,11 +13,11 @@ class MainWindow {
   MainWindow(Width width, Height height);
 
   void Show();
-  View* GetView();
+  View* View();
 
  private:
   QMainWindow window_;
-  View view_;
+  view::View view_;
 };
 
 }  // namespace renderer::view

@@ -8,10 +8,10 @@ namespace renderer::util {
 class TimeAnchor {
  public:
   TimeAnchor(const std::string& name = "Timer");
-  ~TimeAnchor();
 
   double Elapsed() const;
   void Reset();
+  ~TimeAnchor();
 
  private:
   std::chrono::time_point<std::chrono::high_resolution_clock> start_time_;

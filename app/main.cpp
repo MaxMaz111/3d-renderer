@@ -1,6 +1,6 @@
 #include <QApplication>
 
-#include "../src/util/except.h"
+#include "util/except.h"
 #include "application.h"
 
 int main(int argc, char* argv[]) {

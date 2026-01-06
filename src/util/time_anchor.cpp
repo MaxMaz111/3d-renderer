@@ -8,13 +8,6 @@ TimeAnchor::TimeAnchor(const std::string& name) : label_(name) {
   start_time_ = std::chrono::high_resolution_clock::now();
 }
 
-TimeAnchor::~TimeAnchor() {
-  auto end_time = std::chrono::high_resolution_clock::now();
-  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
-      end_time - start_time_);
-  qDebug() << "\rFPS: " << 1000000.0 / duration.count();
-}
-
 double TimeAnchor::Elapsed() const {
   auto current_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
@@ -24,6 +17,14 @@ double TimeAnchor::Elapsed() const {
 
 void TimeAnchor::Reset() {
   start_time_ = std::chrono::high_resolution_clock::now();
+}
+
+
+TimeAnchor::~TimeAnchor() {
+  auto end_time = std::chrono::high_resolution_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(
+      end_time - start_time_);
+  qDebug() << "FPS: " << 1000000.0 / duration.count();
 }
 
 }  // namespace renderer::util

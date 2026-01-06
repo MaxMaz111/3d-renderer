@@ -82,7 +82,7 @@ std::vector<Triangle> ObjReader::ParseFace(
     try {
       int vertex_index = std::stoi(vertex_index_str) - 1;
       face_vertex_indices.push_back(vertex_index);
-    } catch (const std::exception& e) {
+    } catch (const std::exception&) {
       qDebug() << "Error: Failed to parse face vertex index from token: "
                << token << " in line: " << line;
       continue;
@@ -99,7 +99,7 @@ std::vector<Triangle> ObjReader::ParseFace(
         int normal_index = std::stoi(normal_index_str) - 1;
         face_normal_indices.push_back(normal_index);
         has_normals = true;
-      } catch (const std::exception& e) {
+      } catch (const std::exception&) {
         qDebug() << "Error: Failed to parse face normal index from token: "
                  << token << " in line: " << line;
       }

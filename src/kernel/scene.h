@@ -31,7 +31,7 @@ class Scene {
   void SwapTransparency();
   const Camera& GetCamera() const;
   Camera& GetCamera();
-  bool Transapent() const;
+  bool Transparent() const;
 
  private:
   std::vector<Camera> cameras_;

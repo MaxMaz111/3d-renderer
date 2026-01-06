@@ -8,8 +8,8 @@ namespace renderer::kernel {
 
 class Camera {
   static constexpr int kNumberOfPlanes = 6;
-  static constexpr Scalar kMoveSpeed = 0.1;
-  static constexpr Scalar kRotationSpeed = M_PI / 180;
+  static constexpr Scalar kMoveSpeed = 0.2;
+  static constexpr Scalar kRotationSpeed = M_PI / 120;
 
  public:
   Camera();
@@ -37,7 +37,7 @@ class Camera {
   void SwivelRight();
 
  private:
-  std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping();
+  std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping() const;
 
   Width screen_width_;
   Height screen_height_;
