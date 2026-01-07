@@ -2,7 +2,7 @@
 
 #include <QKeyEvent>
 
-namespace renderer::controller {
+namespace renderer {
 
 namespace detail::controller {
 
@@ -81,6 +81,8 @@ State::Key State::ConvertQtKey(int key) {
 
 }  // namespace detail::controller
 
+namespace controller {
+
 Controller::Controller(kernel::Kernel* kernel_ptr, view::View* view_ptr)
     : kernel_ptr_(kernel_ptr) {
   view_ptr->Label()->installEventFilter(this);
@@ -157,4 +159,6 @@ void Controller::NotifyKernel(State::KeyRange range) const {
   }
 }
 
-}  // namespace renderer::controller
+}  // namespace controller
+
+}  // namespace renderer
