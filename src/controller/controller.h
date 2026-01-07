@@ -4,7 +4,7 @@
 
 #include "view/view.h"
 
-namespace renderer::controller {
+namespace renderer {
 
 namespace detail::controller {
 
@@ -68,6 +68,8 @@ class State {
 
 }  // namespace detail::controller
 
+namespace controller {
+
 class Controller : public QObject {
   Q_OBJECT
  public:
@@ -87,4 +89,6 @@ class Controller : public QObject {
   State keys_;
 };
 
-}  // namespace renderer::controller
+}  // namespace controller
+
+}  // namespace renderer
