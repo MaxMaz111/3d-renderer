@@ -17,10 +17,10 @@ Frame Renderer::Render(const Scene& scene) {
   RotateTriangles(triangles, camera);
   triangles = GetClippedTriangles(triangles, camera);
   ProjectTriangles(triangles, camera);
-  int width = camera.GetWidth();
-  int height = camera.GetHeight();
-  z_buffer_.assign(height, std::vector<Scalar>(width, 1));
-  Frame frame(camera.GetWidth(), camera.GetHeight());
+  int width = camera.Width();
+  int height = camera.Height();
+  z_buffer_.ResetTo(Width{width}, Height{height});
+  Frame frame(Width{width}, Height{height});
   for (const Triangle& triangle : triangles) {
     int min_x = std::floor(triangle.GetMinX());
     int max_x = std::ceil(triangle.GetMaxX());
@@ -34,9 +34,12 @@ Frame Renderer::Render(const Scene& scene) {
         }
         if (scene.Transparent()) {
           frame.BlendColor(Width{i}, Height{j}, triangle.GetColor());
-        } else if (z_buffer_[j][i] > z.value()) {
-          z_buffer_[j][i] = z.value();
-          frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
+        } else {
+          Scalar& val = z_buffer_.Get(Width{i}, Height{j});
+          if (val > z.value()) {
+            val = z.value();
+            frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
+          }
         }
       }
     }

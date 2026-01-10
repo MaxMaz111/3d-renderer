@@ -5,6 +5,7 @@
 #include "frame.h"
 #include "scene.h"
 #include "triangle.h"
+#include "z_buffer.h"
 
 namespace renderer::kernel {
 
@@ -22,7 +23,7 @@ class Renderer {
 
   static QColor ConvertColor(const Color& color);
 
-  std::vector<std::vector<Scalar>> z_buffer_;
+  ZBuffer z_buffer_{};
 };
 
 }  // namespace renderer::kernel

@@ -9,9 +9,9 @@ View::View()
 }
 
 void View::SetFrame(const kernel::Frame& frame) {
-  QImage image(frame.GetWidth(), frame.GetHeight(), QImage::Format_RGB32);
-  for (int x = 0; x < frame.GetWidth(); ++x) {
-    for (int y = 0; y < frame.GetHeight(); ++y) {
+  QImage image(frame.Width(), frame.Height(), QImage::Format_RGB32);
+  for (int x = 0; x < frame.Width(); ++x) {
+    for (int y = 0; y < frame.Height(); ++y) {
       kernel::Color color = frame.GetColor(Width{x}, Height{y});
       image.setPixel(x, y,
                      qRgb(color.GetRed(), color.GetGreen(), color.GetBlue()));

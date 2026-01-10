@@ -9,21 +9,23 @@
 namespace renderer::kernel {
 
 class Frame {
+  using WidthT = Width;
+  using HeightT = Height;
+
  public:
   Frame(Width width, Height height);
 
-  Width GetWidth() const;
-  Height GetHeight() const;
-  void SetColor(Width x, Height y, Color color);
-  void BlendColor(Width x, Height y, Color color);
-  const Color& GetColor(Width x, Height y) const;
+  int Width() const;
+  int Height() const;
+  void SetColor(WidthT x, HeightT y, Color color);
+  void BlendColor(WidthT x, HeightT y, Color color);
+  const Color& GetColor(WidthT x, HeightT y) const;
 
  private:
-  bool CheckBounds(Width width, Height height) const;
+  bool CheckBounds(WidthT width, HeightT height) const;
 
-  Width width_;
-  Height height_;
-  std::vector<std::vector<Color>> frame_data_;
+  int width_;
+  std::vector<Color> data_;
 };
 
 }  // namespace renderer::kernel

@@ -19,7 +19,6 @@ void TimeAnchor::Reset() {
   start_time_ = std::chrono::high_resolution_clock::now();
 }
 
-
 TimeAnchor::~TimeAnchor() {
   auto end_time = std::chrono::high_resolution_clock::now();
   auto duration = std::chrono::duration_cast<std::chrono::microseconds>(

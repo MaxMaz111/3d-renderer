@@ -4,39 +4,37 @@
 
 namespace renderer::kernel {
 
-Frame::Frame(Width width, Height height)
-    : width_(width),
-      height_(height),
-      frame_data_(height_, std::vector<Color>(width_)) {
-  assert(width_ > Width{0});
-  assert(height_ > Height{0});
+Frame::Frame(WidthT width, HeightT height)
+    : width_(width), data_(width_ * height) {
+  assert(width >= Width{0});
+  assert(height >= Height{0});
 }
 
-Width Frame::GetWidth() const {
+int Frame::Width() const {
   return width_;
 }
 
-Height Frame::GetHeight() const {
-  return height_;
+int Frame::Height() const {
+  return std::ssize(data_) / width_;
 }
 
-void Frame::SetColor(Width x, Height y, Color color) {
+void Frame::SetColor(WidthT x, HeightT y, Color color) {
   assert(CheckBounds(x, y));
-  frame_data_[y][x] = color;
+  data_[x + y * width_] = color;
 }
 
-void Frame::BlendColor(Width x, Height y, Color color) {
+void Frame::BlendColor(WidthT x, HeightT y, Color color) {
   assert(CheckBounds(x, y));
-  frame_data_[y][x].Blend(color);
+  data_[x + y * width_].Blend(color);
 }
 
-const Color& Frame::GetColor(Width x, Height y) const {
+const Color& Frame::GetColor(WidthT x, HeightT y) const {
   assert(CheckBounds(x, y));
-  return frame_data_[y][x];
+  return data_[x + y * width_];
 }
 
-bool Frame::CheckBounds(Width x, Height y) const {
-  return Width{0} <= x && x < width_ && Height{0} <= y && y < height_;
+bool Frame::CheckBounds(WidthT x, HeightT y) const {
+  return WidthT{0} <= x && x < Width() && HeightT{0} <= y && y < Height();
 }
 
 }  // namespace renderer::kernel
