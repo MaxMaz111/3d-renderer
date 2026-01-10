@@ -36,6 +36,7 @@ build
 asan_build
 build_debug
 build_release
+models
 .cache
 .idea/
 

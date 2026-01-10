@@ -67,3 +67,29 @@ if (TEST_SOURCES)
     include(GoogleTest)
     gtest_discover_tests(renderer_tests)
 endif ()
+
+######################################################
+
+FetchContent_Declare(
+        benchmark
+        GIT_REPOSITORY https://github.com/google/benchmark.git
+        GIT_TAG v1.8.3
+)
+
+set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(benchmark)
+
+file(GLOB_RECURSE BENCHMARK_SOURCES benchmarks/*.cpp)
+
+if (BENCHMARK_SOURCES)
+    add_executable(renderer_benchmarks ${BENCHMARK_SOURCES})
+
+    target_link_libraries(renderer_benchmarks
+            PRIVATE
+            benchmark::benchmark
+            renderer
+    )
+
+    target_compile_options(renderer_benchmarks PRIVATE -O3)
+endif ()
