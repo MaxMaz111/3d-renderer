@@ -1,12 +1,16 @@
 #pragma once
 
 #include "util/size.h"
+
 #include "linalg.h"
 #include "plane.h"
 
 namespace renderer::kernel {
 
 class Camera {
+  using WidthT = Width;
+  using HeightT = Height;
+
   static constexpr int kNumberOfPlanes = 6;
   static constexpr Scalar kMoveSpeed = 0.2;
   static constexpr Scalar kRotationSpeed = M_PI / 120;
@@ -21,10 +25,10 @@ class Camera {
   const std::array<Plane, kNumberOfPlanes>& GetPlanesForClipping() const;
   void BuildProjectionMatrix();
   const Matrix4& GetProjectionMatrix() const;
-  Matrix3 GetRotationMatrix() const;
-  Point3 GetPosition() const;
-  Width GetWidth() const;
-  Height GetHeight() const;
+  const Matrix3& GetRotationMatrix() const;
+  const Point3& GetPosition() const;
+  int Width() const;
+  int Height() const;
   void RotateLeft();
   void RotateRight();
   void RotateUp();
@@ -39,8 +43,8 @@ class Camera {
  private:
   std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping() const;
 
-  Width screen_width_;
-  Height screen_height_;
+  int screen_width_;
+  int screen_height_;
   Scalar near_;
   Scalar far_;
 

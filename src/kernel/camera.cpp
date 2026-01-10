@@ -7,8 +7,8 @@
 namespace renderer::kernel {
 
 Camera::Camera()
-    : screen_width_(Width{800}),
-      screen_height_(Height{600}),
+    : screen_width_(800),
+      screen_height_(600),
       near_(500),
       far_(10000),
       rotation_matrix_(AngleAxis(M_PI, Vector3::UnitX()) *
@@ -18,8 +18,8 @@ Camera::Camera()
   BuildProjectionMatrix();
 }
 
-Camera::Camera(Scalar near, Scalar far, Width screen_width,
-               Height screen_height)
+Camera::Camera(Scalar near, Scalar far, WidthT screen_width,
+               HeightT screen_height)
     : screen_width_(screen_width),
       screen_height_(screen_height),
       near_(near),
@@ -32,7 +32,7 @@ Camera::Camera(Scalar near, Scalar far, Width screen_width,
   assert(screen_height > Height{0});
 }
 
-void Camera::SetScreenDimensions(Width width, Height height) {
+void Camera::SetScreenDimensions(WidthT width, HeightT height) {
   screen_width_ = width;
   screen_height_ = height;
   planes_ = BuildPlanesForClipping();
@@ -73,20 +73,20 @@ const Matrix4& Camera::GetProjectionMatrix() const {
   return projection_matrix_;
 }
 
-Matrix3 Camera::GetRotationMatrix() const {
+const Matrix3& Camera::GetRotationMatrix() const {
   return rotation_matrix_;
 }
 
-Point3 Camera::GetPosition() const {
+const Point3& Camera::GetPosition() const {
   return position_;
 }
 
-Width Camera::GetWidth() const {
-  return Width{screen_width_};
+int Camera::Width() const {
+  return screen_width_;
 }
 
-Height Camera::GetHeight() const {
-  return Height{screen_height_};
+int Camera::Height() const {
+  return screen_height_;
 }
 
 void Camera::RotateLeft() {
