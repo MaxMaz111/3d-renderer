@@ -29,15 +29,15 @@ Frame Renderer::Render(const Scene& scene) {
     for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
       for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
         auto z = triangle.GetZ(Point3(i, j, 0));
-        if (z == std::nullopt) {
+        if (!z.has_value()) {
           continue;
         }
         if (scene.Transparent()) {
           frame.BlendColor(Width{i}, Height{j}, triangle.GetColor());
         } else {
           Scalar& val = z_buffer_.Get(Width{i}, Height{j});
-          if (val > z.value()) {
-            val = z.value();
+          if (val > *z) {
+            val = *z;
             frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
           }
         }

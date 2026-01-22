@@ -23,7 +23,6 @@ class Camera {
   void SetNear(Scalar near);
   void SetFar(Scalar far);
   const std::array<Plane, kNumberOfPlanes>& GetPlanesForClipping() const;
-  void BuildProjectionMatrix();
   const Matrix4& GetProjectionMatrix() const;
   const Matrix3& GetRotationMatrix() const;
   const Point3& GetPosition() const;
@@ -41,6 +40,7 @@ class Camera {
   void SwivelRight();
 
  private:
+  Matrix4 BuildProjectionMatrix();
   std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping() const;
 
   int screen_width_;

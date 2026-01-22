@@ -22,7 +22,7 @@ class Frame {
   const Color& GetColor(WidthT x, HeightT y) const;
 
  private:
-  bool CheckBounds(WidthT width, HeightT height) const;
+  bool IsBounded(WidthT width, HeightT height) const;
 
   int width_;
   std::vector<Color> data_;
