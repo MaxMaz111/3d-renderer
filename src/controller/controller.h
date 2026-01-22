@@ -74,7 +74,7 @@ class Controller : public QObject {
   Q_OBJECT
  public:
   using State = detail::controller::State;
-  Controller(kernel::Kernel* kernel_ptr, view::View* view_ptr);
+  Controller(kernel::Kernel* kernel_ptr, QLabel* plot_ptr);
 
  protected:
   bool eventFilter(QObject* obj, QEvent* event) override;
