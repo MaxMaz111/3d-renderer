@@ -24,12 +24,7 @@ Camera::Camera(Scalar near, Scalar far, WidthT screen_width,
       near_(near),
       far_(far),
       rotation_matrix_(Matrix3::Identity()),
-      planes_(BuildPlanesForClipping()) {
-  assert(near > 0 && far > 0);
-  assert(far > near);
-  assert(screen_width > WidthT{0});
-  assert(screen_height > HeightT{0});
-}
+      planes_(BuildPlanesForClipping()) {}
 
 void Camera::SetScreenDimensions(WidthT width, HeightT height) {
   screen_width_ = width;
@@ -39,16 +34,12 @@ void Camera::SetScreenDimensions(WidthT width, HeightT height) {
 }
 
 void Camera::SetNear(Scalar near) {
-  assert(near > 0);
-  assert(far_ > near);
   near_ = near;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();
 }
 
 void Camera::SetFar(Scalar far) {
-  assert(far > 0);
-  assert(far > near_);
   far_ = far;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();
@@ -123,6 +114,15 @@ void Camera::SwivelLeft() {
 void Camera::SwivelRight() {
   rotation_matrix_ =
       AngleAxis(kRotationSpeed, rotation_matrix_.col(2)) * rotation_matrix_;
+}
+
+void Camera::SwapRenderingMode() {
+  mode_ = mode_ == RenderingMode::AllSolid ? RenderingMode::AllTransparent
+                                           : RenderingMode::AllSolid;
+}
+
+Camera::RenderingMode Camera::CurrentRenderingMode() const {
+  return mode_;
 }
 
 Matrix4 Camera::BuildProjectionMatrix() {

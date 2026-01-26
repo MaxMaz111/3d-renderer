@@ -28,7 +28,7 @@ class Kernel {
   void SwivelLeft();
   void SwivelRight();
   void SetCurrentCamera(int camera_index);
-  void SwapTransparency();
+  void SwapRenderingMode();
 
  private:
   Renderer renderer_;

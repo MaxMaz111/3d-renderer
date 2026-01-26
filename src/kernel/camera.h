@@ -16,6 +16,8 @@ class Camera {
   static constexpr Scalar kRotationSpeed = M_PI / 120;
 
  public:
+  enum class RenderingMode { AllSolid, AllTransparent };
+
   Camera();
   Camera(Scalar near, Scalar far, Width screen_width, Height screen_height);
 
@@ -38,11 +40,14 @@ class Camera {
   void MoveBackward();
   void SwivelLeft();
   void SwivelRight();
+  void SwapRenderingMode();
+  RenderingMode CurrentRenderingMode() const;
 
  private:
   Matrix4 BuildProjectionMatrix();
   std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping() const;
 
+  RenderingMode mode_ = RenderingMode::AllSolid;
   int screen_width_;
   int screen_height_;
   Scalar near_;

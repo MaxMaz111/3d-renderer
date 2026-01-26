@@ -1,7 +1,6 @@
 #include "triangle.h"
 
 #include <algorithm>
-#include <iostream>
 
 #include "linalg.h"
 
@@ -19,11 +18,11 @@ const std::array<Point3, 3>& Triangle::GetPoints() const {
   return points_;
 }
 
-Point3 Triangle::GetPoint(size_t index) const {
+const Point3& Triangle::GetPoint(size_t index) const {
   return points_[index];
 }
 
-Vector3 Triangle::GetNormal() const {
+const Vector3& Triangle::GetNormal() const {
   return normal_;
 }
 

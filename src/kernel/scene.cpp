@@ -6,12 +6,13 @@
 
 namespace renderer::kernel {
 
-Scene::Scene(const std::vector<Camera>& cameras,
-             const std::vector<Triangle>& triangles)
-    : cameras_(cameras), cur_camera_index_(0), triangles_(triangles) {}
+Scene::Scene(std::vector<CameraT>&& cameras, std::vector<Triangle>&& triangles)
+    : cameras_(std::move(cameras)),
+      cur_camera_index_(0),
+      triangles_(std::move(triangles)) {}
 
-Scene::Scene(const std::vector<Triangle>& triangles)
-    : cameras_(4), cur_camera_index_(0), triangles_(triangles) {}
+Scene::Scene(std::vector<Triangle>&& triangles)
+    : cameras_(4), cur_camera_index_(0), triangles_(std::move(triangles)) {}
 
 const std::vector<Triangle>& Scene::GetTriangles() const {
   return triangles_;
@@ -24,43 +25,43 @@ void Scene::SetScreenDimensions(Width width, Height height) {
 }
 
 void Scene::RotateLeft() {
-  GetCamera().RotateLeft();
+  Camera().RotateLeft();
 }
 
 void Scene::RotateRight() {
-  GetCamera().RotateRight();
+  Camera().RotateRight();
 }
 
 void Scene::RotateUp() {
-  GetCamera().RotateUp();
+  Camera().RotateUp();
 }
 
 void Scene::RotateDown() {
-  GetCamera().RotateDown();
+  Camera().RotateDown();
 }
 
 void Scene::MoveLeft() {
-  GetCamera().MoveLeft();
+  Camera().MoveLeft();
 }
 
 void Scene::MoveRight() {
-  GetCamera().MoveRight();
+  Camera().MoveRight();
 }
 
 void Scene::MoveForward() {
-  GetCamera().MoveForward();
+  Camera().MoveForward();
 }
 
 void Scene::MoveBackward() {
-  GetCamera().MoveBackward();
+  Camera().MoveBackward();
 }
 
 void Scene::SwivelLeft() {
-  GetCamera().SwivelLeft();
+  Camera().SwivelLeft();
 }
 
 void Scene::SwivelRight() {
-  GetCamera().SwivelRight();
+  Camera().SwivelRight();
 }
 
 void Scene::SetCurrentCamera(int camera_index) {
@@ -70,20 +71,20 @@ void Scene::SetCurrentCamera(int camera_index) {
   }
 }
 
-void Scene::SwapTransparency() {
-  transparent_ = !transparent_;
+void Scene::SwapRenderingMode() {
+  Camera().SwapRenderingMode();
 }
 
-const Camera& Scene::GetCamera() const {
+const Camera& Scene::Camera() const {
   return cameras_.at(cur_camera_index_);
 }
 
-Camera& Scene::GetCamera() {
+Camera& Scene::Camera() {
   return cameras_.at(cur_camera_index_);
 }
 
-bool Scene::Transparent() const {
-  return transparent_;
+Camera::RenderingMode Scene::CurrentRenderingMode() const {
+  return Camera().CurrentRenderingMode();
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel
