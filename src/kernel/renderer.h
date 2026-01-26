@@ -14,12 +14,15 @@ class Renderer {
   Frame Render(const Scene& scene);
 
  private:
-  std::vector<Triangle> GetClippedTriangles(
-      const std::vector<Triangle>& triangles, const Camera& camera) const;
+  std::vector<Triangle> Clip(std::vector<Triangle>&& triangles,
+                             const Camera& camera) const;
   std::vector<Triangle> ClipTriangleByPlane(const Triangle& triangle,
                                             const Plane& plane) const;
-  void RotateTriangles(std::vector<Triangle>& triangles, const Camera& camera);
-  void ProjectTriangles(std::vector<Triangle>& triangles, const Camera& camera);
+  std::vector<Triangle> Rotate(std::vector<Triangle>&& triangles,
+                               const Camera& camera) const;
+  std::vector<Triangle> Project(std::vector<Triangle>&& triangles,
+                                const Camera& camera) const;
+  Frame Rasterize(std::vector<Triangle>&& triangles, const Camera& camera);
 
   static QColor ConvertColor(const Color& color);
 

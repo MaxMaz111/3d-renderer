@@ -15,8 +15,8 @@ class Triangle {
            const Vector3& normal, const Color& color);
 
   const std::array<Point3, 3>& GetPoints() const;
-  Point3 GetPoint(size_t index) const;
-  Vector3 GetNormal() const;
+  const Point3& GetPoint(size_t index) const;
+  const Vector3& GetNormal() const;
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
   std::optional<Scalar> GetZ(const Point3& point) const;

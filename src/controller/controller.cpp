@@ -38,7 +38,7 @@ State::KeyIterator State::KeyRange::begin() const {
 
 std::default_sentinel_t State::KeyRange::end() const {
   return {};
-};
+}
 
 State::KeyRange State::HandlePressEvent(int key) {
   key_mask_ |= std::to_underlying(ConvertQtKey(key));
@@ -141,7 +141,7 @@ void Controller::NotifyKernel(State::KeyRange range) const {
         kernel_ptr_->SwivelRight();
         break;
       case State::Key::B:
-        kernel_ptr_->SwapTransparency();
+        kernel_ptr_->SwapRenderingMode();
         break;
       case State::Key::UpArrow:
         kernel_ptr_->RotateUp();

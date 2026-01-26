@@ -10,10 +10,11 @@
 namespace renderer::kernel {
 
 class Scene {
+  using CameraT = Camera;
+
  public:
-  Scene(const std::vector<Triangle>& triangles);
-  Scene(const std::vector<Camera>& cameras,
-        const std::vector<Triangle>& triangles);
+  Scene(std::vector<Triangle>&& triangles);
+  Scene(std::vector<Camera>&& cameras, std::vector<Triangle>&& triangles);
 
   const std::vector<Triangle>& GetTriangles() const;
   void SetScreenDimensions(Width width, Height height);
@@ -28,16 +29,15 @@ class Scene {
   void SwivelLeft();
   void SwivelRight();
   void SetCurrentCamera(int camera_index);
-  void SwapTransparency();
-  const Camera& GetCamera() const;
-  Camera& GetCamera();
-  bool Transparent() const;
+  void SwapRenderingMode();
+  const CameraT& Camera() const;
+  CameraT& Camera();
+  Camera::RenderingMode CurrentRenderingMode() const;
 
  private:
-  std::vector<Camera> cameras_;
+  std::vector<CameraT> cameras_;
   int cur_camera_index_;
   std::vector<Triangle> triangles_;
-  bool transparent_ = false;
 };
 
 }  // namespace renderer::kernel

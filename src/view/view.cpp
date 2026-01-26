@@ -8,6 +8,7 @@ View::View()
   label_.setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 }
 
+// TODO: make this function more efficiently fill out QImage
 void View::SetFrame(const kernel::Frame& frame) {
   QImage image(frame.Width(), frame.Height(), QImage::Format_RGB32);
   for (int x = 0; x < frame.Width(); ++x) {

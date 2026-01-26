@@ -13,7 +13,7 @@ class Frame {
   using HeightT = Height;
 
  public:
-  Frame(Width width, Height height);
+  Frame(WidthT width, HeightT height);
 
   int Width() const;
   int Height() const;
