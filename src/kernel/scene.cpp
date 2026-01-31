@@ -18,9 +18,9 @@ const std::vector<Triangle>& Scene::GetTriangles() const {
   return triangles_;
 }
 
-void Scene::SetScreenDimensions(Width width, Height height) {
+void Scene::SetAspectRatio(Scalar aspect_ratio) {
   for (auto& camera : cameras_) {
-    camera.SetScreenDimensions(width, height);
+    camera.SetAspectRatio(aspect_ratio);
   }
 }
 
@@ -76,11 +76,11 @@ void Scene::SwapRenderingMode() {
 }
 
 const Camera& Scene::Camera() const {
-  return cameras_.at(cur_camera_index_);
+  return cameras_[cur_camera_index_];
 }
 
 Camera& Scene::Camera() {
-  return cameras_.at(cur_camera_index_);
+  return cameras_[cur_camera_index_];
 }
 
 Camera::RenderingMode Scene::CurrentRenderingMode() const {

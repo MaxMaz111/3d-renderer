@@ -14,8 +14,7 @@ void View::SetFrame(const kernel::Frame& frame) {
   for (int x = 0; x < frame.Width(); ++x) {
     for (int y = 0; y < frame.Height(); ++y) {
       kernel::Color color = frame.GetColor(Width{x}, Height{y});
-      image.setPixel(x, y,
-                     qRgb(color.GetRed(), color.GetGreen(), color.GetBlue()));
+      image.setPixel(x, y, color.GetQRgb());
     }
   }
   label_.setPixmap(QPixmap::fromImage(image));

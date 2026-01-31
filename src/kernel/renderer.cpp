@@ -10,8 +10,9 @@
 
 namespace renderer::kernel {
 
+Renderer::Renderer(Width width, Height height) : rasterizer_(width, height) {}
+
 Frame Renderer::Render(const Scene& scene) {
-  util::TimeAnchor render_timer("Render timer");
   std::vector<Triangle> triangles = scene.GetTriangles();
   const Camera& camera = scene.Camera();
   triangles = Rotate(std::move(triangles), camera);
@@ -20,9 +21,13 @@ Frame Renderer::Render(const Scene& scene) {
   return Rasterize(std::move(triangles), camera);
 }
 
+void Renderer::ResetTo(Width width, Height height) {
+  rasterizer_.ResetTo(width, height);
+}
+
 std::vector<Triangle> Renderer::Clip(std::vector<Triangle>&& triangles,
                                      const Camera& camera) const {
-  const auto& planes = camera.GetPlanesForClipping();
+  const auto& planes = camera.PlanesForClipping();
 
   std::vector<Triangle> result;
   result.reserve(triangles.size() * 2);
@@ -125,8 +130,8 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
 
 std::vector<Triangle> Renderer::Rotate(std::vector<Triangle>&& triangles,
                                        const Camera& camera) const {
-  Matrix3 mat = camera.GetRotationMatrix().inverse();
-  Point3 translation = -camera.GetPosition();
+  Matrix3 mat = camera.RotationMatrix().transpose();
+  Point3 translation = -camera.Position();
   for (auto& triangle : triangles) {
     triangle.RotateAndMove(mat, translation);
   }
@@ -135,7 +140,7 @@ std::vector<Triangle> Renderer::Rotate(std::vector<Triangle>&& triangles,
 
 std::vector<Triangle> Renderer::Project(std::vector<Triangle>&& triangles,
                                         const Camera& camera) const {
-  Matrix4 mat = camera.GetProjectionMatrix();
+  Matrix4 mat = camera.ProjectionMatrix();
   for (auto& triangle : triangles) {
     triangle.Project(mat);
   }
@@ -144,46 +149,7 @@ std::vector<Triangle> Renderer::Project(std::vector<Triangle>&& triangles,
 
 Frame Renderer::Rasterize(std::vector<Triangle>&& triangles,
                           const Camera& camera) {
-  const int width = camera.Width();
-  const int height = camera.Height();
-  z_buffer_.ResetTo(Width{width}, Height{height});
-  Frame frame(Width{width}, Height{height});
-  for (const Triangle& triangle : triangles) {
-    int min_x = std::floor(triangle.GetMinX());
-    int max_x = std::ceil(triangle.GetMaxX());
-    int min_y = std::floor(triangle.GetMinY());
-    int max_y = std::ceil(triangle.GetMaxY());
-    for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
-      for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
-        auto z = triangle.GetZ(Point3(i, j, 0));
-        if (!z.has_value()) {
-          continue;
-        }
-        switch (camera.CurrentRenderingMode()) {
-          case Camera::RenderingMode::AllSolid: {
-            Scalar& val = z_buffer_.Get(Width{i}, Height{j});
-            if (val > *z) {
-              val = *z;
-              frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
-            }
-            break;
-          }
-          case Camera::RenderingMode::AllTransparent: {
-            frame.BlendColor(Width{i}, Height{j}, triangle.GetColor());
-            break;
-          }
-          default:
-            break;
-        }
-      }
-    }
-  }
-
-  return frame;
-}
-
-QColor Renderer::ConvertColor(const Color& color) {
-  return {color.GetRed(), color.GetGreen(), color.GetBlue()};
+  return rasterizer_.Rasterize(std::move(triangles), camera);
 }
 
 }  // namespace renderer::kernel

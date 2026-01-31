@@ -1,9 +1,11 @@
 #include "main_window.h"
 
+#include "constants.h"
+
 namespace renderer::view {
 
-MainWindow::MainWindow(Width width, Height height) {
-  window_.setGeometry(0, 0, width, height);
+MainWindow::MainWindow() {
+  window_.setGeometry(0, 0, kernel::kDefaultWidth, kernel::kDefaultHeight);
   window_.setWindowTitle("renderer");
   window_.setCentralWidget(View()->Label());
 }

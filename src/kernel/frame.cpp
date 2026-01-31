@@ -18,6 +18,15 @@ int Frame::Height() const {
   return std::ssize(data_) / width_;
 }
 
+void Frame::ResetTo(WidthT width, HeightT height) {
+  if (NeedResize(width, height)) {
+    width_ = width;
+    data_.resize(width_ * height);
+  } else {
+    std::ranges::fill(data_, Color{});
+  }
+}
+
 void Frame::SetColor(WidthT x, HeightT y, Color color) {
   assert(IsBounded(x, y));
   data_[x + y * width_] = color;
@@ -35,6 +44,10 @@ const Color& Frame::GetColor(WidthT x, HeightT y) const {
 
 bool Frame::IsBounded(WidthT x, HeightT y) const {
   return WidthT{0} <= x && x < Width() && HeightT{0} <= y && y < Height();
+}
+
+bool Frame::NeedResize(WidthT width, HeightT height) const {
+  return width != Width() || height != Height();
 }
 
 }  // namespace renderer::kernel

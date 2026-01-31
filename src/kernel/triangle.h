@@ -16,6 +16,7 @@ class Triangle {
 
   const std::array<Point3, 3>& GetPoints() const;
   const Point3& GetPoint(size_t index) const;
+  Point3& GetPoint(size_t index);
   const Vector3& GetNormal() const;
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
@@ -33,7 +34,7 @@ class Triangle {
 
   std::array<Point3, 3> points_;
   Vector3 normal_;
-  Color triangle_color_ = Color::GetRandomColor();
+  Color triangle_color_ = Color(255, 255, 255);
 };
 
 }  // namespace renderer::kernel

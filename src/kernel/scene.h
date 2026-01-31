@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include "util/size.h"
-
 #include "camera.h"
 #include "triangle.h"
 
@@ -17,7 +15,7 @@ class Scene {
   Scene(std::vector<Camera>&& cameras, std::vector<Triangle>&& triangles);
 
   const std::vector<Triangle>& GetTriangles() const;
-  void SetScreenDimensions(Width width, Height height);
+  void SetAspectRatio(Scalar aspect_ratio);
   void RotateLeft();
   void RotateRight();
   void RotateUp();

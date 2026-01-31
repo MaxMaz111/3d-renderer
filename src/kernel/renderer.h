@@ -3,15 +3,18 @@
 #include <QPixmap>
 
 #include "frame.h"
+#include "rasterizer.h"
 #include "scene.h"
 #include "triangle.h"
-#include "z_buffer.h"
 
 namespace renderer::kernel {
 
 class Renderer {
  public:
+  Renderer(Width width, Height height);
+
   Frame Render(const Scene& scene);
+  void ResetTo(Width width, Height height);
 
  private:
   std::vector<Triangle> Clip(std::vector<Triangle>&& triangles,
@@ -24,9 +27,7 @@ class Renderer {
                                 const Camera& camera) const;
   Frame Rasterize(std::vector<Triangle>&& triangles, const Camera& camera);
 
-  static QColor ConvertColor(const Color& color);
-
-  ZBuffer z_buffer_{};
+  Rasterizer rasterizer_;
 };
 
 }  // namespace renderer::kernel

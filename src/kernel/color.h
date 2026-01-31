@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include <QColor>
 
 namespace renderer::kernel {
 
@@ -19,6 +19,7 @@ class Color {
   void Blend(const Color& other, float factor = 0.2);
   bool operator==(const Color& other) const;
   bool operator!=(const Color& other) const;
+  QRgb GetQRgb() const;
 
   static Color GetRandomColor();
 
