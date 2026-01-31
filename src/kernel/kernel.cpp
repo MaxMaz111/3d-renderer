@@ -1,11 +1,13 @@
 #include "kernel.h"
 
+#include "constants.h"
 #include "obj_reader.h"
 
 namespace renderer::kernel {
 
 Kernel::Kernel(const std::filesystem::path& filename)
-    : scene_(ObjReader::ReadFromFile(filename)),
+    : renderer_(Width{kDefaultWidth}, Height{kDefaultHeight}),
+      scene_(ObjReader::ReadFromFile(filename)),
       observable_(renderer_.Render(scene_)) {}
 
 void Kernel::Subscribe(util::Observer<Frame>* observer) {
@@ -14,7 +16,8 @@ void Kernel::Subscribe(util::Observer<Frame>* observer) {
 }
 
 void Kernel::SetScreenDimensions(Width width, Height height) {
-  scene_.SetScreenDimensions(width, height);
+  renderer_.ResetTo(width, height);
+  scene_.SetAspectRatio(AspectRatio(width, height));
   observable_.Set(renderer_.Render(scene_));
 }
 

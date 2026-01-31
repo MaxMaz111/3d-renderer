@@ -49,6 +49,10 @@ bool Color::operator!=(const Color& other) const {
   return !(*this == other);
 }
 
+QRgb Color::GetQRgb() const {
+  return qRgb(GetRed(), GetGreen(), GetBlue());
+}
+
 Color Color::GetRandomColor() {
   return {rand() % 256, rand() % 256, rand() % 256};
 }

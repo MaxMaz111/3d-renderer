@@ -6,7 +6,7 @@
 namespace renderer::kernel {
 
 using Scalar = float;
-static constexpr Scalar kEpsilon = 1e-5;
+static constexpr Scalar kEpsilon = 1e-9;
 static_assert(std::is_same_v<Scalar, double> || std::is_same_v<Scalar, float>);
 using Vector3 = Eigen::Vector3<Scalar>;
 using Vector4 = Eigen::Vector4<Scalar>;
@@ -18,5 +18,9 @@ using Matrix3 = Eigen::Matrix3<Scalar>;
 using Matrix4 = Eigen::Matrix4<Scalar>;
 using AngleAxis = Eigen::AngleAxis<Scalar>;
 using Index = Eigen::Index;
+
+constexpr Scalar DegToRad(Scalar deg) {
+  return deg * 3.14159265358979323846f / 180.0f;
+}
 
 }  // namespace renderer::kernel

@@ -2,33 +2,22 @@
 
 #include <cassert>
 
-#include "linalg.h"
+#include "constants.h"
 
 namespace renderer::kernel {
 
 Camera::Camera()
-    : screen_width_(800),
-      screen_height_(600),
-      near_(500),
-      far_(10000),
-      rotation_matrix_(AngleAxis(M_PI, Vector3::UnitX()) *
-                       AngleAxis(-M_PI / 2, Vector3::UnitY())),
-      projection_matrix_(BuildProjectionMatrix()),
-      position_(15, 0, 0),
-      planes_(BuildPlanesForClipping()) {}
-
-Camera::Camera(Scalar near, Scalar far, WidthT screen_width,
-               HeightT screen_height)
-    : screen_width_(screen_width),
-      screen_height_(screen_height),
-      near_(near),
-      far_(far),
+    : position_(Vector3::Zero()),
       rotation_matrix_(Matrix3::Identity()),
+      near_(kDefaultNear),
+      far_(kDefaultFar),
+      fov_y_(kDefaultFovY),
+      aspect_ratio_(AspectRatio(Width{kDefaultWidth}, Height{kDefaultHeight})),
+      projection_matrix_(BuildProjectionMatrix()),
       planes_(BuildPlanesForClipping()) {}
 
-void Camera::SetScreenDimensions(WidthT width, HeightT height) {
-  screen_width_ = width;
-  screen_height_ = height;
+void Camera::SetAspectRatio(Scalar aspect_ratio) {
+  aspect_ratio_ = aspect_ratio;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();
 }
@@ -43,31 +32,6 @@ void Camera::SetFar(Scalar far) {
   far_ = far;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();
-}
-
-const std::array<Plane, Camera::kNumberOfPlanes>& Camera::GetPlanesForClipping()
-    const {
-  return planes_;
-}
-
-const Matrix4& Camera::GetProjectionMatrix() const {
-  return projection_matrix_;
-}
-
-const Matrix3& Camera::GetRotationMatrix() const {
-  return rotation_matrix_;
-}
-
-const Point3& Camera::GetPosition() const {
-  return position_;
-}
-
-int Camera::Width() const {
-  return screen_width_;
-}
-
-int Camera::Height() const {
-  return screen_height_;
 }
 
 void Camera::RotateLeft() {
@@ -91,19 +55,19 @@ void Camera::RotateDown() {
 }
 
 void Camera::MoveLeft() {
-  position_ -= rotation_matrix_.col(0) * kMoveSpeed;
-}
-
-void Camera::MoveRight() {
   position_ += rotation_matrix_.col(0) * kMoveSpeed;
 }
 
+void Camera::MoveRight() {
+  position_ -= rotation_matrix_.col(0) * kMoveSpeed;
+}
+
 void Camera::MoveForward() {
-  position_ += rotation_matrix_.col(2) * kMoveSpeed;
+  position_ -= rotation_matrix_.col(2) * kMoveSpeed;
 }
 
 void Camera::MoveBackward() {
-  position_ -= rotation_matrix_.col(2) * kMoveSpeed;
+  position_ += rotation_matrix_.col(2) * kMoveSpeed;
 }
 
 void Camera::SwivelLeft() {
@@ -121,27 +85,56 @@ void Camera::SwapRenderingMode() {
                                            : RenderingMode::AllSolid;
 }
 
+const std::array<Plane, Camera::kNumberOfPlanes>& Camera::PlanesForClipping()
+    const {
+  return planes_;
+}
+
+const Matrix4& Camera::ProjectionMatrix() const {
+  return projection_matrix_;
+}
+
+const Matrix3& Camera::RotationMatrix() const {
+  return rotation_matrix_;
+}
+
+const Point3& Camera::Position() const {
+  return position_;
+}
+
 Camera::RenderingMode Camera::CurrentRenderingMode() const {
   return mode_;
 }
 
-Matrix4 Camera::BuildProjectionMatrix() {
+Matrix4 Camera::BuildProjectionMatrix() const {
   assert((far_ - near_) > kEpsilon);
-  return Matrix4{{near_, 0, static_cast<Scalar>(screen_width_) / 2, 0},
-                 {0, near_, static_cast<Scalar>(screen_height_) / 2, 0},
-                 {0, 0, far_ / (far_ - near_), -far_ * near_ / (far_ - near_)},
-                 {0, 0, 1, 0}};
+  Scalar t = near_ * std::tan(fov_y_ * 0.5);
+  Scalar b = -t;
+  Scalar r = -t * aspect_ratio_;
+  Scalar l = -r;
+  return Matrix4{{{2 * near_ / (r - l), 0, (r + l) / (r - l), 0},
+                  {0, 2 * near_ / (t - b), (t + b) / (t - b), 0},
+                  {0, 0, -(far_ + near_) / (far_ - near_),
+                   -2 * far_ * near_ / (far_ - near_)},
+                  {0, 0, -1, 0}}};
 }
 
 std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping()
     const {
-  Plane near(Vector3{0, 0, 1}, near_);
-  Plane far(Vector3{0, 0, -1}, far_);
-  Plane left(Vector3(-near_, 0, screen_width_ / 2), 0);
-  Plane right(Vector3(near_, 0, screen_width_ / 2), 0);
-  Plane up(Vector3(0, -near_, screen_height_ / 2), 0);
-  Plane down(Vector3(0, near_, screen_height_ / 2), 0);
-  return {near, far, left, right, up, down};
+
+  Plane near_plane(Vector3{0, 0, -1}, -near_);
+  Plane far_plane(Vector3{0, 0, 1}, far_);
+
+  Scalar half_height = near_ * std::tan(fov_y_ * 0.5f);
+  Scalar half_width = half_height * aspect_ratio_;
+
+  Plane left_plane(Vector3{-near_, 0, -half_width}, 0);
+  Plane right_plane(Vector3{near_, 0, -half_width}, 0);
+  Plane top_plane(Vector3{0, -near_, -half_height}, 0);
+  Plane bottom_plane(Vector3{0, near_, -half_height}, 0);
+
+  return {near_plane,  far_plane, left_plane,
+          right_plane, top_plane, bottom_plane};
 }
 
 }  // namespace renderer::kernel

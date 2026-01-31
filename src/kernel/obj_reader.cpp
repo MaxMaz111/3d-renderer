@@ -6,7 +6,8 @@
 
 namespace renderer::kernel {
 
-std::vector<Triangle> ObjReader::ReadFromFile(const std::filesystem::path& filepath) {
+std::vector<Triangle> ObjReader::ReadFromFile(
+    const std::filesystem::path& filepath) {
   std::vector<Triangle> triangles;
   std::vector<Point3> vertices;
   std::vector<Vector3> normals;
@@ -125,7 +126,7 @@ std::vector<Triangle> ObjReader::ParseFace(
     }
   }
 
-  Color default_color = Color::GetRandomColor();
+  Color default_color = Color(255, 255, 255);
 
   if (face_vertex_indices.size() == 3) {
     if (has_normals && face_normal_indices.size() == 3) {

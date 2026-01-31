@@ -22,6 +22,10 @@ const Point3& Triangle::GetPoint(size_t index) const {
   return points_[index];
 }
 
+Point3& Triangle::GetPoint(size_t index) {
+  return points_[index];
+}
+
 const Vector3& Triangle::GetNormal() const {
   return normal_;
 }
