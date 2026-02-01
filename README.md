@@ -16,6 +16,7 @@ https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
 - CMake ≥ 3.16
 - Qt6 (Widgets, Core, Gui)
 - Eigen3 ≥ 3.3
+- Assimp
 
 ## 2. Installing Dependencies
 
@@ -48,6 +49,11 @@ https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
    sudo apt-get install libeigen3-dev
    ```
 
+5. Install Assimp
+```bash
+   sudo apt install assimp-utils libassimp-dev
+```
+
 ### 2.2 macOS
 
 1. Install Homebrew (if you haven’t already). See instructions at:
@@ -71,6 +77,11 @@ https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
    ```bash
    brew install eigen
    ```
+   
+5. Install Assimp
+```bash
+brew install assimp
+```
 
 ## 3. Building the Project
 

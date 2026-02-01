@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui)
 find_package(Eigen3 3.3 REQUIRED)
+find_package(assimp CONFIG REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -39,6 +40,7 @@ target_link_libraries(renderer PUBLIC
         Qt6::Core
         Qt6::Gui
         Eigen3::Eigen
+        assimp::assimp
 )
 
 ######################################################
