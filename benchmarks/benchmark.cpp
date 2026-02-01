@@ -4,11 +4,14 @@
 #include "kernel/renderer.h"
 #include "kernel/scene.h"
 
-using namespace renderer::kernel;
+using renderer::kernel::Scene;
+using renderer::kernel::ObjReader;
+using renderer::kernel::Renderer;
+using renderer::kernel::Frame;
 
 static void RenderCow(benchmark::State& state) {
   static Scene scene = ObjReader::ReadFromFile("../models/cow.obj");
-  Renderer renderer;
+  Renderer renderer(renderer::Width{800}, renderer::Height{600});
 
   for (auto _ : state) {
     Frame frame = renderer.Render(scene);
@@ -18,7 +21,7 @@ static void RenderCow(benchmark::State& state) {
 
 static void RenderPenis(benchmark::State& state) {
   static Scene scene = ObjReader::ReadFromFile("../models/penis.obj");
-  Renderer renderer;
+  Renderer renderer(renderer::Width{800}, renderer::Height{600});
 
   for (auto _ : state) {
     Frame frame = renderer.Render(scene);
