@@ -10,10 +10,6 @@ Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
                    const Vector3& normal)
     : points_({p0, p1, p2}), normal_(normal) {}
 
-Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-                   const Vector3& normal, const Color& color)
-    : points_({p0, p1, p2}), normal_(normal), triangle_color_(color) {}
-
 const std::array<Point3, 3>& Triangle::GetPoints() const {
   return points_;
 }
@@ -45,7 +41,8 @@ void Triangle::Project(const Matrix4& projection_matrix) {
   }
 }
 
-std::optional<Scalar> Triangle::GetZ(const Point3& point) const {
+std::optional<Scalar> Triangle::InterpolateZ(XCoordinate x,
+                                             YCoordinate y) const {
   assert(point.z() == 0);
   const Point3& p0 = points_[0];
   const Point3& p1 = points_[1];
@@ -56,13 +53,12 @@ std::optional<Scalar> Triangle::GetZ(const Point3& point) const {
     return std::nullopt;
   }
   Scalar alpha = 0.5 *
-                 ((p1.x() - point.x()) * (p2.y() - point.y()) -
-                  (p2.x() - point.x()) * (p1.y() - point.y())) /
+                 ((p1.x() - x) * (p2.y() - y) - (p2.x() - x) * (p1.y() - y)) /
                  full_area;
-  Scalar beta = 0.5 *
-                ((point.x() - p0.x()) * (p2.y() - p0.y()) -
-                 (p2.x() - p0.x()) * (point.y() - p0.y())) /
-                full_area;
+  Scalar beta =
+      0.5 *
+      ((x - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (y - p0.y())) /
+      full_area;
   Scalar gamma = 1.0 - alpha - beta;
   if (alpha < -kEpsilon || beta < -kEpsilon || gamma < -kEpsilon) {
     return std::nullopt;
@@ -71,12 +67,8 @@ std::optional<Scalar> Triangle::GetZ(const Point3& point) const {
   return z;
 }
 
-const Color& Triangle::GetColor() const {
-  return triangle_color_;
-}
-
-void Triangle::SetColor(const Color& color) {
-  triangle_color_ = color;
+Color Triangle::InterpolateColor(XCoordinate x, YCoordinate y) const {
+  return Color().Invert();
 }
 
 Scalar Triangle::GetMinX() const {

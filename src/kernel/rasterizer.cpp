@@ -39,7 +39,9 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera) {
 
 void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                                const Camera& camera) {
-  auto z = triangle.GetZ(Point3(i, j, 0));
+  Scalar x = i, y = j;
+  auto z =
+      triangle.InterpolateZ(Triangle::XCoordinate{x}, Triangle::YCoordinate{y});
   if (!z.has_value()) {
     return;
   }
@@ -48,12 +50,16 @@ void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
       Scalar& val = z_buffer_.Get(Width{i}, Height{j});
       if (val > *z) {
         val = *z;
-        frame_.SetColor(Width{i}, Height{j}, triangle.GetColor());
+        frame_.SetColor(Width{i}, Height{j},
+                        triangle.InterpolateColor(Triangle::XCoordinate{x},
+                                                  Triangle::YCoordinate{y}));
       }
       break;
     }
     case Camera::RenderingMode::AllTransparent: {
-      frame_.BlendColor(Width{i}, Height{j}, triangle.GetColor());
+      frame_.BlendColor(Width{i}, Height{j},
+                        triangle.InterpolateColor(Triangle::XCoordinate{x},
+                                                  Triangle::YCoordinate{y}));
       break;
     }
     default:
