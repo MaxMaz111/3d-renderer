@@ -21,8 +21,6 @@ std::vector<Triangle> ObjReader::ReadFromFile(
   }
 
   aiMesh* mesh = scene->mMeshes[0];
-  Color default_color(255, 255, 255);
-
   for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
     const aiFace& face = mesh->mFaces[i];
     const aiVector3D& a = mesh->mVertices[face.mIndices[0]];
@@ -40,7 +38,7 @@ std::vector<Triangle> ObjReader::ReadFromFile(
       Vector3 e2 = p2 - p0;
       normal = e1.cross(e2).normalized();
     }
-    triangles.emplace_back(p0, p1, p2, normal, default_color);
+    triangles.emplace_back(p0, p1, p2, normal);
   }
 
   return triangles;

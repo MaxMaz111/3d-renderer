@@ -106,7 +106,7 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
       intersect2 = outside[1];
     }
     return {{intersect1.value(), intersect2.value(), inside[0],
-             triangle.GetNormal(), triangle.GetColor()}};
+             triangle.GetNormal()}};
   } else if (is_inside_cnt == 2) {
     auto intersect1 =
         plane.LineIntersection(outside[0], inside[0] - outside[0]);
@@ -120,9 +120,8 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
       intersect2 = inside[1];
     }
     return {{intersect1.value(), intersect2.value(), inside[0],
-             triangle.GetNormal(), triangle.GetColor()},
-            {inside[0], inside[1], intersect2.value(), triangle.GetNormal(),
-             triangle.GetColor()}};
+             triangle.GetNormal()},
+            {inside[0], inside[1], intersect2.value(), triangle.GetNormal()}};
   }
 
   return {triangle};
