@@ -39,7 +39,7 @@ namespace kernel {
 class Triangle {
  public:
   using XCoordinate = detail::kernel::XCoordinate;
-  using YCoordinate = detail::kernel::XCoordinate;
+  using YCoordinate = detail::kernel::YCoordinate;
 
   Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
            const Vector3& normal);

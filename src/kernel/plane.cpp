@@ -30,4 +30,4 @@ bool Plane::IsOnTheSameSideAsNormal(const Point3& point) const {
   return DistanceToPoint(point) > 0;
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

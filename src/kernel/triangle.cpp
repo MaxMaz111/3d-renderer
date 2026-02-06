@@ -43,7 +43,6 @@ void Triangle::Project(const Matrix4& projection_matrix) {
 
 std::optional<Scalar> Triangle::InterpolateZ(XCoordinate x,
                                              YCoordinate y) const {
-  assert(point.z() == 0);
   const Point3& p0 = points_[0];
   const Point3& p1 = points_[1];
   const Point3& p2 = points_[2];
