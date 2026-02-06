@@ -11,4 +11,4 @@ class LightSource {
   Vector3 direction_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

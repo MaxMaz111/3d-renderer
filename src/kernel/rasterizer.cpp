@@ -3,8 +3,8 @@
 namespace renderer::kernel {
 
 Rasterizer::Rasterizer(Width width, Height height)
-    : width_(width),
-      height_(height),
+    : width_(width()),
+      height_(height()),
       z_buffer_(Width{width_}, Height{height_}),
       frame_(Width{width_}, Height{height_}) {}
 
@@ -20,8 +20,8 @@ Frame Rasterizer::Rasterize(std::vector<Triangle>&& triangles,
 }
 
 void Rasterizer::ResetTo(Width width, Height height) {
-  width_ = width;
-  height_ = height;
+  width_ = width();
+  height_ = height();
   z_buffer_.ResetTo(width, height);
 }
 
@@ -39,7 +39,7 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera) {
 
 void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                                const Camera& camera) {
-  Scalar x = i, y = j;
+  Scalar x = i() + 0.5f, y = j() + 0.5f;
   auto z =
       triangle.InterpolateZ(Triangle::XCoordinate{x}, Triangle::YCoordinate{y});
   if (!z.has_value()) {

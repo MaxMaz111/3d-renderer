@@ -2,44 +2,16 @@
 
 #include <optional>
 
+#include "alias.h"
 #include "color.h"
 #include "linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
-namespace detail::kernel {
-
-class XCoordinate {
-  using Scalar = renderer::kernel::Scalar;
-
- public:
-  explicit XCoordinate(Scalar value) : value_(value) {}
-
-  operator double() const { return value_; }
-
- private:
-  Scalar value_;
-};
-
-class YCoordinate {
-  using Scalar = renderer::kernel::Scalar;
-
- public:
-  explicit YCoordinate(Scalar value) : value_(value) {}
-
-  operator double() const { return value_; }
-
- private:
-  Scalar value_;
-};
-
-}  // namespace detail::kernel
-
-namespace kernel {
 class Triangle {
  public:
-  using XCoordinate = detail::kernel::XCoordinate;
-  using YCoordinate = detail::kernel::XCoordinate;
+  using XCoordinate = util::Alias<Scalar, struct x_tag>;
+  using YCoordinate = util::Alias<Scalar, struct y_tag>;
 
   Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
            const Vector3& normal);
@@ -65,6 +37,4 @@ class Triangle {
   Vector3 normal_;
 };
 
-}  // namespace kernel
-
-}  // namespace renderer
+}  // namespace renderer::kernel

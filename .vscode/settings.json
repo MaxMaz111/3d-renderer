@@ -1,0 +1,8 @@
+{
+  "cmake.configureOnEdit": true,
+  "cmake.setBuildTypeOnMultiConfig": true,
+  "cmake.buildType": "Release",
+  "cmake.debugConfig": {
+    "args": ["../models/cow.obj"]
+  }
+}

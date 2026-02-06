@@ -3,8 +3,6 @@
 #include <optional>
 #include <vector>
 
-#include "util/time_anchor.h"
-
 #include "linalg.h"
 #include "triangle.h"
 

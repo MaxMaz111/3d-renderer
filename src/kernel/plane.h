@@ -22,4 +22,4 @@ class Plane {
   Scalar d_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

@@ -43,22 +43,23 @@ void Triangle::Project(const Matrix4& projection_matrix) {
 
 std::optional<Scalar> Triangle::InterpolateZ(XCoordinate x,
                                              YCoordinate y) const {
-  assert(point.z() == 0);
   const Point3& p0 = points_[0];
   const Point3& p1 = points_[1];
   const Point3& p2 = points_[2];
+
   Scalar full_area = 0.5 * ((p1.x() - p0.x()) * (p2.y() - p0.y()) -
                             (p2.x() - p0.x()) * (p1.y() - p0.y()));
   if (std::abs(full_area) < kEpsilon) {
     return std::nullopt;
   }
-  Scalar alpha = 0.5 *
-                 ((p1.x() - x) * (p2.y() - y) - (p2.x() - x) * (p1.y() - y)) /
-                 full_area;
-  Scalar beta =
+  Scalar alpha =
       0.5 *
-      ((x - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (y - p0.y())) /
+      ((p1.x() - x()) * (p2.y() - y()) - (p2.x() - x()) * (p1.y() - y())) /
       full_area;
+  Scalar beta = 0.5 *
+                ((x() - p0.x()) * (p2.y() - p0.y()) -
+                 (p2.x() - p0.x()) * (y() - p0.y())) /
+                full_area;
   Scalar gamma = 1.0 - alpha - beta;
   if (alpha < -kEpsilon || beta < -kEpsilon || gamma < -kEpsilon) {
     return std::nullopt;
