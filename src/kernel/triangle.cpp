@@ -87,7 +87,7 @@ Scalar Triangle::GetMaxY() const {
 }
 
 Point3 Triangle::FromHomogeneous(const Point4& point) const {
-  assert(abs(point.w()) > kEpsilon);
+  assert(std::abs(point.w()) > kEpsilon);
   return Point3(point.x() / point.w(), point.y() / point.w(),
                 point.z() / point.w());
 }
