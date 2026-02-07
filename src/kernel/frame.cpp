@@ -22,9 +22,8 @@ void Frame::ResetTo(WidthT width, HeightT height) {
   if (NeedResize(width, height)) {
     width_ = width();
     data_.resize(width_ * height());
-  } else {
-    std::ranges::fill(data_, Color{});
   }
+  std::ranges::fill(data_, Color{});
 }
 
 void Frame::SetColor(WidthT x, HeightT y, Color color) {
