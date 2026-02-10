@@ -11,6 +11,9 @@ class Camera {
   using WidthT = Width;
   using HeightT = Height;
 
+  static const Vector3 kDefaultPosition;
+  static const Matrix3 kDefaultRotation;
+
   static constexpr Scalar kDefaultNear = 0.1;
   static constexpr Scalar kDefaultFar = 1000;
   static constexpr int kNumberOfPlanes = 6;

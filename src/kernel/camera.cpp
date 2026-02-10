@@ -6,9 +6,12 @@
 
 namespace renderer::kernel {
 
+const Vector3 Camera::kDefaultPosition{0, -30, 10};
+const Matrix3 Camera::kDefaultRotation = Matrix3{AngleAxis(M_PI / 2, Vector3::UnitX())};
+
 Camera::Camera()
-    : position_(Vector3::Zero()),
-      rotation_matrix_(Matrix3::Identity()),
+    : position_(kDefaultPosition),
+      rotation_matrix_(kDefaultRotation),
       near_(kDefaultNear),
       far_(kDefaultFar),
       fov_y_(kDefaultFovY),
