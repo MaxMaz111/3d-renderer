@@ -2,7 +2,7 @@
 
 #include "camera.h"
 #include "frame.h"
-#include "triangle.h"
+#include "mesh.h"
 #include "z_buffer.h"
 
 namespace renderer::kernel {
@@ -11,16 +11,16 @@ class Rasterizer {
  public:
   Rasterizer(Width width, Height height);
 
-  Frame Rasterize(std::vector<Triangle>&& triangles, const Camera& camera);
   void ResetTo(Width width, Height height);
+  Frame Rasterize(std::vector<Mesh>&& meshes, const Camera& camera);
 
  private:
+  void Rasterize(Mesh&& mesh, const Camera& camera);
   void Rasterize(const Triangle& triangle, const Camera& camera);
   void UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                      const Camera& camera);
 
-  static std::vector<Triangle> ConvertToRasterSpace(
-      std::vector<Triangle>&& triangles, int width, int height);
+  static Mesh ConvertToRasterSpace(Mesh&& meshes, int width, int height);
 
   int width_, height_;
   ZBuffer z_buffer_;

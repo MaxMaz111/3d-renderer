@@ -2,20 +2,20 @@
 
 #include <vector>
 
-#include "triangle.h"
+#include "mesh.h"
 
 namespace renderer::kernel {
 
-Scene::Scene(std::vector<CameraT>&& cameras, std::vector<Triangle>&& triangles)
+Scene::Scene(std::vector<Mesh>&& meshes)
+    : cameras_(4), cur_camera_index_(0), meshes_(std::move(meshes)) {}
+
+Scene::Scene(std::vector<CameraT>&& cameras, std::vector<Mesh>&& meshes)
     : cameras_(std::move(cameras)),
       cur_camera_index_(0),
-      triangles_(std::move(triangles)) {}
+      meshes_(std::move(meshes)) {}
 
-Scene::Scene(std::vector<Triangle>&& triangles)
-    : cameras_(4), cur_camera_index_(0), triangles_(std::move(triangles)) {}
-
-const std::vector<Triangle>& Scene::GetTriangles() const {
-  return triangles_;
+const std::vector<Mesh>& Scene::Meshes() const {
+  return meshes_;
 }
 
 void Scene::SetAspectRatio(Scalar aspect_ratio) {

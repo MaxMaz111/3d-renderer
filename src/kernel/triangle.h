@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <optional>
 
 #include "alias.h"
@@ -8,20 +9,26 @@
 
 namespace renderer::kernel {
 
+using XCoordinate = util::Alias<Scalar, struct x_tag>;
+using YCoordinate = util::Alias<Scalar, struct y_tag>;
+
 class Triangle {
  public:
-  using XCoordinate = util::Alias<Scalar, struct x_tag>;
-  using YCoordinate = util::Alias<Scalar, struct y_tag>;
+  struct Vertex {
+    Point3 point;
+    Vector3 normal;
+    Scalar inv_w = 1.0f;
+  };
 
-  Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-           const Vector3& normal);
+  Triangle(const std::array<Vertex, 3>& vertices);
 
-  const std::array<Point3, 3>& GetPoints() const;
-  const Point3& GetPoint(size_t index) const;
-  Point3& GetPoint(size_t index);
-  const Vector3& GetNormal() const;
+  const std::array<Vertex, 3> Vertices() const;
+  Point3& GetPoint(int index);
+  const Point3& GetPoint(int index) const;
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
+  std::optional<std::array<Scalar, 3>> PerspectiveCorrectBarycentric(
+      XCoordinate x, YCoordinate y) const;
   std::optional<Scalar> InterpolateZ(XCoordinate x, YCoordinate y) const;
   Color InterpolateColor(XCoordinate x, YCoordinate y) const;
   Scalar GetMinX() const;
@@ -30,11 +37,12 @@ class Triangle {
   Scalar GetMaxY() const;
 
  private:
+  std::optional<std::array<Scalar, 3>> Barycentric(XCoordinate x,
+                                                   YCoordinate y) const;
   Point3 FromHomogeneous(const Point4& point) const;
   Point4 ToHomogeneous(const Point3& point) const;
 
-  std::array<Point3, 3> points_;
-  Vector3 normal_;
+  std::array<Vertex, 3> vertices_;
 };
 
 }  // namespace renderer::kernel

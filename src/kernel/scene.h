@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "camera.h"
-#include "triangle.h"
+#include "mesh.h"
 
 namespace renderer::kernel {
 
@@ -11,10 +11,10 @@ class Scene {
   using CameraT = Camera;
 
  public:
-  Scene(std::vector<Triangle>&& triangles);
-  Scene(std::vector<Camera>&& cameras, std::vector<Triangle>&& triangles);
+  Scene(std::vector<Mesh>&& meshes);
+  Scene(std::vector<Camera>&& cameras, std::vector<Mesh>&& meshes);
 
-  const std::vector<Triangle>& GetTriangles() const;
+  const std::vector<Mesh>& Meshes() const;
   void SetAspectRatio(Scalar aspect_ratio);
   void RotateLeft();
   void RotateRight();
@@ -35,7 +35,7 @@ class Scene {
  private:
   std::vector<CameraT> cameras_;
   int cur_camera_index_;
-  std::vector<Triangle> triangles_;
+  std::vector<Mesh> meshes_;
 };
 
 }  // namespace renderer::kernel

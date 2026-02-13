@@ -1,64 +1,42 @@
 #include "color.h"
 
-#include <algorithm>
+#include <cstdlib>
 
 namespace renderer::kernel {
 
-Color::Color(int red, int green, int blue)
-    : r_(Clamp(red)), g_(Clamp(green)), b_(Clamp(blue)) {}
+Color::Color(RedT red, GreenT green, BlueT blue)
+    : r_(red()), g_(green()), b_(blue()) {}
 
-uint8_t Color::GetRed() const {
+uint8_t Color::Red() const {
   return r_;
 }
 
-uint8_t Color::GetGreen() const {
+uint8_t Color::Green() const {
   return g_;
 }
 
-uint8_t Color::GetBlue() const {
+uint8_t Color::Blue() const {
   return b_;
 }
 
-void Color::SetRed(int red) {
-  r_ = Clamp(red);
-}
-
-void Color::SetGreen(int green) {
-  g_ = Clamp(green);
-}
-
-void Color::SetBlue(int blue) {
-  b_ = Clamp(blue);
-}
 
 Color Color::Invert() const {
-  return Color(255 - r_, 255 - g_, 255 - b_);
+  return Color(RedT{255 - r_}, GreenT{255 - g_}, BlueT{255 - b_});
 }
 
 void Color::Blend(const Color& other, float factor) {
-  r_ += other.GetRed() * factor;
-  g_ += other.GetGreen() * factor;
-  b_ += other.GetBlue() * factor;
-}
-
-bool Color::operator==(const Color& other) const {
-  return r_ == other.r_ && g_ == other.g_ && b_ == other.b_;
-}
-
-bool Color::operator!=(const Color& other) const {
-  return !(*this == other);
+  r_ = r_ + other.Red() * factor;
+  g_ = g_ + other.Green() * factor;
+  b_ = b_ + other.Blue() * factor;
 }
 
 QRgb Color::GetQRgb() const {
-  return qRgb(GetRed(), GetGreen(), GetBlue());
+  return qRgb(Red(), Green(), Blue());
 }
 
 Color Color::GetRandomColor() {
-  return {rand() % 256, rand() % 256, rand() % 256};
-}
-
-uint8_t Color::Clamp(int value) {
-  return std::clamp(value, 0, 255);
+  return {RedT{std::rand() % 256}, GreenT{std::rand() % 256},
+          BlueT{std::rand() % 256}};
 }
 
 }  // namespace renderer::kernel

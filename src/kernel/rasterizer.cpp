@@ -8,21 +8,26 @@ Rasterizer::Rasterizer(Width width, Height height)
       z_buffer_(Width{width_}, Height{height_}),
       frame_(Width{width_}, Height{height_}) {}
 
-Frame Rasterizer::Rasterize(std::vector<Triangle>&& triangles,
-                            const Camera& camera) {
-  frame_.ResetTo(Width{width_}, Height{height_});
-  triangles = ConvertToRasterSpace(std::move(triangles), width_, height_);
-  z_buffer_.ResetTo(Width{width_}, Height{height_});
-  for (const Triangle& triangle : triangles) {
-    Rasterize(triangle, camera);
-  }
-  return frame_;
-}
-
 void Rasterizer::ResetTo(Width width, Height height) {
   width_ = width();
   height_ = height();
   z_buffer_.ResetTo(width, height);
+}
+
+Frame Rasterizer::Rasterize(std::vector<Mesh>&& meshes, const Camera& camera) {
+  frame_.ResetTo(Width{width_}, Height{height_});
+  z_buffer_.ResetTo(Width{width_}, Height{height_});
+  for (auto& mesh : meshes) {
+    Rasterize(std::move(mesh), camera);
+  }
+  return frame_;
+}
+
+void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera) {
+  mesh = ConvertToRasterSpace(std::move(mesh), width_, height_);
+  for (const Triangle& triangle : mesh.triangles) {
+    Rasterize(triangle, camera);
+  }
 }
 
 void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera) {
@@ -40,8 +45,7 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera) {
 void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                                const Camera& camera) {
   Scalar x = i() + 0.5f, y = j() + 0.5f;
-  auto z =
-      triangle.InterpolateZ(Triangle::XCoordinate{x}, Triangle::YCoordinate{y});
+  auto z = triangle.InterpolateZ(XCoordinate{x}, YCoordinate{y});
   if (!z.has_value()) {
     return;
   }
@@ -50,16 +54,16 @@ void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
       Scalar& val = z_buffer_.Get(Width{i}, Height{j});
       if (val > *z) {
         val = *z;
-        frame_.SetColor(Width{i}, Height{j},
-                        triangle.InterpolateColor(Triangle::XCoordinate{x},
-                                                  Triangle::YCoordinate{y}));
+        frame_.SetColor(
+            Width{i}, Height{j},
+            triangle.InterpolateColor(XCoordinate{x}, YCoordinate{y}));
       }
       break;
     }
     case Camera::RenderingMode::AllTransparent: {
-      frame_.BlendColor(Width{i}, Height{j},
-                        triangle.InterpolateColor(Triangle::XCoordinate{x},
-                                                  Triangle::YCoordinate{y}));
+      frame_.BlendColor(
+          Width{i}, Height{j},
+          triangle.InterpolateColor(XCoordinate{x}, YCoordinate{y}));
       break;
     }
     default:
@@ -67,9 +71,8 @@ void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
   }
 }
 
-std::vector<Triangle> Rasterizer::ConvertToRasterSpace(
-    std::vector<Triangle>&& triangles, int width, int height) {
-  for (auto& triangle : triangles) {
+Mesh Rasterizer::ConvertToRasterSpace(Mesh&& mesh, int width, int height) {
+  for (auto& triangle : mesh.triangles) {
     for (int i = 0; i < 3; ++i) {
       Vector3 v_ndc = triangle.GetPoint(i);
 
@@ -80,7 +83,7 @@ std::vector<Triangle> Rasterizer::ConvertToRasterSpace(
       triangle.GetPoint(i) = Vector3{x_rasterized, y_rasterized, z_rasterized};
     }
   }
-  return triangles;
+  return mesh;
 }
 
 }  // namespace renderer::kernel

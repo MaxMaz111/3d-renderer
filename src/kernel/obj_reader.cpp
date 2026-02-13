@@ -5,44 +5,49 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <vector>
 
-#include "linalg.h"
+#include "mesh.h"
 
 namespace renderer::kernel {
 
-std::vector<Triangle> ObjReader::ReadFromFile(
+std::vector<Mesh> ObjReader::ReadFromFile(
     const std::filesystem::path& filepath) {
-  std::vector<Triangle> triangles;
+  if (!std::filesystem::exists(filepath)) {
+    qWarning() << "File does not exist:"
+               << QString::fromStdString(filepath.string());
+    return {};
+  }
   Assimp::Importer importer;
 
   const aiScene* scene = importer.ReadFile(
       filepath.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 
   if (!scene || !scene->HasMeshes()) {
-    qWarning() << "No mesh found in the file";
-    return triangles;
+    qWarning() << "No mesh found in file";
+    return {};
   }
 
+  std::vector<Mesh> model;
   for (uint32_t mesh_index = 0; mesh_index < scene->mNumMeshes; ++mesh_index) {
     aiMesh* mesh = scene->mMeshes[mesh_index];
+    Mesh current;
     for (uint32_t i = 0; i < mesh->mNumFaces; ++i) {
-      std::array<Point3, 3> points;
-      std::array<Vector3, 3> normals;
-      for (int vertex = 0; vertex < 3; ++vertex) {
-        uint32_t vertex_index = mesh->mFaces[i].mIndices[vertex];
-        points[vertex] = Point3(mesh->mVertices[vertex_index].x,
-                                mesh->mVertices[vertex_index].y,
-                                mesh->mVertices[vertex_index].z);
-        normals[vertex] = Vector3(mesh->mNormals[vertex_index].x,
-                                  mesh->mNormals[vertex_index].y,
-                                  mesh->mNormals[vertex_index].z)
-                              .normalized();
+      std::array<Triangle::Vertex, 3> vertices;
+      for (int v = 0; v < 3; ++v) {
+        uint32_t index = mesh->mFaces[i].mIndices[v];
+        vertices[v] = {
+            .point = {mesh->mVertices[index].x, mesh->mVertices[index].y,
+                      mesh->mVertices[index].z},
+            .normal = Vector3{mesh->mNormals[index].x, mesh->mNormals[index].y,
+                              mesh->mNormals[index].z}
+                          .normalized()};
       }
-      triangles.emplace_back(points, normals);
+      current.triangles.emplace_back(vertices);
     }
+    model.push_back(std::move(current));
   }
-
-  return triangles;
+  return model;
 }
 
 }  // namespace renderer::kernel
