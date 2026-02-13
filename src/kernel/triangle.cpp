@@ -1,9 +1,11 @@
 #include "triangle.h"
 
+#include <QColor>
 #include <algorithm>
 #include <array>
 #include <cmath>
 
+#include "constants.h"
 #include "linalg.h"
 
 namespace renderer::kernel {
@@ -78,10 +80,10 @@ std::optional<Scalar> Triangle::InterpolateZ(XCoordinate x,
   return alpha * p0.z() + beta * p1.z() + gamma * p2.z();
 }
 
-Color Triangle::InterpolateColor(XCoordinate x, YCoordinate y) const {
+QRgb Triangle::InterpolateColor(XCoordinate x, YCoordinate y) const {
   auto weights = PerspectiveCorrectBarycentric(x, y);
   if (!weights.has_value()) {
-    return Color{};
+    return kBlackColor;
   }
 
   const auto [alpha, beta, gamma] = *weights;
@@ -92,7 +94,7 @@ Color Triangle::InterpolateColor(XCoordinate x, YCoordinate y) const {
   if (normal.norm() > kEpsilon) {
     normal.normalize();
   }
-  return Color{}.Invert();
+  return kWhiteColor;
 }
 
 Scalar Triangle::GetMinX() const {

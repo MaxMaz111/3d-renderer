@@ -13,8 +13,7 @@ void View::SetFrame(const kernel::Frame& frame) {
   QImage image(frame.Width(), frame.Height(), QImage::Format_RGB32);
   for (int x = 0; x < frame.Width(); ++x) {
     for (int y = 0; y < frame.Height(); ++y) {
-      kernel::Color color = frame.GetColor(Width{x}, Height{y});
-      image.setPixel(x, y, color.GetQRgb());
+      image.setPixel(x, y, frame.GetColor(Width{x}, Height{y}));
     }
   }
   label_.setPixmap(QPixmap::fromImage(image));
