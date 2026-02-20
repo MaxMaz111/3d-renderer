@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Eigen/Geometry>
+#include <numbers>
 #include <type_traits>
 
 namespace renderer::kernel {
@@ -20,7 +21,9 @@ using AngleAxis = Eigen::AngleAxis<Scalar>;
 using Index = Eigen::Index;
 
 constexpr Scalar DegToRad(Scalar deg) {
-  return deg * 3.14159265358979323846f / 180.0f;
+  static constexpr Scalar kDegToRad =
+      std::numbers::pi_v<Scalar> / static_cast<Scalar>(180);
+  return deg * kDegToRad;
 }
 
 }  // namespace renderer::kernel

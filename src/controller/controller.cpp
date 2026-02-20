@@ -106,15 +106,18 @@ bool Controller::eventFilter(QObject* obj, QEvent* event) {
 
 void Controller::KeyPressEventHandler(const QKeyEvent* ev) {
   NotifyKernel(keys_.HandlePressEvent(ev->key()));
+  kernel_ptr_->NotifyView();
 }
 
 void Controller::KeyReleaseEventHandler(const QKeyEvent* ev) {
   NotifyKernel(keys_.HandleReleaseEvent(ev->key()));
+  kernel_ptr_->NotifyView();
 }
 
 void Controller::ResizeEventHandler(const QResizeEvent* ev) const {
   kernel_ptr_->SetScreenDimensions(Width{ev->size().width()},
                                    Height{ev->size().height()});
+  kernel_ptr_->NotifyView();
 }
 
 void Controller::NotifyKernel(State::KeyRange range) const {

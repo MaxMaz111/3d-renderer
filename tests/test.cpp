@@ -1,5 +1,6 @@
-#include <camera.h>
 #include <gtest/gtest.h>
+
+#include "kernel/camera.h"
 
 namespace {
 

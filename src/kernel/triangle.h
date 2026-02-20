@@ -4,7 +4,9 @@
 #include <array>
 #include <optional>
 
-#include "alias.h"
+#include "util/alias.h"
+
+#include "directional_light.h"
 #include "linalg.h"
 
 namespace renderer::kernel {
@@ -30,7 +32,8 @@ class Triangle {
   std::optional<std::array<Scalar, 3>> PerspectiveCorrectBarycentric(
       XCoordinate x, YCoordinate y) const;
   std::optional<Scalar> InterpolateZ(XCoordinate x, YCoordinate y) const;
-  QRgb InterpolateColor(XCoordinate x, YCoordinate y) const;
+  QRgb InterpolateColor(XCoordinate x, YCoordinate y,
+                        const std::vector<DirectionalLight>& lights) const;
   Scalar GetMinX() const;
   Scalar GetMaxX() const;
   Scalar GetMinY() const;

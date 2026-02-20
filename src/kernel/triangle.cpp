@@ -5,7 +5,10 @@
 #include <array>
 #include <cmath>
 
-#include "constants.h"
+#include "util/constants.h"
+
+#include "color.h"
+#include "directional_light.h"
 #include "linalg.h"
 
 namespace renderer::kernel {
@@ -27,7 +30,7 @@ const Point3& Triangle::GetPoint(int index) const {
 
 void Triangle::RotateAndMove(const Matrix3& rotation_matrix,
                              const Point3& translation) {
-  assert((rotation_matrix.determinant() - 1) < kEpsilon);
+  assert(std::abs(rotation_matrix.determinant() - 1) < kEpsilon);
   assert((rotation_matrix * rotation_matrix.transpose()).isIdentity(kEpsilon));
   for (auto& vertex : vertices_) {
     vertex.point = rotation_matrix * (vertex.point + translation);
@@ -80,7 +83,9 @@ std::optional<Scalar> Triangle::InterpolateZ(XCoordinate x,
   return alpha * p0.z() + beta * p1.z() + gamma * p2.z();
 }
 
-QRgb Triangle::InterpolateColor(XCoordinate x, YCoordinate y) const {
+QRgb Triangle::InterpolateColor(
+    XCoordinate x, YCoordinate y,
+    const std::vector<DirectionalLight>& lights) const {
   auto weights = PerspectiveCorrectBarycentric(x, y);
   if (!weights.has_value()) {
     return kBlackColor;
@@ -94,7 +99,10 @@ QRgb Triangle::InterpolateColor(XCoordinate x, YCoordinate y) const {
   if (normal.norm() > kEpsilon) {
     normal.normalize();
   }
-  return kWhiteColor;
+  return lights.empty()
+             ? kWhiteColor
+             : Color::ScaleColor(kWhiteColor,
+                                 lights[0].CalculateIntensity(normal));
 }
 
 Scalar Triangle::GetMinX() const {

@@ -2,6 +2,7 @@
 
 #include <vector>
 
+#include "directional_light.h"
 #include "linalg.h"
 #include "mesh.h"
 #include "triangle.h"
@@ -17,14 +18,26 @@ void Renderer::ResetTo(Width width, Height height) {
 Frame Renderer::Render(const Scene& scene) {
   std::vector<Mesh> meshes = scene.Meshes();
   const Camera& camera = scene.Camera();
-  meshes = Rotate(std::move(meshes), camera);
+  std::vector<DirectionalLight> lights = scene.DirectionalLights();
+  lights = RotateAndMove(std::move(lights), camera);
+  meshes = RotateAndMove(std::move(meshes), camera);
   meshes = Clip(std::move(meshes), camera);
   meshes = Project(std::move(meshes), camera);
-  return Rasterize(std::move(meshes), camera);
+  return Rasterize(std::move(meshes), camera, lights);
 }
 
-std::vector<Mesh> Renderer::Rotate(std::vector<Mesh>&& meshes,
-                                   const Camera& camera) const {
+std::vector<DirectionalLight> Renderer::RotateAndMove(
+    std::vector<DirectionalLight>&& lights, const Camera& camera) const {
+  Matrix3 mat = camera.RotationMatrix().transpose();
+  Point3 translation = -camera.Position();
+  for (auto& light : lights) {
+    light.RotateAndMove(mat, translation);
+  }
+  return lights;
+}
+
+std::vector<Mesh> Renderer::RotateAndMove(std::vector<Mesh>&& meshes,
+                                          const Camera& camera) const {
   Matrix3 mat = camera.RotationMatrix().transpose();
   Point3 translation = -camera.Position();
   for (auto& mesh : meshes) {
@@ -54,8 +67,9 @@ std::vector<Mesh> Renderer::Project(std::vector<Mesh>&& meshes,
   return meshes;
 }
 
-Frame Renderer::Rasterize(std::vector<Mesh>&& meshes, const Camera& camera) {
-  return rasterizer_.Rasterize(std::move(meshes), camera);
+Frame Renderer::Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
+                          const std::vector<DirectionalLight>& lights) {
+  return rasterizer_.Rasterize(std::move(meshes), camera, lights);
 }
 
 std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,

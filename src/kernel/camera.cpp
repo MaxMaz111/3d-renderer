@@ -2,12 +2,13 @@
 
 #include <cassert>
 
-#include "constants.h"
+#include "util/constants.h"
 
 namespace renderer::kernel {
 
-const Vector3 Camera::kDefaultPosition{0, -30, 10};
-const Matrix3 Camera::kDefaultRotation = Matrix3{AngleAxis(M_PI / 2, Vector3::UnitX())};
+const Vector3 Camera::kDefaultPosition{0, 100, 10};
+const Matrix3 Camera::kDefaultRotation =
+    Matrix3{AngleAxis(-M_PI / 2, Vector3::UnitX())};
 
 Camera::Camera()
     : position_(kDefaultPosition),
@@ -20,18 +21,23 @@ Camera::Camera()
       planes_(BuildPlanesForClipping()) {}
 
 void Camera::SetAspectRatio(Scalar aspect_ratio) {
+  assert(aspect_ratio > kEpsilon);
   aspect_ratio_ = aspect_ratio;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();
 }
 
 void Camera::SetNear(Scalar near) {
+  assert(near > kEpsilon);
+  assert(far_ > near);
   near_ = near;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();
 }
 
 void Camera::SetFar(Scalar far) {
+  assert(far > kEpsilon);
+  assert(far > near_);
   far_ = far;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();

@@ -2,23 +2,10 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
+
+#include "color.h"
 
 namespace renderer::kernel {
-
-namespace {
-
-QRgb Blend(QRgb base, QRgb new_color, Scalar blend_factor) {
-  int r = std::round(qRed(base) * (1 - blend_factor) +
-                     qRed(new_color) * blend_factor);
-  int g = std::round(qGreen(base) * (1 - blend_factor) +
-                     qGreen(new_color) * blend_factor);
-  int b = std::round(qBlue(base) * (1 - blend_factor) +
-                     qBlue(new_color) * blend_factor);
-  return qRgb(r, g, b);
-}
-
-}  // namespace
 
 Frame::Frame(WidthT width, HeightT height)
     : width_(width()), data_(width_ * height()) {
@@ -49,8 +36,8 @@ void Frame::SetColor(WidthT x, HeightT y, QRgb color) {
 
 void Frame::BlendColor(WidthT x, HeightT y, QRgb color) {
   assert(IsBounded(x, y));
-  QRgb base = data_[x() + y() * width_];
-  data_[x() + y() * width_] = Blend(base, color, kBlendFactor);
+  QRgb* base = &data_[x() + y() * width_];
+  Color::Blend(base, color, kBlendFactor);
 }
 
 QRgb Frame::GetColor(WidthT x, HeightT y) const {

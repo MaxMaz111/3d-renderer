@@ -3,11 +3,11 @@
 #include <filesystem>
 
 #include "util/observer.hpp"
+#include "util/size.h"
 
 #include "frame.h"
 #include "renderer.h"
 #include "scene.h"
-#include "size.h"
 
 namespace renderer::kernel {
 
@@ -27,8 +27,8 @@ class Kernel {
   void MoveBackward();
   void SwivelLeft();
   void SwivelRight();
-  void SetCurrentCamera(int camera_index);
   void SwapRenderingMode();
+  void NotifyView();
 
  private:
   Renderer renderer_;

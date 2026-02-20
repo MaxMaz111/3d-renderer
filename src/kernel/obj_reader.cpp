@@ -27,7 +27,6 @@ std::vector<Mesh> ObjReader::ReadFromFile(
     qWarning() << "No mesh found in file";
     return {};
   }
-
   std::vector<Mesh> model;
   for (uint32_t mesh_index = 0; mesh_index < scene->mNumMeshes; ++mesh_index) {
     aiMesh* mesh = scene->mMeshes[mesh_index];

@@ -1,12 +1,11 @@
 #include <benchmark/benchmark.h>
-#include <iostream>
 #include <memory>
 
 #include "kernel/obj_reader.h"
 #include "kernel/renderer.h"
 #include "kernel/scene.h"
 
-#include "constants.h"
+#include "util/constants.h"
 
 using renderer::Height;
 using renderer::Width;

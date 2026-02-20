@@ -1,7 +1,8 @@
 #pragma once
 
+#include "util/size.h"
+
 #include "linalg.h"
-#include "size.h"
 
 namespace renderer::kernel {
 

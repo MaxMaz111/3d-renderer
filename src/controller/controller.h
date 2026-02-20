@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kernel/kernel.h"
+#include <QLabel>
 
-#include "view/view.h"
+#include "kernel/kernel.h"
 
 namespace renderer {
 
@@ -30,7 +30,7 @@ class State {
 
   class KeyIterator {
    public:
-    using value_type = Key;
+    using value_type = Key;  // NOLINT
 
     explicit KeyIterator(KeyUnderlying mask);
 
@@ -39,7 +39,7 @@ class State {
     bool operator==(std::default_sentinel_t) const;
 
    private:
-    void advance();
+    void advance();  // NOLINT
 
     KeyUnderlying remaining_{0};
     KeyUnderlying current_{0};
@@ -49,9 +49,9 @@ class State {
    public:
     explicit KeyRange(KeyUnderlying mask);
 
-    KeyIterator begin() const;
+    KeyIterator begin() const;  // NOLINT
 
-    std::default_sentinel_t end() const;
+    std::default_sentinel_t end() const;  // NOLINT
 
    private:
     KeyUnderlying mask_;

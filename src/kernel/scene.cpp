@@ -1,27 +1,28 @@
 #include "scene.h"
 
-#include <vector>
-
-#include "mesh.h"
+#include "camera.h"
+#include "directional_light.h"
 
 namespace renderer::kernel {
 
 Scene::Scene(std::vector<Mesh>&& meshes)
-    : cameras_(4), cur_camera_index_(0), meshes_(std::move(meshes)) {}
+    : camera_(), meshes_(std::move(meshes)), directional_lights_{{{0, 1, 1}}} {}
 
-Scene::Scene(std::vector<CameraT>&& cameras, std::vector<Mesh>&& meshes)
-    : cameras_(std::move(cameras)),
-      cur_camera_index_(0),
-      meshes_(std::move(meshes)) {}
+Scene::Scene(CameraT&& camera, std::vector<Mesh>&& meshes)
+    : camera_(std::move(camera)),
+      meshes_(std::move(meshes)),
+      directional_lights_{{{0, 1, 1}}} {}
 
 const std::vector<Mesh>& Scene::Meshes() const {
   return meshes_;
 }
 
+const std::vector<DirectionalLight>& Scene::DirectionalLights() const {
+  return directional_lights_;
+}
+
 void Scene::SetAspectRatio(Scalar aspect_ratio) {
-  for (auto& camera : cameras_) {
-    camera.SetAspectRatio(aspect_ratio);
-  }
+  camera_.SetAspectRatio(aspect_ratio);
 }
 
 void Scene::RotateLeft() {
@@ -64,23 +65,16 @@ void Scene::SwivelRight() {
   Camera().SwivelRight();
 }
 
-void Scene::SetCurrentCamera(int camera_index) {
-  assert(camera_index >= 0);
-  if (static_cast<size_t>(camera_index) < cameras_.size()) {
-    cur_camera_index_ = camera_index;
-  }
-}
-
 void Scene::SwapRenderingMode() {
   Camera().SwapRenderingMode();
 }
 
 const Camera& Scene::Camera() const {
-  return cameras_[cur_camera_index_];
+  return camera_;
 }
 
 Camera& Scene::Camera() {
-  return cameras_[cur_camera_index_];
+  return camera_;
 }
 
 Camera::RenderingMode Scene::CurrentRenderingMode() const {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera.h"
+#include "directional_light.h"
 #include "frame.h"
 #include "mesh.h"
 #include "z_buffer.h"
@@ -12,13 +13,17 @@ class Rasterizer {
   Rasterizer(Width width, Height height);
 
   void ResetTo(Width width, Height height);
-  Frame Rasterize(std::vector<Mesh>&& meshes, const Camera& camera);
+  Frame Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
+                  const std::vector<DirectionalLight>& lights);
 
  private:
-  void Rasterize(Mesh&& mesh, const Camera& camera);
-  void Rasterize(const Triangle& triangle, const Camera& camera);
+  void Rasterize(Mesh&& mesh, const Camera& camera,
+                 const std::vector<DirectionalLight>& lights);
+  void Rasterize(const Triangle& triangle, const Camera& camera,
+                 const std::vector<DirectionalLight>& lights);
   void UpdateZBuffer(Width i, Height j, const Triangle& triangle,
-                     const Camera& camera);
+                     const Camera& camera,
+                     const std::vector<DirectionalLight>& lights);
 
   static Mesh ConvertToRasterSpace(Mesh&& meshes, int width, int height);
 

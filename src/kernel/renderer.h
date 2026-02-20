@@ -2,6 +2,9 @@
 
 #include <QPixmap>
 
+#include "kernel/camera.h"
+
+#include "directional_light.h"
 #include "frame.h"
 #include "mesh.h"
 #include "rasterizer.h"
@@ -18,13 +21,16 @@ class Renderer {
   Frame Render(const Scene& scene);
 
  private:
-  std::vector<Mesh> Rotate(std::vector<Mesh>&& meshes,
-                           const Camera& camera) const;
+  std::vector<DirectionalLight> RotateAndMove(
+      std::vector<DirectionalLight>&& lights, const Camera& camera) const;
+  std::vector<Mesh> RotateAndMove(std::vector<Mesh>&& meshes,
+                                  const Camera& camera) const;
   std::vector<Mesh> Clip(std::vector<Mesh>&& meshes,
                          const Camera& camera) const;
   std::vector<Mesh> Project(std::vector<Mesh>&& meshes,
                             const Camera& camera) const;
-  Frame Rasterize(std::vector<Mesh>&& meshes, const Camera& camera);
+  Frame Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
+                  const std::vector<DirectionalLight>& lights);
   std::vector<Triangle> ClipTriangles(std::vector<Triangle>&& triangles,
                                       const Camera& camera) const;
   std::vector<Triangle> ClipTriangleByPlane(const Triangle& triangle,

@@ -2,7 +2,8 @@
 
 #include <QColor>
 
-#include "linalg.h"
+#include "kernel/linalg.h"
+
 #include "size.h"
 
 namespace renderer::kernel {
