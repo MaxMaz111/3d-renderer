@@ -3,17 +3,20 @@
 #include <optional>
 
 #include "linalg.h"
+#include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Plane {
  public:
   Plane(const Vector3& normal, const Point3& point);
   Plane(const Vector3& normal, Scalar distance);
+
   Scalar DistanceToPoint(const Point3& point) const;
   Point3 ProjectPoint(const Point3& point) const;
-  std::optional<Vector3> LineIntersection(const Vector3& line_origin,
-                                          const Vector3& line_direction) const;
+  std::optional<Triangle::Vertex> LineIntersection(
+      const Triangle::Vertex& line_start,
+      const Triangle::Vertex& line_end) const;
   bool IsOnTheSameSideAsNormal(const Point3& point) const;
 
  private:
@@ -21,4 +24,4 @@ class Plane {
   Scalar d_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

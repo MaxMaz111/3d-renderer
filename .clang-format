@@ -14,7 +14,7 @@ AllowAllParametersOfDeclarationOnNextLine: false
 AllowShortBlocksOnASingleLine: Empty
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Inline
-AllowShortIfStatementsOnASingleLine: Never  # To avoid conflict, set this "Never" and each "if statement" should include brace when coding
+AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: Inline
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterReturnType: None
@@ -46,19 +46,23 @@ ColumnLimit: 80
 CompactNamespaces: false
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: true
-DerivePointerAlignment: false  # Make sure the * or & align on the left
+DerivePointerAlignment: false
 EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex: '^<.*>$'         # Системные заголовки (stdlib.h, iostream и т. д.)
+  - Regex: '^<.*>$'
     Priority: 1
-  - Regex: '"mylib/.*"'     # Заголовки из библиотеки проекта
+  - Regex: '"kernel/.*"'
     Priority: 2
-  - Regex: '"third_party/.*"' # Сторонние библиотеки
+  - Regex: '"view/.*"'
     Priority: 3
-  - Regex: '".*"'           # Остальные пользовательские заголовки
+  - Regex: '"controller/.*"'
     Priority: 4
+  - Regex: '"util/.*"'
+    Priority: 5
+  - Regex: '".*"'
+    Priority: 6
 IndentCaseLabels: true
 IndentPPDirectives: None
 IndentWidth: 2
@@ -69,7 +73,7 @@ NamespaceIndentation: None
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
 PointerAlignment: Left
-ReflowComments: false
+ReflowComments: IndentOnly
 SeparateDefinitionBlocks: Always
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
@@ -88,6 +92,6 @@ SpacesInCStyleCastParentheses: false
 SpacesInContainerLiterals: false
 SpacesInParentheses: false
 SpacesInSquareBrackets: false
-Standard: c++20
+Standard: Auto
 TabWidth: 4
 UseTab: Never

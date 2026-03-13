@@ -2,20 +2,22 @@
 
 #include <vector>
 
-#include "../size.h"
 #include "camera.h"
-#include "triangle.h"
+#include "directional_light.h"
+#include "mesh.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Scene {
+  using CameraT = Camera;
+
  public:
-  Scene() = delete;
-  Scene(const std::vector<Triangle>& triangles);
-  Scene(const std::vector<Camera>& cameras,
-        const std::vector<Triangle>& triangles);
-  const std::vector<Triangle>& GetTriangles() const;
-  void SetScreenDimensions(Width width, Height height);
+  Scene(std::vector<Mesh>&& meshes);
+  Scene(CameraT&& camera, std::vector<Mesh>&& meshes);
+
+  const std::vector<Mesh>& Meshes() const;
+  const std::vector<DirectionalLight>& DirectionalLights() const;
+  void SetAspectRatio(Scalar aspect_ratio);
   void RotateLeft();
   void RotateRight();
   void RotateUp();
@@ -26,17 +28,15 @@ class Scene {
   void MoveBackward();
   void SwivelLeft();
   void SwivelRight();
-  void SetCurrentCamera(int camera_index);
-  void SwapTransparency();
-  const Camera& GetCamera() const;
-  Camera& GetCamera();
-  bool Transapent() const;
+  void SwapRenderingMode();
+  const CameraT& Camera() const;
+  CameraT& Camera();
+  Camera::RenderingMode CurrentRenderingMode() const;
 
  private:
-  std::vector<Camera> cameras_;
-  int cur_camera_index_;
-  std::vector<Triangle> triangles_;
-  bool transparent_ = false;
+  CameraT camera_;
+  std::vector<Mesh> meshes_;
+  std::vector<DirectionalLight> directional_lights_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

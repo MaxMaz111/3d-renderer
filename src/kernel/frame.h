@@ -1,27 +1,36 @@
 #pragma once
 
+#include <QColor>
 #include <vector>
 
-#include "../size.h"
-#include "color.h"
+#include "util/size.h"
 
-namespace renderer {
+#include "linalg.h"
+
+namespace renderer::kernel {
 
 class Frame {
+  static constexpr Scalar kBlendFactor = 0.05f;
+
+  using WidthT = Width;
+  using HeightT = Height;
+
  public:
-  Frame(Width width, Height height);
-  Width GetWidth() const;
-  Height GetHeight() const;
-  void SetColor(Width x, Height y, Color color);
-  void BlendColor(Width x, Height y, Color color);
-  const Color& GetColor(Width x, Height y) const;
+  Frame(WidthT width, HeightT height);
+
+  int Width() const;
+  int Height() const;
+  void ResetTo(WidthT width, HeightT height);
+  void SetColor(WidthT x, HeightT y, QRgb color);
+  void BlendColor(WidthT x, HeightT y, QRgb color);
+  QRgb GetColor(WidthT x, HeightT y) const;
 
  private:
-  bool CheckBounds(Width width, Height height) const;
+  bool IsBounded(WidthT width, HeightT height) const;
+  bool NeedResize(WidthT width, HeightT height) const;
 
-  Width width_;
-  Height height_;
-  std::vector<std::vector<Color>> frame_data_;
+  int width_;
+  std::vector<QRgb> data_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

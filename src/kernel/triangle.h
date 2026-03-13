@@ -1,40 +1,51 @@
 #pragma once
 
+#include <QColor>
+#include <array>
 #include <optional>
 
-#include "color.h"
+#include "util/alias.h"
+
+#include "directional_light.h"
 #include "linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
+
+using XCoordinate = util::Alias<Scalar, struct x_tag>;
+using YCoordinate = util::Alias<Scalar, struct y_tag>;
 
 class Triangle {
  public:
-  Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-           const Vector3& normal);
-  Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-           const Vector3& normal, const Color& color);
-  const std::array<Point3, 3>& GetPoints() const;
-  Point3 GetPoint(size_t index) const;
-  Vector3 GetNormal() const;
+  struct Vertex {
+    Point3 point;
+    Vector3 normal;
+    Scalar inv_w = 1.0f;
+  };
+
+  Triangle(const std::array<Vertex, 3>& vertices);
+
+  const std::array<Vertex, 3> Vertices() const;
+  Point3& GetPoint(int index);
+  const Point3& GetPoint(int index) const;
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
-  std::optional<Scalar> GetZ(const Point3& point) const;
-  const Color& GetColor() const;
-  void SetColor(const Color& color);
-  void Print() const;
+  std::optional<std::array<Scalar, 3>> PerspectiveCorrectBarycentric(
+      XCoordinate x, YCoordinate y) const;
+  std::optional<Scalar> InterpolateZ(XCoordinate x, YCoordinate y) const;
+  QRgb InterpolateColor(XCoordinate x, YCoordinate y,
+                        const std::vector<DirectionalLight>& lights) const;
   Scalar GetMinX() const;
   Scalar GetMaxX() const;
   Scalar GetMinY() const;
   Scalar GetMaxY() const;
 
  private:
+  std::optional<std::array<Scalar, 3>> Barycentric(XCoordinate x,
+                                                   YCoordinate y) const;
   Point3 FromHomogeneous(const Point4& point) const;
   Point4 ToHomogeneous(const Point3& point) const;
 
-  std::array<Point3, 3> points_;
-  Vector3 normal_;
-
-  Color triangle_color_ = Color::GetRandomColor();
+  std::array<Vertex, 3> vertices_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

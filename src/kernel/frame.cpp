@@ -1,43 +1,56 @@
 #include "frame.h"
 
+#include <algorithm>
 #include <cassert>
 
-namespace renderer {
+#include "color.h"
 
-Frame::Frame(Width width, Height height)
-    : width_(width),
-      height_(height),
-      frame_data_(static_cast<int>(height_),
-                  std::vector<Color>(static_cast<int>(width_))) {
-  assert(width_ > Width{0});
-  assert(height_ > Height{0});
+namespace renderer::kernel {
+
+Frame::Frame(WidthT width, HeightT height)
+    : width_(width()), data_(width_ * height()) {
+  assert(width() >= 0);
+  assert(height() >= 0);
 }
 
-Width Frame::GetWidth() const {
+int Frame::Width() const {
   return width_;
 }
 
-Height Frame::GetHeight() const {
-  return height_;
+int Frame::Height() const {
+  return std::ssize(data_) / width_;
 }
 
-void Frame::SetColor(Width x, Height y, Color color) {
-  assert(CheckBounds(x, y));
-  frame_data_[static_cast<int>(y)][static_cast<int>(x)] = color;
+void Frame::ResetTo(WidthT width, HeightT height) {
+  if (NeedResize(width, height)) {
+    width_ = width();
+    data_.resize(width_ * height());
+  }
+  std::ranges::fill(data_, qRgb(0, 0, 0));
 }
 
-void Frame::BlendColor(Width x, Height y, Color color) {
-  assert(CheckBounds(x, y));
-  frame_data_[static_cast<int>(y)][static_cast<int>(x)].Blend(color);
+void Frame::SetColor(WidthT x, HeightT y, QRgb color) {
+  assert(IsBounded(x, y));
+  data_[x() + y() * width_] = color;
 }
 
-const Color& Frame::GetColor(Width x, Height y) const {
-  assert(CheckBounds(x, y));
-  return frame_data_[static_cast<int>(y)][static_cast<int>(x)];
+void Frame::BlendColor(WidthT x, HeightT y, QRgb color) {
+  assert(IsBounded(x, y));
+  QRgb* base = &data_[x() + y() * width_];
+  Color::Blend(base, color, kBlendFactor);
 }
 
-bool Frame::CheckBounds(Width x, Height y) const {
-  return Width{0} <= x && x < width_ && Height{0} <= y && y < height_;
+QRgb Frame::GetColor(WidthT x, HeightT y) const {
+  assert(IsBounded(x, y));
+  return data_[x() + y() * width_];
 }
 
-}  // namespace renderer
+bool Frame::IsBounded(WidthT x, HeightT y) const {
+  return 0 <= x() && x() < Width() && 0 <= y() && y() < Height();
+}
+
+bool Frame::NeedResize(WidthT width, HeightT height) const {
+  return width() != Width() || height() != Height();
+}
+
+}  // namespace renderer::kernel

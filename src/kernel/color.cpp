@@ -2,61 +2,47 @@
 
 #include <algorithm>
 
-namespace renderer {
+namespace renderer::kernel {
 
-Color::Color() : r_(0), g_(0), b_(0) {}
-
-Color::Color(int red, int green, int blue)
-    : r_(Clamp(red)), g_(Clamp(green)), b_(Clamp(blue)) {}
-
-uint8_t Color::GetRed() const {
-  return r_;
+QRgb Color::Get(kernel::Red r, kernel::Green g, kernel::Blue b) {
+  return qRgb(r(), g(), b());
 }
 
-uint8_t Color::GetGreen() const {
-  return g_;
+QRgb Color::ScaleColor(QRgb color, Scalar intensity) {
+  int r = ClampComponent(Red(color) * intensity);
+  int g = ClampComponent(Green(color) * intensity);
+  int b = ClampComponent(Blue(color) * intensity);
+  return qRgb(r, g, b);
 }
 
-uint8_t Color::GetBlue() const {
-  return b_;
+void Color::Blend(QRgb* base, QRgb new_color, Scalar blend_factor) {
+  int r = ClampComponent(Red(*base) * (1 - blend_factor) +
+                         Red(new_color) * blend_factor);
+  int g = ClampComponent(Green(*base) * (1 - blend_factor) +
+                         Green(new_color) * blend_factor);
+  int b = ClampComponent(Blue(*base) * (1 - blend_factor) +
+                         Blue(new_color) * blend_factor);
+  *base = qRgb(r, g, b);
 }
 
-void Color::SetRed(int red) {
-  r_ = Clamp(red);
+int Color::ClampComponent(int value) {
+  return std::clamp(value, kMinComponent, kMaxComponent);
 }
 
-void Color::SetGreen(int green) {
-  g_ = Clamp(green);
+Scalar Color::ClampComponentScalar(Scalar value) {
+  return std::clamp(value, kMinComponentScalar, kMaxComponentScalar);
 }
 
-void Color::SetBlue(int blue) {
-  b_ = Clamp(blue);
+int Color::Red(QRgb color) {
+  return qRed(color);
 }
 
-Color Color::Invert() const {
-  return Color(255 - r_, 255 - g_, 255 - b_);
+int Color::Green(QRgb color) {
+  return qGreen(color);
 }
 
-void Color::Blend(const Color& other, Scalar factor) {
-  r_ += other.GetRed() * factor;
-  g_ += other.GetGreen() * factor;
-  b_ += other.GetBlue() * factor;
+int Color::Blue(QRgb color) {
+  return qBlue(color);
 }
 
-bool Color::operator==(const Color& other) const {
-  return r_ == other.r_ && g_ == other.g_ && b_ == other.b_;
-}
-
-bool Color::operator!=(const Color& other) const {
-  return !(*this == other);
-}
-
-Color Color::GetRandomColor() {
-  return {rand() % 256, rand() % 256, rand() % 256};
-}
-
-uint8_t Color::Clamp(int value) {
-  return static_cast<uint8_t>(std::max(0, std::min(255, value)));
-}
-
-}  // namespace renderer
+}  // namespace renderer::kernel

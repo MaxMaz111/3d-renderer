@@ -1,171 +1,149 @@
 #include "renderer.h"
 
-#include <optional>
 #include <vector>
 
-#include "../timer.h"
+#include "directional_light.h"
 #include "linalg.h"
+#include "mesh.h"
 #include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
-Frame Renderer::Render(const Scene& scene) {
-  Timer render_timer("Render timer");
-  std::vector<Triangle> triangles = scene.GetTriangles();
-  const Camera& camera = scene.GetCamera();
-  RotateTriangles(triangles, camera);
-  triangles = GetClippedTriangles(triangles, camera);
-  ProjectTriangles(triangles, camera);
-  int width = static_cast<int>(camera.GetWidth());
-  int height = static_cast<int>(camera.GetHeight());
-  z_buffer_.assign(height, std::vector<Scalar>(width, 1));
-  Frame frame(camera.GetWidth(), camera.GetHeight());
-  for (const Triangle& triangle : triangles) {
-    int min_x = std::floor(triangle.GetMinX());
-    int max_x = std::ceil(triangle.GetMaxX());
-    int min_y = std::floor(triangle.GetMinY());
-    int max_y = std::ceil(triangle.GetMaxY());
-    for (int j = std::max(0, min_y); j <= std::min(max_y, height - 1); ++j) {
-      for (int i = std::max(0, min_x); i <= std::min(max_x, width - 1); ++i) {
-        auto z = triangle.GetZ({i, j, 0});
-        if (z == std::nullopt) {
-          continue;
-        }
-        if (scene.Transapent()) {
-          frame.BlendColor(Width{i}, Height{j}, triangle.GetColor());
-        } else if (z_buffer_[j][i] > z.value()) {
-          z_buffer_[j][i] = z.value();
-          frame.SetColor(Width{i}, Height{j}, triangle.GetColor());
-        }
-      }
-    }
-  }
+Renderer::Renderer(Width width, Height height) : rasterizer_(width, height) {}
 
-  return frame;
+void Renderer::ResetTo(Width width, Height height) {
+  rasterizer_.ResetTo(width, height);
 }
 
-std::vector<Triangle> Renderer::GetClippedTriangles(
-    const std::vector<Triangle>& triangles, const Camera& camera) const {
-  const auto& planes = camera.GetPlanesForClipping();
+Frame Renderer::Render(const Scene& scene) {
+  std::vector<Mesh> meshes = scene.Meshes();
+  const Camera& camera = scene.Camera();
+  std::vector<DirectionalLight> lights = scene.DirectionalLights();
+  lights = RotateAndMove(std::move(lights), camera);
+  meshes = RotateAndMove(std::move(meshes), camera);
+  meshes = Clip(std::move(meshes), camera);
+  meshes = Project(std::move(meshes), camera);
+  return Rasterize(std::move(meshes), camera, lights);
+}
+
+std::vector<DirectionalLight> Renderer::RotateAndMove(
+    std::vector<DirectionalLight>&& lights, const Camera& camera) const {
+  Matrix3 mat = camera.RotationMatrix().transpose();
+  Point3 translation = -camera.Position();
+  for (auto& light : lights) {
+    light.RotateAndMove(mat, translation);
+  }
+  return lights;
+}
+
+std::vector<Mesh> Renderer::RotateAndMove(std::vector<Mesh>&& meshes,
+                                          const Camera& camera) const {
+  Matrix3 mat = camera.RotationMatrix().transpose();
+  Point3 translation = -camera.Position();
+  for (auto& mesh : meshes) {
+    for (auto& triangle : mesh.triangles) {
+      triangle.RotateAndMove(mat, translation);
+    }
+  }
+  return meshes;
+}
+
+std::vector<Mesh> Renderer::Clip(std::vector<Mesh>&& meshes,
+                                 const Camera& camera) const {
+  for (auto& mesh : meshes) {
+    mesh.triangles = ClipTriangles(std::move(mesh.triangles), camera);
+  }
+  return meshes;
+}
+
+std::vector<Mesh> Renderer::Project(std::vector<Mesh>&& meshes,
+                                    const Camera& camera) const {
+  Matrix4 mat = camera.ProjectionMatrix();
+  for (auto& mesh : meshes) {
+    for (auto& triangle : mesh.triangles) {
+      triangle.Project(mat);
+    }
+  }
+  return meshes;
+}
+
+Frame Renderer::Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
+                          const std::vector<DirectionalLight>& lights) {
+  return rasterizer_.Rasterize(std::move(meshes), camera, lights);
+}
+
+std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,
+                                              const Camera& camera) const {
+  const auto& planes = camera.PlanesForClipping();
 
   std::vector<Triangle> result;
-  result.reserve(triangles.size() * 2);
+  result.reserve(triangles.size() * 3);
 
   std::vector<Triangle> current_buffer;
   std::vector<Triangle> next_buffer;
-  current_buffer.reserve(8);
-  next_buffer.reserve(16);
 
   for (const Triangle& triangle : triangles) {
     current_buffer.clear();
     current_buffer.push_back(triangle);
-    bool visible = true;
     for (const Plane& plane : planes) {
       if (current_buffer.empty()) {
-        visible = false;
         break;
       }
       next_buffer.clear();
       for (const Triangle& current_triangle : current_buffer) {
-        auto clipped_triangles = ClipTriangleByPlane(current_triangle, plane);
-        if (!clipped_triangles.empty()) {
-          if (next_buffer.size() + clipped_triangles.size() >
-              next_buffer.capacity()) {
-            next_buffer.reserve(next_buffer.size() + clipped_triangles.size());
-          }
-          next_buffer.insert(next_buffer.end(),
-                             std::make_move_iterator(clipped_triangles.begin()),
-                             std::make_move_iterator(clipped_triangles.end()));
-        }
+        std::ranges::move(ClipTriangleByPlane(current_triangle, plane),
+                          std::back_inserter(next_buffer));
       }
       current_buffer.swap(next_buffer);
     }
-
-    if (visible && !current_buffer.empty()) {
-      if (result.size() + current_buffer.size() > result.capacity()) {
-        result.reserve(result.size() + current_buffer.size());
-      }
-      result.insert(result.end(),
-                    std::make_move_iterator(current_buffer.begin()),
-                    std::make_move_iterator(current_buffer.end()));
-    }
+    std::ranges::move(current_buffer, std::back_inserter(result));
   }
   return result;
 }
 
 std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
                                                     const Plane& plane) const {
-  std::array<bool, 3> is_inside;
-  int is_inside_cnt = 0;
-  for (int i = 0; i < 3; ++i) {
-    is_inside[i] = plane.IsOnTheSameSideAsNormal(triangle.GetPoints()[i]);
-    is_inside_cnt += is_inside[i];
-  }
-  if (is_inside_cnt == 0) {
-    return {};
-  } else if (is_inside_cnt == 3) {
+  auto [inside, outside] = SplitVertices(triangle, plane);
+  if (inside.size() == 3) {
     return {triangle};
   }
-  std::vector<Point3> inside, outside;
+  if (inside.size() == 0) {
+    return {};
+  }
+  std::vector<Triangle::Vertex> intersections;
+  for (const auto& inside_vertex : inside) {
+    for (const auto& outside_vertex : outside) {
+      auto intersection = plane.LineIntersection(inside_vertex, outside_vertex);
+      if (intersection.has_value()) {
+        intersections.push_back(*intersection);
+      }
+    }
+  }
+  if (intersections.size() < 2) {
+    return {};
+  }
+  if (inside.size() == 1) {
+    return {Triangle({inside[0], intersections[0], intersections[1]})};
+  }
+  return {Triangle({inside[0], inside[1], intersections[0]}),
+          Triangle({inside[1], intersections[0], intersections[1]})};
+}
+
+std::pair<std::vector<Triangle::Vertex>, std::vector<Triangle::Vertex>>
+Renderer::SplitVertices(const Triangle& triangle, const Plane& plane) const {
+  std::vector<Triangle::Vertex> inside;
+  std::vector<Triangle::Vertex> outside;
+
+  const auto& vertices = triangle.Vertices();
+
   for (int i = 0; i < 3; ++i) {
-    if (is_inside[i]) {
-      inside.push_back(triangle.GetPoints()[i]);
+    if (plane.IsOnTheSameSideAsNormal(vertices[i].point)) {
+      inside.push_back(vertices[i]);
     } else {
-      outside.push_back(triangle.GetPoints()[i]);
+      outside.push_back(vertices[i]);
     }
   }
-  if (is_inside_cnt == 1) {
-    auto intersect1 = plane.LineIntersection(inside[0], outside[0] - inside[0]);
-    auto intersect2 = plane.LineIntersection(inside[0], outside[1] - inside[0]);
-    assert(intersect1.has_value() && intersect2.has_value());
-    if (intersect1 == std::nullopt) {
-      intersect1 = outside[0];
-    }
-    if (intersect2 == std::nullopt) {
-      intersect2 = outside[1];
-    }
-    return {{intersect1.value(), intersect2.value(), inside[0],
-             triangle.GetNormal(), triangle.GetColor()}};
-  } else if (is_inside_cnt == 2) {
-    auto intersect1 =
-        plane.LineIntersection(outside[0], inside[0] - outside[0]);
-    auto intersect2 =
-        plane.LineIntersection(outside[0], inside[1] - outside[0]);
-    assert(intersect1.has_value() && intersect2.has_value());
-    if (intersect1 == std::nullopt) {
-      intersect1 = inside[0];
-    }
-    if (intersect2 == std::nullopt) {
-      intersect2 = inside[1];
-    }
-    return {{intersect1.value(), intersect2.value(), inside[0],
-             triangle.GetNormal(), triangle.GetColor()},
-            {inside[0], inside[1], intersect2.value(), triangle.GetNormal(),
-             triangle.GetColor()}};
-  }
-
-  return {triangle};
+  return {inside, outside};
 }
 
-void Renderer::RotateTriangles(std::vector<Triangle>& triangles,
-                               const Camera& camera) {
-  Matrix3 mat = camera.GetRotationMatrix().inverse();
-  Point3 translation = -camera.GetPosition();
-  for (auto& triangle : triangles) {
-    triangle.RotateAndMove(mat, translation);
-  }
-}
-
-void Renderer::ProjectTriangles(std::vector<Triangle>& triangles,
-                                const Camera& camera) {
-  Matrix4 mat = camera.GetProjectionMatrix();
-  for (auto& triangle : triangles) {
-    triangle.Project(mat);
-  }
-}
-
-QColor Renderer::ConvertColor(const Color& color) {
-  return {color.GetRed(), color.GetGreen(), color.GetBlue()};
-}
-
-}  // namespace renderer
+}  // namespace renderer::kernel

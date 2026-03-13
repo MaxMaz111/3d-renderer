@@ -34,9 +34,14 @@
 # Build folders
 build
 asan_build
-build_debug
-build_release
+build-debug
+build-release
+models
 .cache
+.idea/
 
 # MacOS cache
 .DS_Store
+
+# Visual Studio Code settings
+.vscode/

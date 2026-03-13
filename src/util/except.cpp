@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <exception>
 
-namespace except {
+namespace renderer::util {
 
 void React() noexcept {
   try {
@@ -15,4 +15,4 @@ void React() noexcept {
   }
 }
 
-}  // namespace except
+}  // namespace renderer::util

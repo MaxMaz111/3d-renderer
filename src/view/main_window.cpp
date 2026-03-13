@@ -1,19 +1,21 @@
 #include "main_window.h"
 
-namespace renderer {
+#include "util/constants.h"
 
-MainWindow::MainWindow(Width width, Height height) : view_(&window_) {
-  window_.setGeometry(0, 0, static_cast<int>(width), static_cast<int>(height));
+namespace renderer::view {
+
+MainWindow::MainWindow() {
+  window_.setGeometry(0, 0, kernel::kDefaultWidth, kernel::kDefaultHeight);
   window_.setWindowTitle("renderer");
-  window_.setCentralWidget(GetView());
+  window_.setCentralWidget(View()->Label());
 }
 
 void MainWindow::Show() {
   window_.show();
 }
 
-View* MainWindow::GetView() {
+View* MainWindow::View() {
   return &view_;
 }
 
-}  // namespace renderer
+}  // namespace renderer::view

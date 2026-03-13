@@ -1,22 +1,21 @@
 #pragma once
 
-#include <QLabel>
 #include <QMainWindow>
 
-#include "../size.h"
 #include "view.h"
 
-namespace renderer {
+namespace renderer::view {
 
 class MainWindow {
  public:
-  MainWindow(Width width, Height height);
+  MainWindow();
+
   void Show();
-  View* GetView();
+  View* View();
 
  private:
   QMainWindow window_;
-  View view_;
+  view::View view_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::view

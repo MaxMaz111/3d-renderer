@@ -1,29 +1,34 @@
 #pragma once
 
-#include "../size.h"
+#include "util/size.h"
+
 #include "linalg.h"
 #include "plane.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Camera {
+  using WidthT = Width;
+  using HeightT = Height;
+
+  static const Vector3 kDefaultPosition;
+  static const Matrix3 kDefaultRotation;
+
+  static constexpr Scalar kDefaultNear = 0.1;
+  static constexpr Scalar kDefaultFar = 1000;
   static constexpr int kNumberOfPlanes = 6;
-  static constexpr Scalar kMoveSpeed = 0.1;
-  static constexpr Scalar kRotationSpeed = M_PI / 180;
+  static constexpr Scalar kMoveSpeed = 0.2;
+  static constexpr Scalar kRotationSpeed = M_PI / 120;
+  static constexpr Scalar kDefaultFovY = DegToRad(60);
 
  public:
+  enum class RenderingMode { AllSolid, AllTransparent };
+
   Camera();
-  Camera(Scalar near, Scalar far, Width screen_width, Height screen_height);
-  void SetScreenDimensions(Width width, Height height);
+
+  void SetAspectRatio(Scalar aspect_ratio);
   void SetNear(Scalar near);
   void SetFar(Scalar far);
-  const std::array<Plane, kNumberOfPlanes>& GetPlanesForClipping() const;
-  void BuildProjectionMatrix();
-  const Matrix4& GetProjectionMatrix() const;
-  Matrix3 GetRotationMatrix() const;
-  Point3 GetPosition() const;
-  Width GetWidth() const;
-  Height GetHeight() const;
   void RotateLeft();
   void RotateRight();
   void RotateUp();
@@ -34,22 +39,27 @@ class Camera {
   void MoveBackward();
   void SwivelLeft();
   void SwivelRight();
+  void SwapRenderingMode();
+  const std::array<Plane, kNumberOfPlanes>& PlanesForClipping() const;
+  const Matrix4& ProjectionMatrix() const;
+  const Matrix3& RotationMatrix() const;
+  const Point3& Position() const;
+  RenderingMode CurrentRenderingMode() const;
 
  private:
-  std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping();
+  Matrix4 BuildProjectionMatrix() const;
+  std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping() const;
 
-  Width screen_width_;
-  Height screen_height_;
+  RenderingMode mode_ = RenderingMode::AllSolid;
+  Point3 position_;
+  Matrix3 rotation_matrix_;
   Scalar near_;
   Scalar far_;
+  Scalar fov_y_;
+  Scalar aspect_ratio_;
 
-  Matrix3 rotation_matrix_;
   Matrix4 projection_matrix_;
-  Point3 position_;
-
   std::array<Plane, kNumberOfPlanes> planes_;
 };
 
-;
-
-}  // namespace renderer
+}  // namespace renderer::kernel

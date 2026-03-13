@@ -1,40 +1,40 @@
 #pragma once
 
-#include "../observer.hpp"
-#include "../size.h"
-#include "kernel/frame.h"
+#include <filesystem>
+
+#include "util/observer.hpp"
+#include "util/size.h"
+
+#include "frame.h"
 #include "renderer.h"
 #include "scene.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Kernel {
  public:
-  Kernel() = delete;
-  Kernel(const std::string& filename);
-  void Subscribe(Observer<Frame>* observer);
+  Kernel(const std::filesystem::path& filename);
+
+  void Subscribe(util::Observer<Frame>* observer);
   void SetScreenDimensions(Width width, Height height);
   void RotateLeft();
   void RotateRight();
   void RotateUp();
   void RotateDown();
-
   void MoveLeft();
   void MoveRight();
   void MoveForward();
   void MoveBackward();
   void SwivelLeft();
   void SwivelRight();
-
-  void SetCurrentCamera(int camera_index);
-
-  void SwapTransparency();
+  void SwapRenderingMode();
+  void NotifyView();
 
  private:
   Renderer renderer_;
   Scene scene_;
 
-  ObservableData<Frame> observable_;
+  util::ObservableData<Frame> observable_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel
