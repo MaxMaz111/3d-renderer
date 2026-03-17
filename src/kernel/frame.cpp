@@ -1,48 +1,54 @@
 #include "frame.h"
 
-#include <algorithm>
 #include <cassert>
+
+#include "util/constants.h"
 
 #include "color.h"
 
 namespace renderer::kernel {
 
 Frame::Frame(WidthT width, HeightT height)
-    : width_(width()), data_(width_ * height()) {
+    : image_(width(), height(), QImage::Format_RGB32) {
   assert(width() >= 0);
   assert(height() >= 0);
+  image_.fill(kBlackColor);
 }
 
 int Frame::Width() const {
-  return width_;
+  return image_.width();
 }
 
 int Frame::Height() const {
-  return std::ssize(data_) / width_;
+  return image_.height();
 }
 
 void Frame::ResetTo(WidthT width, HeightT height) {
   if (NeedResize(width, height)) {
-    width_ = width();
-    data_.resize(width_ * height());
+    image_ = QImage(width(), height(), QImage::Format_RGB32);
   }
-  std::ranges::fill(data_, qRgb(0, 0, 0));
+  image_.fill(kBlackColor);
 }
 
 void Frame::SetColor(WidthT x, HeightT y, QRgb color) {
   assert(IsBounded(x, y));
-  data_[x() + y() * width_] = color;
+  image_.setPixel(x(), y(), color);
 }
 
 void Frame::BlendColor(WidthT x, HeightT y, QRgb color) {
   assert(IsBounded(x, y));
-  QRgb* base = &data_[x() + y() * width_];
-  Color::Blend(base, color, kBlendFactor);
+  QRgb base = image_.pixel(x(), y());
+  Color::Blend(&base, color, kBlendFactor);
+  image_.setPixel(x(), y(), base);
 }
 
-QRgb Frame::GetColor(WidthT x, HeightT y) const {
+QRgb Frame::Color(WidthT x, HeightT y) const {
   assert(IsBounded(x, y));
-  return data_[x() + y() * width_];
+  return image_.pixel(x(), y());
+}
+
+const QImage& Frame::Image() const {
+  return image_;
 }
 
 bool Frame::IsBounded(WidthT x, HeightT y) const {

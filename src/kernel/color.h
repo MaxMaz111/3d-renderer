@@ -21,8 +21,8 @@ class Color {
  private:
   static constexpr int kMinComponent = 0;
   static constexpr int kMaxComponent = 255;
-  static constexpr Scalar kMinComponentScalar = 0.0f;
-  static constexpr Scalar kMaxComponentScalar = 1.0f;
+  static constexpr Scalar kMinComponentScalar = 0;
+  static constexpr Scalar kMaxComponentScalar = 1;
 
   static int ClampComponent(int value);
   static Scalar ClampComponentScalar(Scalar value);

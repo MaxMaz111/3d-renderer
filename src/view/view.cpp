@@ -8,15 +8,8 @@ View::View()
   label_.setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 }
 
-// TODO: make this function more efficiently fill out QImage
 void View::SetFrame(const kernel::Frame& frame) {
-  QImage image(frame.Width(), frame.Height(), QImage::Format_RGB32);
-  for (int x = 0; x < frame.Width(); ++x) {
-    for (int y = 0; y < frame.Height(); ++y) {
-      image.setPixel(x, y, frame.GetColor(Width{x}, Height{y}));
-    }
-  }
-  label_.setPixmap(QPixmap::fromImage(image));
+  label_.setPixmap(QPixmap::fromImage(frame.Image()));
 }
 
 QLabel* View::Label() {

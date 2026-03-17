@@ -11,7 +11,7 @@ Scene::Scene(std::vector<Mesh>&& meshes)
 Scene::Scene(CameraT&& camera, std::vector<Mesh>&& meshes)
     : camera_(std::move(camera)),
       meshes_(std::move(meshes)),
-      directional_lights_{{{0, 1, 1}}} {}
+      directional_lights_{{{}}} {}
 
 const std::vector<Mesh>& Scene::Meshes() const {
   return meshes_;

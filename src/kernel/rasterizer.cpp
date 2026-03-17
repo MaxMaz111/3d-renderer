@@ -48,26 +48,24 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
 void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                                const Camera& camera,
                                const std::vector<DirectionalLight>& lights) {
-  Scalar x = i() + 0.5f, y = j() + 0.5f;
+  Scalar x = i() + 0.5, y = j() + 0.5;
   auto z = triangle.InterpolateZ(XCoordinate{x}, YCoordinate{y});
   if (!z.has_value()) {
     return;
   }
+  auto color =
+      triangle.InterpolateColor(XCoordinate{x}, YCoordinate{y}, lights);
   switch (camera.CurrentRenderingMode()) {
     case Camera::RenderingMode::AllSolid: {
       Scalar& val = z_buffer_.Get(Width{i}, Height{j});
       if (val > *z) {
         val = *z;
-        frame_.SetColor(
-            Width{i}, Height{j},
-            triangle.InterpolateColor(XCoordinate{x}, YCoordinate{y}, lights));
+        frame_.SetColor(Width{i}, Height{j}, color);
       }
       break;
     }
     case Camera::RenderingMode::AllTransparent: {
-      frame_.BlendColor(
-          Width{i}, Height{j},
-          triangle.InterpolateColor(XCoordinate{x}, YCoordinate{y}, lights));
+      frame_.BlendColor(Width{i}, Height{j}, color);
       break;
     }
     default:

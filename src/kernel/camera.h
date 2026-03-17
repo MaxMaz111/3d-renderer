@@ -1,5 +1,7 @@
 #pragma once
 
+#include <numbers>
+
 #include "util/size.h"
 
 #include "linalg.h"
@@ -17,8 +19,8 @@ class Camera {
   static constexpr Scalar kDefaultNear = 0.1;
   static constexpr Scalar kDefaultFar = 1000;
   static constexpr int kNumberOfPlanes = 6;
-  static constexpr Scalar kMoveSpeed = 0.2;
-  static constexpr Scalar kRotationSpeed = M_PI / 120;
+  static constexpr Scalar kMoveSpeed = 1;
+  static constexpr Scalar kRotationSpeed = std::numbers::pi_v<Scalar> / 80;
   static constexpr Scalar kDefaultFovY = DegToRad(60);
 
  public:
