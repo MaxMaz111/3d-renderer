@@ -73,7 +73,7 @@ class Observable;
 
 template <class Data, class SendBy = observer::AutoSendBy<Data>>
 class Observer {
-  using Observable = Observable<Data, SendBy>;
+  using Observable = ::renderer::util::Observable<Data, SendBy>;
 
   using DataSentBy = observer::DataSentBy<Data, SendBy>;
   using Signature = void(DataSentBy);
@@ -125,7 +125,7 @@ class Observer {
 
 template <class Data, class SendBy = observer::AutoSendBy<Data>>
 class Observable {
-  using Observer = Observer<Data, SendBy>;
+  using Observer = ::renderer::util::Observer<Data, SendBy>;
   using ObserversContainer = std::list<Observer*>;
 
   using DataSentBy = observer::DataSentBy<Data, SendBy>;
@@ -224,7 +224,7 @@ template <class Data, class SendBy = observer::AutoSendBy<Data>>
 class ObservableMono : protected Observable<Data, SendBy> {
   using Base = Observable<Data, SendBy>;
 
-  using Observer = Observer<Data, SendBy>;
+  using Observer = ::renderer::util::Observer<Data, SendBy>;
 
  public:
   using Base::Base;

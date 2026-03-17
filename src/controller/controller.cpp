@@ -100,6 +100,7 @@ bool Controller::eventFilter(QObject* obj, QEvent* event) {
       ResizeEventHandler(static_cast<QResizeEvent*>(event));
       break;
     default:
+      break;
   }
   return QObject::eventFilter(obj, event);
 }

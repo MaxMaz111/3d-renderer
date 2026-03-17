@@ -7,6 +7,8 @@
 
 #include "util/constants.h"
 
+namespace {
+
 using renderer::Height;
 using renderer::Width;
 using renderer::kernel::Frame;
@@ -54,5 +56,7 @@ BENCHMARK_REGISTER_F(RenderFixture, Render)
     ->Arg(2)
     ->Arg(3)
     ->Unit(benchmark::kMillisecond);
+
+} // namespace
 
 BENCHMARK_MAIN();

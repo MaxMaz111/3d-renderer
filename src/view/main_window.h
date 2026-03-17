@@ -11,7 +11,7 @@ class MainWindow {
   MainWindow();
 
   void Show();
-  View* View();
+  ::renderer::view::View* View();
 
  private:
   QMainWindow window_;

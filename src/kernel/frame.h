@@ -12,8 +12,8 @@ namespace renderer::kernel {
 class Frame {
   static constexpr Scalar kBlendFactor = 0.2f;
 
-  using WidthT = Width;
-  using HeightT = Height;
+  using WidthT = ::renderer::Width;
+  using HeightT = ::renderer::Height;
 
  public:
   Frame(WidthT width, HeightT height);

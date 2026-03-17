@@ -9,7 +9,7 @@
 namespace renderer::kernel {
 
 class Scene {
-  using CameraT = Camera;
+  using CameraT = ::renderer::kernel::Camera;
 
  public:
   Scene(std::vector<Mesh>&& meshes);
