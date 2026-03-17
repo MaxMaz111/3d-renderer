@@ -73,7 +73,7 @@ NamespaceIndentation: None
 ObjCSpaceAfterProperty: false
 ObjCSpaceBeforeProtocolList: true
 PointerAlignment: Left
-ReflowComments: IndentOnly
+ReflowComments: true
 SeparateDefinitionBlocks: Always
 SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
