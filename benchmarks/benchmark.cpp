@@ -45,8 +45,8 @@ class RenderFixture : public benchmark::Fixture {
 BENCHMARK_DEFINE_F(RenderFixture, Render)(benchmark::State& state) {
   state.SetLabel(paths_.at(state.range(0)));
   for (auto _ : state) {
-    Frame frame = renderer->Render(*scene);
-    benchmark::DoNotOptimize(frame);
+    const Frame& frame = renderer->Render(*scene);
+    benchmark::DoNotOptimize(&frame);
   }
 }
 

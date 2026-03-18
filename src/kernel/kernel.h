@@ -12,7 +12,7 @@
 namespace renderer::kernel {
 
 class Kernel {
-  using Observable = util::ObservableData<Frame>;
+  using Observable = util::Observable<Frame>;
   using Observer = util::Observer<Frame>;
 
  public:

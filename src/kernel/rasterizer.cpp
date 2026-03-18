@@ -14,8 +14,9 @@ void Rasterizer::ResetTo(Width width, Height height) {
   z_buffer_.ResetTo(width, height);
 }
 
-Frame Rasterizer::Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
-                            const std::vector<DirectionalLight>& lights) {
+const Frame& Rasterizer::Rasterize(
+    std::vector<Mesh>&& meshes, const Camera& camera,
+    const std::vector<DirectionalLight>& lights) {
   frame_.ResetTo(Width{width_}, Height{height_});
   z_buffer_.ResetTo(Width{width_}, Height{height_});
   for (auto& mesh : meshes) {

@@ -9,7 +9,8 @@ namespace renderer::kernel {
 Kernel::Kernel(const std::filesystem::path& filename)
     : renderer_(Width{kDefaultWidth}, Height{kDefaultHeight}),
       scene_(ObjReader::ReadFromFile(filename)),
-      observable_(renderer_.Render(scene_)) {}
+      observable_(
+          [this]() -> const Frame& { return renderer_.Render(scene_); }) {}
 
 void Kernel::Subscribe(Observer* observer) {
   assert(observer);
@@ -23,7 +24,7 @@ void Kernel::SetScreenDimensions(Width width, Height height) {
 
 void Kernel::RotateLeft() {
   scene_.Camera().RotateLeft();
-  observable_.Set(renderer_.Render(scene_));
+  observable_.Notify();
 }
 
 void Kernel::RotateRight() {
@@ -67,7 +68,7 @@ void Kernel::SwapRenderingMode() {
 }
 
 void Kernel::NotifyView() {
-  observable_.Set(renderer_.Render(scene_));
+  observable_.Notify();
 }
 
 }  // namespace renderer::kernel

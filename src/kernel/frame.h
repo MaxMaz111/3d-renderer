@@ -18,6 +18,11 @@ class Frame {
  public:
   Frame(WidthT width, HeightT height);
 
+  Frame(const Frame&) = delete;
+  Frame(Frame&&) noexcept = delete;
+  Frame& operator=(const Frame&) = delete;
+  Frame& operator=(Frame&&) noexcept = delete;
+
   int Width() const;
   int Height() const;
   void ResetTo(WidthT width, HeightT height);

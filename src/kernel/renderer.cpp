@@ -15,7 +15,7 @@ void Renderer::ResetTo(Width width, Height height) {
   rasterizer_.ResetTo(width, height);
 }
 
-Frame Renderer::Render(const Scene& scene) {
+const Frame& Renderer::Render(const Scene& scene) {
   std::vector<Mesh> meshes = scene.Meshes();
   const Camera& camera = scene.Camera();
   std::vector<DirectionalLight> lights = scene.DirectionalLights();
@@ -67,8 +67,9 @@ std::vector<Mesh> Renderer::Project(std::vector<Mesh>&& meshes,
   return meshes;
 }
 
-Frame Renderer::Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
-                          const std::vector<DirectionalLight>& lights) {
+const Frame& Renderer::Rasterize(std::vector<Mesh>&& meshes,
+                                 const Camera& camera,
+                                 const std::vector<DirectionalLight>& lights) {
   return rasterizer_.Rasterize(std::move(meshes), camera, lights);
 }
 
@@ -129,20 +130,18 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
           Triangle({inside[1], intersections[0], intersections[1]})};
 }
 
-std::pair<std::vector<Triangle::Vertex>, std::vector<Triangle::Vertex>>
-Renderer::SplitVertices(const Triangle& triangle, const Plane& plane) const {
-  std::pair<std::vector<Triangle::Vertex>, std::vector<Triangle::Vertex>>
-      result;
-  result.first.reserve(3);
-  result.second.reserve(3);
+Renderer::Split Renderer::SplitVertices(const Triangle& triangle,
+                                        const Plane& plane) const {
+  Split result;
+  result.inside.reserve(3);
 
   const auto& vertices = triangle.Vertices();
 
   for (int i = 0; i < 3; ++i) {
     if (plane.IsOnTheSameSideAsNormal(vertices[i].point)) {
-      result.first.push_back(vertices[i]);
+      result.inside.push_back(vertices[i]);
     } else {
-      result.second.push_back(vertices[i]);
+      result.outside.push_back(vertices[i]);
     }
   }
   return result;
