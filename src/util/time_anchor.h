@@ -9,6 +9,8 @@ namespace renderer::util {
 class TimeAnchor {
  public:
   using Clock = std::chrono::high_resolution_clock;
+  using TimePoint = Clock::time_point;
+  using Callback = std::function<void(const std::string&, double)>;
 
   explicit TimeAnchor(
       std::string name = "Timer",
@@ -24,9 +26,9 @@ class TimeAnchor {
   void Reset();
 
  private:
-  Clock::time_point start_time_;
+  TimePoint start_time_;
   std::string name_;
-  std::function<void(const std::string&, double)> on_destroy_;
+  Callback on_destroy_;
 };
 
 }  // namespace renderer::util

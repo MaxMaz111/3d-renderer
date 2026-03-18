@@ -12,6 +12,9 @@
 namespace renderer::kernel {
 
 class Kernel {
+  using Observable = util::ObservableData<Frame>;
+  using Observer = util::Observer<Frame>;
+
  public:
   Kernel(const std::filesystem::path& filename);
 
@@ -34,7 +37,7 @@ class Kernel {
   Renderer renderer_;
   Scene scene_;
 
-  util::ObservableData<Frame> observable_;
+  Observable observable_;
 };
 
 }  // namespace renderer::kernel

@@ -131,19 +131,21 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
 
 std::pair<std::vector<Triangle::Vertex>, std::vector<Triangle::Vertex>>
 Renderer::SplitVertices(const Triangle& triangle, const Plane& plane) const {
-  std::vector<Triangle::Vertex> inside;
-  std::vector<Triangle::Vertex> outside;
+  std::pair<std::vector<Triangle::Vertex>, std::vector<Triangle::Vertex>>
+      result;
+  result.first.reserve(3);
+  result.second.reserve(3);
 
   const auto& vertices = triangle.Vertices();
 
   for (int i = 0; i < 3; ++i) {
     if (plane.IsOnTheSameSideAsNormal(vertices[i].point)) {
-      inside.push_back(vertices[i]);
+      result.first.push_back(vertices[i]);
     } else {
-      outside.push_back(vertices[i]);
+      result.second.push_back(vertices[i]);
     }
   }
-  return {inside, outside};
+  return result;
 }
 
 }  // namespace renderer::kernel

@@ -89,5 +89,5 @@ if (BENCHMARK_SOURCES)
             renderer
     )
 
-    target_compile_options(renderer_benchmarks PRIVATE -O3)
+    target_compile_options(renderer_benchmarks PRIVATE)
 endif ()

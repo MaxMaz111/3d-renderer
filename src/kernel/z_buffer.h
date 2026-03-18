@@ -16,7 +16,7 @@ class ZBuffer {
   const Scalar& Get(Width width, Height height) const;
 
  private:
-  inline int GetIndex(Width width, Height height) const;
+  int GetIndex(Width width, Height height) const;
 
   int width_;
   std::vector<Scalar> data_;

@@ -3,14 +3,14 @@
 namespace renderer::kernel {
 
 Rasterizer::Rasterizer(Width width, Height height)
-    : width_(width()),
-      height_(height()),
+    : width_(width),
+      height_(height),
       z_buffer_(Width{width_}, Height{height_}),
       frame_(Width{width_}, Height{height_}) {}
 
 void Rasterizer::ResetTo(Width width, Height height) {
-  width_ = width();
-  height_ = height();
+  width_ = width;
+  height_ = height;
   z_buffer_.ResetTo(width, height);
 }
 
@@ -48,7 +48,7 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
 void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                                const Camera& camera,
                                const std::vector<DirectionalLight>& lights) {
-  Scalar x = i() + 0.5, y = j() + 0.5;
+  Scalar x = i + 0.5, y = j + 0.5;
   auto z = triangle.InterpolateZ(XCoordinate{x}, YCoordinate{y});
   if (!z.has_value()) {
     return;
@@ -57,15 +57,15 @@ void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
       triangle.InterpolateColor(XCoordinate{x}, YCoordinate{y}, lights);
   switch (camera.CurrentRenderingMode()) {
     case Camera::RenderingMode::AllSolid: {
-      Scalar& val = z_buffer_.Get(Width{i}, Height{j});
+      Scalar& val = z_buffer_.Get(i, j);
       if (val > *z) {
         val = *z;
-        frame_.SetColor(Width{i}, Height{j}, color);
+        frame_.SetColor(i, j, color);
       }
       break;
     }
     case Camera::RenderingMode::AllTransparent: {
-      frame_.BlendColor(Width{i}, Height{j}, color);
+      frame_.BlendColor(i, j, color);
       break;
     }
     default:

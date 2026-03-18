@@ -13,6 +13,10 @@ using Green = util::Alias<uint8_t, struct green_tag>;
 using Blue = util::Alias<uint8_t, struct blue_tag>;
 
 class Color {
+  using RedT = Red;
+  using GreenT = Green;
+  using BlueT = Blue;
+
  public:
   static QRgb Get(Red r, Green g, Blue b);
   static QRgb ScaleColor(QRgb color, Scalar intensity);
@@ -26,9 +30,9 @@ class Color {
 
   static int ClampComponent(int value);
   static Scalar ClampComponentScalar(Scalar value);
-  static int Red(QRgb color);
-  static int Green(QRgb color);
-  static int Blue(QRgb color);
+  static int ExtractRed(QRgb color);
+  static int ExtractGreen(QRgb color);
+  static int ExtractBlue(QRgb color);
 };
 
 }  // namespace renderer::kernel

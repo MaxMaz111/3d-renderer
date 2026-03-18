@@ -10,6 +10,7 @@ namespace renderer::kernel {
 
 class Scene {
   using CameraT = ::renderer::kernel::Camera;
+  using RenderingMode = CameraT::RenderingMode;
 
  public:
   Scene(std::vector<Mesh>&& meshes);
@@ -17,21 +18,9 @@ class Scene {
 
   const std::vector<Mesh>& Meshes() const;
   const std::vector<DirectionalLight>& DirectionalLights() const;
-  void SetAspectRatio(Scalar aspect_ratio);
-  void RotateLeft();
-  void RotateRight();
-  void RotateUp();
-  void RotateDown();
-  void MoveLeft();
-  void MoveRight();
-  void MoveForward();
-  void MoveBackward();
-  void SwivelLeft();
-  void SwivelRight();
-  void SwapRenderingMode();
   const CameraT& Camera() const;
   CameraT& Camera();
-  Camera::RenderingMode CurrentRenderingMode() const;
+  RenderingMode CurrentRenderingMode() const;
 
  private:
   CameraT camera_;

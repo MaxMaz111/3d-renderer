@@ -1,6 +1,6 @@
 #pragma once
 
-#include "kernel/linalg.h"
+#include "linalg.h"
 
 namespace renderer::kernel {
 

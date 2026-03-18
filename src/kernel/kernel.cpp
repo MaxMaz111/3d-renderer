@@ -11,59 +11,59 @@ Kernel::Kernel(const std::filesystem::path& filename)
       scene_(ObjReader::ReadFromFile(filename)),
       observable_(renderer_.Render(scene_)) {}
 
-void Kernel::Subscribe(util::Observer<Frame>* observer) {
+void Kernel::Subscribe(Observer* observer) {
   assert(observer);
   observable_.Subscribe(observer);
 }
 
 void Kernel::SetScreenDimensions(Width width, Height height) {
   renderer_.ResetTo(width, height);
-  scene_.SetAspectRatio(AspectRatio(width, height));
+  scene_.Camera().SetAspectRatio(AspectRatio(width, height));
 }
 
 void Kernel::RotateLeft() {
-  scene_.RotateLeft();
+  scene_.Camera().RotateLeft();
   observable_.Set(renderer_.Render(scene_));
 }
 
 void Kernel::RotateRight() {
-  scene_.RotateRight();
+  scene_.Camera().RotateRight();
 }
 
 void Kernel::RotateUp() {
-  scene_.RotateUp();
+  scene_.Camera().RotateUp();
 }
 
 void Kernel::RotateDown() {
-  scene_.RotateDown();
+  scene_.Camera().RotateDown();
 }
 
 void Kernel::MoveLeft() {
-  scene_.MoveLeft();
+  scene_.Camera().MoveLeft();
 }
 
 void Kernel::MoveRight() {
-  scene_.MoveRight();
+  scene_.Camera().MoveRight();
 }
 
 void Kernel::MoveForward() {
-  scene_.MoveForward();
+  scene_.Camera().MoveForward();
 }
 
 void Kernel::MoveBackward() {
-  scene_.MoveBackward();
+  scene_.Camera().MoveBackward();
 }
 
 void Kernel::SwivelLeft() {
-  scene_.SwivelLeft();
+  scene_.Camera().SwivelLeft();
 }
 
 void Kernel::SwivelRight() {
-  scene_.SwivelRight();
+  scene_.Camera().SwivelRight();
 }
 
 void Kernel::SwapRenderingMode() {
-  scene_.SwapRenderingMode();
+  scene_.Camera().SwapRenderingMode();
 }
 
 void Kernel::NotifyView() {

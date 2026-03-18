@@ -83,7 +83,7 @@ State::Key State::ConvertQtKey(int key) {
 
 namespace controller {
 
-Controller::Controller(kernel::Kernel* kernel_ptr, QLabel* plot_ptr)
+Controller::Controller(Kernel* kernel_ptr, QLabel* plot_ptr)
     : kernel_ptr_(kernel_ptr) {
   plot_ptr->installEventFilter(this);
 }

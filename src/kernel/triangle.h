@@ -24,7 +24,7 @@ class Triangle {
 
   Triangle(const std::array<Vertex, 3>& vertices);
 
-  const std::array<Vertex, 3> Vertices() const;
+  const std::array<Vertex, 3>& Vertices() const;
   Point3& GetPoint(int index);
   const Point3& GetPoint(int index) const;
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);

@@ -16,7 +16,7 @@ namespace renderer::kernel {
 Triangle::Triangle(const std::array<Vertex, 3>& vertices)
     : vertices_(vertices) {}
 
-const std::array<Triangle::Vertex, 3> Triangle::Vertices() const {
+const std::array<Triangle::Vertex, 3>& Triangle::Vertices() const {
   return vertices_;
 }
 
@@ -137,14 +137,13 @@ std::optional<std::array<Scalar, 3>> Triangle::Barycentric(
     return std::nullopt;
   }
 
-  Scalar alpha =
+  Scalar alpha = 0.5f *
+                 ((p1.x() - x) * (p2.y() - y) - (p2.x() - x) * (p1.y() - y)) /
+                 full_area;
+  Scalar beta =
       0.5f *
-      ((p1.x() - x()) * (p2.y() - y()) - (p2.x() - x()) * (p1.y() - y())) /
+      ((x - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (y - p0.y())) /
       full_area;
-  Scalar beta = 0.5f *
-                ((x() - p0.x()) * (p2.y() - p0.y()) -
-                 (p2.x() - p0.x()) * (y() - p0.y())) /
-                full_area;
   Scalar gamma = 1.0f - alpha - beta;
 
   if (alpha < -kEpsilon || beta < -kEpsilon || gamma < -kEpsilon) {

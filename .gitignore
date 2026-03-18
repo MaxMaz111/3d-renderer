@@ -36,6 +36,7 @@ build
 asan_build
 build-debug
 build-release
+build-rel-with-deb-info
 models
 .cache
 .idea/

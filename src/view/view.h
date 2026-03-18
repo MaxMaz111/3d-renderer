@@ -9,16 +9,20 @@
 namespace renderer::view {
 
 class View {
+  using Frame = kernel::Frame;
+  using HotInput = util::HotInput<Frame>;
+
  public:
   View();
 
-  void SetFrame(const kernel::Frame& frame);
   QLabel* Label();
-  util::HotInput<kernel::Frame>* KernelPort();
+  HotInput* KernelPort();
 
  private:
+  void SetFrame(const Frame& frame);
+
   QLabel label_;
-  util::HotInput<kernel::Frame> kernel_port_;
+  HotInput kernel_port_;
 };
 
 }  // namespace renderer::view

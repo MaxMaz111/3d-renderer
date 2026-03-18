@@ -72,9 +72,12 @@ namespace controller {
 
 class Controller : public QObject {
   Q_OBJECT
+
+  using Kernel = kernel::Kernel;
+
  public:
   using State = detail::controller::State;
-  Controller(kernel::Kernel* kernel_ptr, QLabel* plot_ptr);
+  Controller(Kernel* kernel_ptr, QLabel* plot_ptr);
 
  protected:
   bool eventFilter(QObject* obj, QEvent* event) override;
@@ -85,7 +88,7 @@ class Controller : public QObject {
   void ResizeEventHandler(const QResizeEvent*) const;
   void NotifyKernel(State::KeyRange range) const;
 
-  kernel::Kernel* kernel_ptr_;
+  Kernel* kernel_ptr_;
   State keys_;
 };
 

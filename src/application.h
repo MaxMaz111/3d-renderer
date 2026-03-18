@@ -9,13 +9,17 @@
 namespace renderer {
 
 class Application {
+  using Kernel = kernel::Kernel;
+  using MainWindow = view::MainWindow;
+  using Controller = controller::Controller;
+
  public:
   Application(int argc, char* argv[]);
 
  private:
-  kernel::Kernel kernel_;
-  view::MainWindow render_window_;
-  controller::Controller controller_;
+  Kernel kernel_;
+  MainWindow render_window_;
+  Controller controller_;
 };
 
 }  // namespace renderer

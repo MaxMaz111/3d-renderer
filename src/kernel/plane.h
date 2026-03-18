@@ -8,15 +8,16 @@
 namespace renderer::kernel {
 
 class Plane {
+  using Vertex = Triangle::Vertex;
+
  public:
   Plane(const Vector3& normal, const Point3& point);
   Plane(const Vector3& normal, Scalar distance);
 
   Scalar DistanceToPoint(const Point3& point) const;
   Point3 ProjectPoint(const Point3& point) const;
-  std::optional<Triangle::Vertex> LineIntersection(
-      const Triangle::Vertex& line_start,
-      const Triangle::Vertex& line_end) const;
+  std::optional<Vertex> LineIntersection(const Vertex& line_start,
+                                         const Vertex& line_end) const;
   bool IsOnTheSameSideAsNormal(const Point3& point) const;
 
  private:

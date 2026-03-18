@@ -2,22 +2,21 @@
 
 namespace renderer::view {
 
-View::View()
-    : kernel_port_([this](const kernel::Frame& frame) { SetFrame(frame); }) {
+View::View() : kernel_port_([this](const Frame& frame) { SetFrame(frame); }) {
   label_.setFocusPolicy(Qt::StrongFocus);
   label_.setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-}
-
-void View::SetFrame(const kernel::Frame& frame) {
-  label_.setPixmap(QPixmap::fromImage(frame.Image()));
 }
 
 QLabel* View::Label() {
   return &label_;
 }
 
-util::HotInput<kernel::Frame>* View::KernelPort() {
+View::HotInput* View::KernelPort() {
   return &kernel_port_;
+}
+
+void View::SetFrame(const Frame& frame) {
+  label_.setPixmap(QPixmap::fromImage(frame.Image()));
 }
 
 }  // namespace renderer::view
