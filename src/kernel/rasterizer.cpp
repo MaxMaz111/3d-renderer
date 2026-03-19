@@ -3,8 +3,7 @@
 namespace renderer::kernel {
 
 Rasterizer::Rasterizer(Width width, Height height)
-    :
-      z_buffer_(Width{width}, Height{height}),
+    : z_buffer_(Width{width}, Height{height}),
       frame_(Width{width}, Height{height}) {}
 
 void Rasterizer::ResetTo(Width width, Height height) {
@@ -35,8 +34,10 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
   int max_x = std::ceil(triangle.GetMaxX());
   int min_y = std::floor(triangle.GetMinY());
   int max_y = std::ceil(triangle.GetMaxY());
-  for (int j = std::max(0, min_y); j <= std::min(max_y, frame_.Height() - 1); ++j) {
-    for (int i = std::max(0, min_x); i <= std::min(max_x, frame_.Width() - 1); ++i) {
+  for (int j = std::max(0, min_y); j <= std::min(max_y, frame_.Height() - 1);
+       ++j) {
+    for (int i = std::max(0, min_x); i <= std::min(max_x, frame_.Width() - 1);
+         ++i) {
       UpdateZBuffer(Width{i}, Height{j}, triangle, camera, lights);
     }
   }
