@@ -3,22 +3,18 @@
 namespace renderer::kernel {
 
 Rasterizer::Rasterizer(Width width, Height height)
-    : width_(width),
-      height_(height),
-      z_buffer_(Width{width_}, Height{height_}),
-      frame_(Width{width_}, Height{height_}) {}
+    :
+      z_buffer_(Width{width}, Height{height}),
+      frame_(Width{width}, Height{height}) {}
 
 void Rasterizer::ResetTo(Width width, Height height) {
-  width_ = width;
-  height_ = height;
   z_buffer_.ResetTo(width, height);
+  frame_.ResetTo(width, height);
 }
 
 const Frame& Rasterizer::Rasterize(
     std::vector<Mesh>&& meshes, const Camera& camera,
     const std::vector<DirectionalLight>& lights) {
-  frame_.ResetTo(Width{width_}, Height{height_});
-  z_buffer_.ResetTo(Width{width_}, Height{height_});
   for (auto& mesh : meshes) {
     Rasterize(std::move(mesh), camera, lights);
   }
@@ -27,7 +23,7 @@ const Frame& Rasterizer::Rasterize(
 
 void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera,
                            const std::vector<DirectionalLight>& lights) {
-  mesh = ConvertToRasterSpace(std::move(mesh), width_, height_);
+  mesh = ConvertToRasterSpace(std::move(mesh));
   for (const Triangle& triangle : mesh.triangles) {
     Rasterize(triangle, camera, lights);
   }
@@ -39,8 +35,8 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
   int max_x = std::ceil(triangle.GetMaxX());
   int min_y = std::floor(triangle.GetMinY());
   int max_y = std::ceil(triangle.GetMaxY());
-  for (int j = std::max(0, min_y); j <= std::min(max_y, height_ - 1); ++j) {
-    for (int i = std::max(0, min_x); i <= std::min(max_x, width_ - 1); ++i) {
+  for (int j = std::max(0, min_y); j <= std::min(max_y, frame_.Height() - 1); ++j) {
+    for (int i = std::max(0, min_x); i <= std::min(max_x, frame_.Width() - 1); ++i) {
       UpdateZBuffer(Width{i}, Height{j}, triangle, camera, lights);
     }
   }
@@ -74,16 +70,14 @@ void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
   }
 }
 
-Mesh Rasterizer::ConvertToRasterSpace(Mesh&& mesh, int width, int height) {
+Mesh Rasterizer::ConvertToRasterSpace(Mesh&& mesh) const {
   for (auto& triangle : mesh.triangles) {
     for (int i = 0; i < 3; ++i) {
-      Vector3 v_ndc = triangle.GetPoint(i);
+      Vector3& v = triangle.GetPoint(i);
 
-      Scalar x_rasterized = (v_ndc.x() + 1.0f) * 0.5f * width;
-      Scalar y_rasterized = (1.0f - (v_ndc.y() + 1.0f) * 0.5f) * height;
-      Scalar z_rasterized = (v_ndc.z() + 1.0f) * 0.5f;
-
-      triangle.GetPoint(i) = Vector3{x_rasterized, y_rasterized, z_rasterized};
+      v.x() = (v.x() + 1) * 0.5 * frame_.Width();
+      v.y() = (1 - (v.y() + 1) * 0.5) * frame_.Height();
+      v.z() = (v.z() + 1) * 0.5;
     }
   }
   return mesh;

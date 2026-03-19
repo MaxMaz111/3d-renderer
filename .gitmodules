@@ -1,0 +1,9 @@
+[submodule "third-party/assimp"]
+	path = third-party/assimp
+	url = https://github.com/assimp/assimp
+[submodule "third-party/eigen3"]
+	path = third-party/eigen3
+	url = https://gitlab.com/libeigen/eigen.git
+[submodule "third-party/spdlog"]
+	path = third-party/spdlog
+	url = https://github.com/gabime/spdlog

@@ -24,7 +24,6 @@ void Kernel::SetScreenDimensions(Width width, Height height) {
 
 void Kernel::RotateLeft() {
   scene_.Camera().RotateLeft();
-  observable_.Notify();
 }
 
 void Kernel::RotateRight() {

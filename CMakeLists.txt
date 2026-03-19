@@ -8,8 +8,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ######################################################
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui)
-find_package(Eigen3 3.3 REQUIRED)
-find_package(assimp CONFIG REQUIRED)
+
+set(ASSIMP_BUILD_ZLIB ON)
+
+add_subdirectory(third-party/eigen3)
+add_subdirectory(third-party/assimp)
+add_subdirectory(third-party/spdlog)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 
@@ -37,12 +41,18 @@ target_link_libraries(renderer PUBLIC
         Qt6::Gui
         Eigen3::Eigen
         assimp::assimp
+        spdlog::spdlog
 )
 
 ######################################################
 
 add_executable(renderer_app app/main.cpp)
 target_link_libraries(renderer_app PRIVATE renderer)
+
+######################################################
+
+add_executable(renderer_perf perf/main.cpp)
+target_link_libraries(renderer_perf PRIVATE renderer)
 
 ######################################################
 
