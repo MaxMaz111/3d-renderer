@@ -28,6 +28,8 @@ void Frame::Clear() {
 }
 
 void Frame::ResetTo(WidthT width, HeightT height) {
+  assert(width >= 0);
+  assert(height >= 0);
   if (NeedResize(width, height)) {
     image_ = QImage(width, height, QImage::Format_RGB32);
   }

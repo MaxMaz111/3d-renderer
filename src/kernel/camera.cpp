@@ -4,11 +4,13 @@
 
 #include "util/constants.h"
 
+#include "spdlog/spdlog.h"
+
 namespace renderer::kernel {
 
-const Vector3 Camera::kDefaultPosition{0, 1, 1};
+const Vector3 Camera::kDefaultPosition{0, 50, 300};
 const Matrix3 Camera::kDefaultRotation =
-    Matrix3{AngleAxis(-M_PI / 4, Vector3::UnitX())};
+    Matrix3{AngleAxis(0, Vector3::UnitX())};
 
 Camera::Camera()
     : position_(kDefaultPosition),
@@ -77,6 +79,8 @@ void Camera::MoveForward() {
 
 void Camera::MoveBackward() {
   position_ += rotation_matrix_.col(2) * kMoveSpeed;
+  spdlog::info("Camera position: ({:.2f}, {:.2f}, {:.2f})", position_.x(),
+               position_.y(), position_.z());
 }
 
 void Camera::SwivelLeft() {
@@ -90,8 +94,11 @@ void Camera::SwivelRight() {
 }
 
 void Camera::SwapRenderingMode() {
-  mode_ = mode_ == RenderingMode::AllSolid ? RenderingMode::AllTransparent
-                                           : RenderingMode::AllSolid;
+  if (mode_ == RenderingMode::AllSolid) {
+    mode_ = RenderingMode::AllTransparent;
+  } else {
+    mode_ = RenderingMode::AllSolid;
+  }
 }
 
 const std::array<Plane, Camera::kNumberOfPlanes>& Camera::PlanesForClipping()

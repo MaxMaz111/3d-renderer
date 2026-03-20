@@ -115,7 +115,7 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
                                                     const Plane& plane) const {
   auto [inside, outside] = SplitVertices(triangle, plane);
   if (inside.size() == 3) {
-    return {triangle};
+    return {std::move(triangle)};
   }
   if (inside.size() == 0) {
     return {};
@@ -133,10 +133,13 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
     return {};
   }
   if (inside.size() == 1) {
-    return {Triangle({inside[0], intersections[0], intersections[1]})};
+    return {Triangle({std::move(inside[0]), std::move(intersections[0]),
+                      std::move(intersections[1])})};
   }
-  return {Triangle({inside[0], inside[1], intersections[0]}),
-          Triangle({inside[1], intersections[0], intersections[1]})};
+  return {Triangle({std::move(inside[0]), std::move(inside[1]),
+                    std::move(intersections[0])}),
+          Triangle({std::move(inside[1]), std::move(intersections[0]),
+                    std::move(intersections[1])})};
 }
 
 Renderer::Split Renderer::SplitVertices(const Triangle& triangle,

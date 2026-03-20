@@ -52,12 +52,11 @@ void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                                const Camera& camera,
                                const std::vector<DirectionalLight>& lights) {
   Scalar x = i + 0.5, y = j + 0.5;
-  auto z = triangle.InterpolateZ(XCoordinate{x}, YCoordinate{y});
+  auto z = triangle.InterpolateZ(XAxis{x}, YAxis{y});
   if (!z.has_value()) {
     return;
   }
-  auto color =
-      triangle.InterpolateColor(XCoordinate{x}, YCoordinate{y}, lights);
+  auto color = triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights);
   switch (camera.CurrentRenderingMode()) {
     case Camera::RenderingMode::AllSolid: {
       Scalar& val = z_buffer_.Get(i, j);

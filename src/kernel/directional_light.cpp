@@ -4,7 +4,7 @@
 
 namespace renderer::kernel {
 
-DirectionalLight::DirectionalLight() : direction_(0, -1, 0) {}
+DirectionalLight::DirectionalLight() : direction_(0, 0, 1) {}
 
 DirectionalLight::DirectionalLight(const Vector3& direction)
     : direction_(direction.normalized()) {}

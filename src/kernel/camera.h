@@ -19,8 +19,8 @@ class Camera {
   static constexpr Scalar kDefaultNear = 0.1;
   static constexpr Scalar kDefaultFar = 1000;
   static constexpr int kNumberOfPlanes = 6;
-  static constexpr Scalar kMoveSpeed = 0.05;
-  static constexpr Scalar kRotationSpeed = std::numbers::pi_v<Scalar> / 180;
+  static constexpr Scalar kMoveSpeed = 5;
+  static constexpr Scalar kRotationSpeed = std::numbers::pi_v<Scalar> / 60;
   static constexpr Scalar kDefaultFovY = DegToRad(60);
 
  public:

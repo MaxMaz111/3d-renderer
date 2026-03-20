@@ -49,8 +49,8 @@ target_link_libraries(renderer_app PRIVATE renderer)
 
 ######################################################
 
-add_executable(renderer_perf perf/main.cpp)
-target_link_libraries(renderer_perf PRIVATE renderer)
+add_executable(renderer_export export/main.cpp)
+target_link_libraries(renderer_export PRIVATE renderer)
 
 ######################################################
 

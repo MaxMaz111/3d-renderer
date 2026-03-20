@@ -49,7 +49,7 @@ void Triangle::Project(const Matrix4& projection_matrix) {
 }
 
 std::optional<std::array<Scalar, 3>> Triangle::PerspectiveCorrectBarycentric(
-    XCoordinate x, YCoordinate y) const {
+    XAxis x, YAxis y) const {
   auto bary = Barycentric(x, y);
   if (!bary.has_value()) {
     return std::nullopt;
@@ -69,8 +69,7 @@ std::optional<std::array<Scalar, 3>> Triangle::PerspectiveCorrectBarycentric(
                                gamma * w2 / denom};
 }
 
-std::optional<Scalar> Triangle::InterpolateZ(XCoordinate x,
-                                             YCoordinate y) const {
+std::optional<Scalar> Triangle::InterpolateZ(XAxis x, YAxis y) const {
   auto weights = Barycentric(x, y);
   if (!weights.has_value()) {
     return std::nullopt;
@@ -84,8 +83,7 @@ std::optional<Scalar> Triangle::InterpolateZ(XCoordinate x,
 }
 
 QRgb Triangle::InterpolateColor(
-    XCoordinate x, YCoordinate y,
-    const std::vector<DirectionalLight>& lights) const {
+    XAxis x, YAxis y, const std::vector<DirectionalLight>& lights) const {
   auto weights = PerspectiveCorrectBarycentric(x, y);
   if (!weights.has_value()) {
     return kBlackColor;
@@ -125,8 +123,8 @@ Scalar Triangle::GetMaxY() const {
       {vertices_[0].point.y(), vertices_[1].point.y(), vertices_[2].point.y()});
 }
 
-std::optional<std::array<Scalar, 3>> Triangle::Barycentric(
-    XCoordinate x, YCoordinate y) const {
+std::optional<std::array<Scalar, 3>> Triangle::Barycentric(XAxis x,
+                                                           YAxis y) const {
   const Point3& p0 = vertices_[0].point;
   const Point3& p1 = vertices_[1].point;
   const Point3& p2 = vertices_[2].point;

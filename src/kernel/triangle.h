@@ -11,15 +11,15 @@
 
 namespace renderer::kernel {
 
-using XCoordinate = util::Alias<Scalar, struct x_tag>;
-using YCoordinate = util::Alias<Scalar, struct y_tag>;
+using XAxis = util::Alias<Scalar, struct x_tag>;
+using YAxis = util::Alias<Scalar, struct y_tag>;
 
 class Triangle {
  public:
   struct Vertex {
     Point3 point;
     Vector3 normal;
-    Scalar inv_w = 1.0f;
+    Scalar inv_w = 1;
   };
 
   Triangle(const std::array<Vertex, 3>& vertices);
@@ -30,9 +30,9 @@ class Triangle {
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
   std::optional<std::array<Scalar, 3>> PerspectiveCorrectBarycentric(
-      XCoordinate x, YCoordinate y) const;
-  std::optional<Scalar> InterpolateZ(XCoordinate x, YCoordinate y) const;
-  QRgb InterpolateColor(XCoordinate x, YCoordinate y,
+      XAxis x, YAxis y) const;
+  std::optional<Scalar> InterpolateZ(XAxis x, YAxis y) const;
+  QRgb InterpolateColor(XAxis x, YAxis y,
                         const std::vector<DirectionalLight>& lights) const;
   Scalar GetMinX() const;
   Scalar GetMaxX() const;
@@ -40,8 +40,7 @@ class Triangle {
   Scalar GetMaxY() const;
 
  private:
-  std::optional<std::array<Scalar, 3>> Barycentric(XCoordinate x,
-                                                   YCoordinate y) const;
+  std::optional<std::array<Scalar, 3>> Barycentric(XAxis x, YAxis y) const;
   Point3 FromHomogeneous(const Point4& point) const;
   Point4 ToHomogeneous(const Point3& point) const;
 
