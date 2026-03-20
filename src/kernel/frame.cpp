@@ -23,11 +23,15 @@ int Frame::Height() const {
   return image_.height();
 }
 
+void Frame::Clear() {
+  image_.fill(kBlackColor);
+}
+
 void Frame::ResetTo(WidthT width, HeightT height) {
   if (NeedResize(width, height)) {
     image_ = QImage(width, height, QImage::Format_RGB32);
   }
-  image_.fill(kBlackColor);
+  Clear();
 }
 
 void Frame::SetColor(WidthT x, HeightT y, QRgb color) {

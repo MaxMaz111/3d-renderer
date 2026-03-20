@@ -25,6 +25,7 @@ class Frame {
 
   int Width() const;
   int Height() const;
+  void Clear();
   void ResetTo(WidthT width, HeightT height);
   void SetColor(WidthT x, HeightT y, QRgb color);
   void BlendColor(WidthT x, HeightT y, QRgb color);

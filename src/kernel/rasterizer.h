@@ -12,6 +12,7 @@ class Rasterizer {
  public:
   Rasterizer(Width width, Height height);
 
+  void Clear();
   void ResetTo(Width width, Height height);
   const Frame& Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
                          const std::vector<DirectionalLight>& lights);

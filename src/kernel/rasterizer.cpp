@@ -6,6 +6,11 @@ Rasterizer::Rasterizer(Width width, Height height)
     : z_buffer_(Width{width}, Height{height}),
       frame_(Width{width}, Height{height}) {}
 
+void Rasterizer::Clear() {
+  z_buffer_.Clear();
+  frame_.Clear();
+}
+
 void Rasterizer::ResetTo(Width width, Height height) {
   z_buffer_.ResetTo(width, height);
   frame_.ResetTo(width, height);

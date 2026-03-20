@@ -112,7 +112,6 @@ void Controller::KeyPressEventHandler(const QKeyEvent* ev) {
 
 void Controller::KeyReleaseEventHandler(const QKeyEvent* ev) {
   NotifyKernel(keys_.HandleReleaseEvent(ev->key()));
-  kernel_ptr_->NotifyView();
 }
 
 void Controller::ResizeEventHandler(const QResizeEvent* ev) const {

@@ -5,6 +5,10 @@ namespace renderer::kernel {
 ZBuffer::ZBuffer(Width width, Height height)
     : width_(width), data_(width_ * height, 1) {}
 
+void ZBuffer::Clear() {
+  std::ranges::fill(data_, 1);
+}
+
 void ZBuffer::ResetTo(Width width, Height height) {
   width_ = width;
   data_.assign(width_ * height, 1);

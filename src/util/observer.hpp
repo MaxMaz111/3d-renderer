@@ -5,8 +5,6 @@
 #include <list>
 #include <type_traits>
 
-#include <spdlog/spdlog.h>
-
 namespace renderer::util {
 
 namespace observer {
@@ -154,7 +152,6 @@ class Observable {
   ~Observable() { UnsubscribeAll(); }
 
   void Notify() const {
-    spdlog::debug("Notifying");
     for (Observer* obs : listeners_) {
       obs->on_notify_(data_());
     }

@@ -1,6 +1,10 @@
 #include "renderer.h"
 
+#include <algorithm>
+#include <spdlog/spdlog.h>
 #include <vector>
+
+#include "util/time_anchor.h"
 
 #include "directional_light.h"
 #include "linalg.h"
@@ -16,6 +20,11 @@ void Renderer::ResetTo(Width width, Height height) {
 }
 
 const Frame& Renderer::Render(const Scene& scene) {
+  util::TimeAnchor anchor("Rendering frametime",
+                          [](const std::string& name, double time) {
+                            spdlog::info("{}: {:.2f} ms", name, time);
+                          });
+  rasterizer_.Clear();
   std::vector<Mesh> meshes = scene.Meshes();
   const Camera& camera = scene.Camera();
   std::vector<DirectionalLight> lights = scene.DirectionalLights();

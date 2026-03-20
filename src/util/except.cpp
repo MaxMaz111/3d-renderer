@@ -1,7 +1,7 @@
 #include "except.h"
 
-#include <QDebug>
 #include <exception>
+#include <spdlog/spdlog.h>
 
 namespace renderer::util {
 
@@ -9,9 +9,9 @@ void React() noexcept {
   try {
     throw;
   } catch (std::exception& e) {
-    qDebug() << "A known exception was caught, with a message: " << e.what();
+    spdlog::error("A known exception was caught, with a message: {}", e.what());
   } catch (...) {
-    qDebug() << "An unknown exception was caught";
+    spdlog::error("An unknown exception was caught");
   }
 }
 

@@ -9,8 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui)
 
-set(ASSIMP_BUILD_ZLIB ON)
-
 add_subdirectory(third-party/eigen3)
 add_subdirectory(third-party/assimp)
 add_subdirectory(third-party/spdlog)

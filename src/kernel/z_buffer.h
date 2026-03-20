@@ -11,6 +11,7 @@ class ZBuffer {
   ZBuffer() = default;
   ZBuffer(Width width, Height height);
 
+  void Clear();
   void ResetTo(Width width, Height height);
   Scalar& Get(Width width, Height height);
   const Scalar& Get(Width width, Height height) const;

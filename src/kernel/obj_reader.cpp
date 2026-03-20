@@ -1,10 +1,10 @@
 #include "obj_reader.h"
 
-#include <QDebug>
 #include <array>
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include <spdlog/spdlog.h>
 #include <vector>
 
 #include "mesh.h"
@@ -14,8 +14,7 @@ namespace renderer::kernel {
 std::vector<Mesh> ObjReader::ReadFromFile(
     const std::filesystem::path& filepath) {
   if (!std::filesystem::exists(filepath)) {
-    qWarning() << "File does not exist:"
-               << QString::fromStdString(filepath.string());
+    spdlog::warn("File {} does not exist", filepath.string());
     return {};
   }
   Assimp::Importer importer;
@@ -24,7 +23,8 @@ std::vector<Mesh> ObjReader::ReadFromFile(
       filepath.string(), aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 
   if (!scene || !scene->HasMeshes()) {
-    qWarning() << "No mesh found in file";
+    spdlog::warn("Failed to load model from file {}: {}", filepath.string(),
+                 importer.GetErrorString());
     return {};
   }
   std::vector<Mesh> model;

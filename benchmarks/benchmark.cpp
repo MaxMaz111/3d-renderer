@@ -57,6 +57,6 @@ BENCHMARK_REGISTER_F(RenderFixture, Render)
     ->Arg(3)
     ->Unit(benchmark::kMillisecond);
 
-} // namespace
+}  // namespace
 
 BENCHMARK_MAIN();
