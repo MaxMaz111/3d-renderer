@@ -4,8 +4,6 @@
 
 #include "util/constants.h"
 
-#include "spdlog/spdlog.h"
-
 namespace renderer::kernel {
 
 const Vector3 Camera::kDefaultPosition{0, 50, 300};
@@ -79,8 +77,6 @@ void Camera::MoveForward() {
 
 void Camera::MoveBackward() {
   position_ += rotation_matrix_.col(2) * kMoveSpeed;
-  spdlog::info("Camera position: ({:.2f}, {:.2f}, {:.2f})", position_.x(),
-               position_.y(), position_.z());
 }
 
 void Camera::SwivelLeft() {
