@@ -29,12 +29,13 @@ void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera,
                            const std::vector<DirectionalLight>& lights) {
   mesh = ConvertToRasterSpace(std::move(mesh));
   for (const Triangle& triangle : mesh.triangles) {
-    Rasterize(triangle, camera, lights);
+    Rasterize(triangle, camera, lights, mesh.diffuse_texture);
   }
 }
 
 void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
-                           const std::vector<DirectionalLight>& lights) {
+                           const std::vector<DirectionalLight>& lights,
+                           const Texture& diffuse_texture) {
   int min_x = std::floor(triangle.GetMinX());
   int max_x = std::ceil(triangle.GetMaxX());
   int min_y = std::floor(triangle.GetMinY());
@@ -43,20 +44,23 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
        ++j) {
     for (int i = std::max(0, min_x); i <= std::min(max_x, frame_.Width() - 1);
          ++i) {
-      UpdateZBuffer(Width{i}, Height{j}, triangle, camera, lights);
+      UpdateZBuffer(Width{i}, Height{j}, triangle, camera, lights,
+                    diffuse_texture);
     }
   }
 }
 
 void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                                const Camera& camera,
-                               const std::vector<DirectionalLight>& lights) {
+                               const std::vector<DirectionalLight>& lights,
+                               const Texture& diffuse_texture) {
   Scalar x = i + 0.5, y = j + 0.5;
   auto z = triangle.InterpolateZ(XAxis{x}, YAxis{y});
   if (!z.has_value()) {
     return;
   }
-  auto color = triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights);
+  auto color =
+      triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights, diffuse_texture);
   switch (camera.CurrentRenderingMode()) {
     case Camera::RenderingMode::AllSolid: {
       Scalar& val = z_buffer_.Get(i, j);

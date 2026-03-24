@@ -30,10 +30,11 @@ std::optional<Triangle::Vertex> Plane::LineIntersection(
   Vector3 interpolated_normal =
       (line_start.normal + t * (line_end.normal - line_start.normal))
           .normalized();
-  Vertex vertex{
-      .point = line_start.point + t * line_direction,
-      .normal = interpolated_normal,
-  };
+  Point2 interpolated_tex_coord =
+      line_start.tex_coord + t * (line_end.tex_coord - line_start.tex_coord);
+  Vertex vertex{.point = line_start.point + t * line_direction,
+                .normal = interpolated_normal,
+                .tex_coord = interpolated_tex_coord};
   return vertex;
 }
 

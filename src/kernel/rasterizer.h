@@ -21,13 +21,13 @@ class Rasterizer {
   void Rasterize(Mesh&& mesh, const Camera& camera,
                  const std::vector<DirectionalLight>& lights);
   void Rasterize(const Triangle& triangle, const Camera& camera,
-                 const std::vector<DirectionalLight>& lights);
+                 const std::vector<DirectionalLight>& lights,
+                 const Texture& diffuse_texture);
   void UpdateZBuffer(Width i, Height j, const Triangle& triangle,
                      const Camera& camera,
-                     const std::vector<DirectionalLight>& lights);
-
-  Mesh ConvertToRasterSpace(Mesh&& meshes) const;
-
+                     const std::vector<DirectionalLight>& lights,
+                     const Texture& diffuse_texture);
+  Mesh ConvertToRasterSpace(Mesh&& mesh) const;
   ZBuffer z_buffer_;
   Frame frame_;
 };

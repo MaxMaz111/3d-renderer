@@ -5,8 +5,6 @@
 #include <array>
 #include <cmath>
 
-#include "util/constants.h"
-
 #include "color.h"
 #include "directional_light.h"
 #include "linalg.h"
@@ -42,31 +40,10 @@ void Triangle::Project(const Matrix4& projection_matrix) {
   for (auto& vertex : vertices_) {
     Point4 clip = projection_matrix * ToHomogeneous(vertex.point);
     assert(std::abs(clip.w()) > kEpsilon);
-    vertex.inv_w = 1.0f / clip.w();
+    vertex.inv_w = 1 / clip.w();
     vertex.point = Point3(clip.x() * vertex.inv_w, clip.y() * vertex.inv_w,
                           clip.z() * vertex.inv_w);
   }
-}
-
-std::optional<std::array<Scalar, 3>> Triangle::PerspectiveCorrectBarycentric(
-    XAxis x, YAxis y) const {
-  auto bary = Barycentric(x, y);
-  if (!bary.has_value()) {
-    return std::nullopt;
-  }
-
-  const auto [alpha, beta, gamma] = *bary;
-  const Scalar w0 = vertices_[0].inv_w;
-  const Scalar w1 = vertices_[1].inv_w;
-  const Scalar w2 = vertices_[2].inv_w;
-  const Scalar denom = alpha * w0 + beta * w1 + gamma * w2;
-
-  if (std::abs(denom) < kEpsilon) {
-    return std::nullopt;
-  }
-
-  return std::array<Scalar, 3>{alpha * w0 / denom, beta * w1 / denom,
-                               gamma * w2 / denom};
 }
 
 std::optional<Scalar> Triangle::InterpolateZ(XAxis x, YAxis y) const {
@@ -82,25 +59,38 @@ std::optional<Scalar> Triangle::InterpolateZ(XAxis x, YAxis y) const {
   return alpha * p0.z() + beta * p1.z() + gamma * p2.z();
 }
 
-QRgb Triangle::InterpolateColor(
-    XAxis x, YAxis y, const std::vector<DirectionalLight>& lights) const {
-  auto weights = PerspectiveCorrectBarycentric(x, y);
-  if (!weights.has_value()) {
-    return kBlackColor;
+QRgb Triangle::InterpolateColor(XAxis x, YAxis y,
+                                const std::vector<DirectionalLight>& lights,
+                                const Texture& diffuse_texture) const {
+  auto normal = InterpolateNormal(x, y);
+  auto tex_coord = InterpolateTexCoord(x, y);
+  auto base_color = diffuse_texture.Sample(tex_coord);
+  Scalar diffuse_intensity = 0;
+  for (const auto& light : lights) {
+    diffuse_intensity += light.CalculateIntensity(normal);
   }
+  return Color::ScaleColor(base_color, diffuse_intensity);
+}
+
+Point2 Triangle::InterpolateTexCoord(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  assert(weights.has_value());
 
   const auto [alpha, beta, gamma] = *weights;
-  const Vector3& n0 = vertices_[0].normal;
-  const Vector3& n1 = vertices_[1].normal;
-  const Vector3& n2 = vertices_[2].normal;
-  Vector3 normal = alpha * n0 + beta * n1 + gamma * n2;
-  if (normal.norm() > kEpsilon) {
-    normal.normalize();
-  }
-  return lights.empty()
-             ? kWhiteColor
-             : Color::ScaleColor(kWhiteColor,
-                                 lights[0].CalculateIntensity(normal));
+
+  return alpha * vertices_[0].tex_coord + beta * vertices_[1].tex_coord +
+         gamma * vertices_[2].tex_coord;
+}
+
+Vector3 Triangle::InterpolateNormal(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  assert(weights.has_value());
+
+  const auto [alpha, beta, gamma] = *weights;
+
+  return (alpha * vertices_[0].normal + beta * vertices_[1].normal +
+          gamma * vertices_[2].normal)
+      .normalized();
 }
 
 Scalar Triangle::GetMinX() const {
@@ -149,6 +139,27 @@ std::optional<std::array<Scalar, 3>> Triangle::Barycentric(XAxis x,
   }
 
   return std::array<Scalar, 3>{alpha, beta, gamma};
+}
+
+std::optional<std::array<Scalar, 3>> Triangle::PerspectiveCorrectBarycentric(
+    XAxis x, YAxis y) const {
+  auto bary = Barycentric(x, y);
+  if (!bary.has_value()) {
+    return std::nullopt;
+  }
+
+  const auto [alpha, beta, gamma] = *bary;
+  const Scalar w0 = vertices_[0].inv_w;
+  const Scalar w1 = vertices_[1].inv_w;
+  const Scalar w2 = vertices_[2].inv_w;
+  const Scalar denom = alpha * w0 + beta * w1 + gamma * w2;
+
+  if (std::abs(denom) < kEpsilon) {
+    return std::nullopt;
+  }
+
+  return std::array<Scalar, 3>{alpha * w0 / denom, beta * w1 / denom,
+                               gamma * w2 / denom};
 }
 
 Point3 Triangle::FromHomogeneous(const Point4& point) const {
