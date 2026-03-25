@@ -8,12 +8,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ######################################################
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Core Gui)
+find_package(TBB REQUIRED)
 
 add_subdirectory(third-party/eigen3)
 add_subdirectory(third-party/assimp)
 add_subdirectory(third-party/spdlog)
 
-file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
 
 add_library(renderer ${SOURCES})
 
@@ -22,6 +23,8 @@ set_target_properties(renderer PROPERTIES
         AUTOUIC ON
         AUTORCC ON
 )
+
+add_compile_definitions(QT_NO_KEYWORDS)
 
 target_include_directories(renderer PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -39,6 +42,7 @@ target_link_libraries(renderer PUBLIC
         Qt6::Gui
         Eigen3::Eigen
         assimp::assimp
+        TBB::tbb
         spdlog::spdlog
 )
 

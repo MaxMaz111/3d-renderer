@@ -6,9 +6,9 @@
 
 namespace renderer::kernel {
 
-const Vector3 Camera::kDefaultPosition{0, 0, 5};
+const Vector3 Camera::kDefaultPosition{4, 0, 0};
 const Matrix3 Camera::kDefaultRotation =
-    Matrix3{AngleAxis(0, Vector3::UnitX())};
+    Matrix3{AngleAxis(std::numbers::pi_v<Scalar> / 2, Vector3::UnitY())};
 
 Camera::Camera()
     : position_(kDefaultPosition),
