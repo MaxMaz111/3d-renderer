@@ -14,6 +14,8 @@ class Scene {
 
  public:
   Scene(std::vector<Mesh>&& meshes);
+  Scene(std::vector<Mesh>&& meshes,
+        std::vector<DirectionalLight>&& directional_lights);
   Scene(CameraT&& camera, std::vector<Mesh>&& meshes);
 
   const std::vector<Mesh>& Meshes() const;

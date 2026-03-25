@@ -2,13 +2,13 @@
 
 #include "util/constants.h"
 
-#include "obj_reader.h"
+#include "scene_loader.h"
 
 namespace renderer::kernel {
 
 Kernel::Kernel(const std::filesystem::path& filename)
     : renderer_(Width{kDefaultWidth}, Height{kDefaultHeight}),
-      scene_(ObjReader::ReadFromFile(filename)),
+      scene_(SceneLoader::ReadFromJson(filename)),
       observable_(
           [this]() -> const Frame& { return renderer_.Render(scene_); }) {}
 

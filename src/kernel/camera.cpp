@@ -6,7 +6,7 @@
 
 namespace renderer::kernel {
 
-const Vector3 Camera::kDefaultPosition{0, 50, 300};
+const Vector3 Camera::kDefaultPosition{0, 0, 5};
 const Matrix3 Camera::kDefaultRotation =
     Matrix3{AngleAxis(0, Vector3::UnitX())};
 
@@ -145,8 +145,8 @@ std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping()
   Plane top_plane(Vector3{0, -near_, -half_height}, 0);
   Plane bottom_plane(Vector3{0, near_, -half_height}, 0);
 
-  return {near_plane,  far_plane, left_plane,
-          right_plane, top_plane, bottom_plane};
+  return {near_plane, left_plane,   right_plane,
+          top_plane,  bottom_plane, far_plane};
 }
 
 }  // namespace renderer::kernel

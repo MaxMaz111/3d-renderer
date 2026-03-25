@@ -6,12 +6,18 @@
 namespace renderer::kernel {
 
 Scene::Scene(std::vector<Mesh>&& meshes)
-    : camera_{}, meshes_{std::move(meshes)}, directional_lights_{1} {}
+    : Scene(std::move(meshes), std::vector<DirectionalLight>{}) {}
+
+Scene::Scene(std::vector<Mesh>&& meshes,
+             std::vector<DirectionalLight>&& directional_lights)
+    : camera_{},
+      meshes_{std::move(meshes)},
+      directional_lights_{std::move(directional_lights)} {}
 
 Scene::Scene(CameraT&& camera, std::vector<Mesh>&& meshes)
-    : camera_{std::move(camera)},
-      meshes_{std::move(meshes)},
-      directional_lights_{1} {}
+    : camera_(std::move(camera)),
+      meshes_(std::move(meshes)),
+      directional_lights_{} {}
 
 const std::vector<Mesh>& Scene::Meshes() const {
   return meshes_;

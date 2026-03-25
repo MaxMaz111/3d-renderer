@@ -31,10 +31,44 @@ git submodule update --init --recursive
 
 ## Run
 
-The app expects a model path as the first argument:
+The app expects a scene JSON path as the first argument:
 
 ```bash
-./build/renderer_app ./models/cube.obj
+./build/renderer_app ./models/basic_scene.json
+```
+
+## Scene JSON (basic)
+
+`models` is an array of objects with:
+- `path` (string, required)
+- `is_normalized` (bool, optional, default `false`) — normalizes model to a
+	unit bounding box centered at origin
+- `position` (`[x, y, z]`, optional, default `[0, 0, 0]`)
+
+`lights` is an array of objects with:
+- `direction` (`[x, y, z]`, optional, default `[0, 0, -1]`)
+
+Relative model paths are resolved from the JSON file directory.
+
+```json
+{
+	"models": [
+		{
+			"path": "cube.obj",
+			"is_normalized": true,
+			"position": [0.0, 0.0, 0.0]
+		},
+		{
+			"path": "cow.obj",
+			"is_normalized": true,
+			"position": [2.5, 0.0, 0.0]
+		}
+	],
+	"lights": [
+		{ "direction": [0.0, -1.0, -1.0] },
+		{ "direction": [1.0, 0.0, -1.0] }
+	]
+}
 ```
 
 ## Other targets

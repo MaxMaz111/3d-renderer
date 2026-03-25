@@ -7,7 +7,7 @@
 
 int main(int argc, char* argv[]) {
   if (argc < 2) {
-    spdlog::error("Usage: {} <path_to_obj_file>", argv[0]);
+    spdlog::error("Usage: {} <path_to_scene_json>", argv[0]);
     return 1;
   }
   QApplication runtime(argc, argv);
