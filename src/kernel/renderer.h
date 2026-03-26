@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QPixmap>
-
 #include "kernel/camera.h"
 
 #include "directional_light.h"
@@ -32,19 +30,20 @@ class Renderer {
       std::vector<DirectionalLight>&& lights, const Camera& camera) const;
   std::vector<Mesh> RotateAndMove(std::vector<Mesh>&& meshes,
                                   const Camera& camera) const;
-  std::vector<Mesh> Clip(std::vector<Mesh>&& meshes,
-                         const Camera& camera) const;
+  std::vector<Mesh> Clip(std::vector<Mesh>&& meshes, const Camera& camera);
   std::vector<Mesh> Project(std::vector<Mesh>&& meshes,
                             const Camera& camera) const;
   const Frame& Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
                          const std::vector<DirectionalLight>& lights);
   std::vector<Triangle> ClipTriangles(std::vector<Triangle>&& triangles,
-                                      const Camera& camera) const;
+                                      const Camera& camera);
   std::vector<Triangle> ClipTriangleByPlane(const Triangle& triangle,
-                                            const Plane& plane) const;
-  Split SplitVertices(const Triangle& triangle, const Plane& plane) const;
+                                            const Plane& plane);
+  void SplitVertices(const Triangle& triangle, const Plane& plane);
 
   Rasterizer rasterizer_;
+
+  Split cache_;
 };
 
 }  // namespace renderer::kernel

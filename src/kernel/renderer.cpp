@@ -58,7 +58,7 @@ std::vector<Mesh> Renderer::RotateAndMove(std::vector<Mesh>&& meshes,
 }
 
 std::vector<Mesh> Renderer::Clip(std::vector<Mesh>&& meshes,
-                                 const Camera& camera) const {
+                                 const Camera& camera) {
   for (auto& mesh : meshes) {
     mesh.triangles = ClipTriangles(std::move(mesh.triangles), camera);
   }
@@ -83,7 +83,7 @@ const Frame& Renderer::Rasterize(std::vector<Mesh>&& meshes,
 }
 
 std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,
-                                              const Camera& camera) const {
+                                              const Camera& camera) {
   const auto& planes = camera.PlanesForClipping();
 
   std::vector<Triangle> result;
@@ -112,8 +112,15 @@ std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,
 }
 
 std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
-                                                    const Plane& plane) const {
-  auto [inside, outside] = SplitVertices(triangle, plane);
+                                                    const Plane& plane) {
+  cache_.inside.reserve(3);
+  cache_.outside.reserve(3);
+  cache_.inside.clear();
+  cache_.outside.clear();
+  SplitVertices(triangle, plane);
+  auto& inside = cache_.inside;
+  auto& outside = cache_.outside;
+
   if (inside.size() == 3) {
     return {std::move(triangle)};
   }
@@ -141,21 +148,16 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
                     std::move(intersections[1])})};
 }
 
-Renderer::Split Renderer::SplitVertices(const Triangle& triangle,
-                                        const Plane& plane) const {
-  Split result;
-  result.inside.reserve(3);
-
+void Renderer::SplitVertices(const Triangle& triangle, const Plane& plane) {
   const auto& vertices = triangle.Vertices();
 
   for (int i = 0; i < 3; ++i) {
     if (plane.IsOnTheSameSideAsNormal(vertices[i].point)) {
-      result.inside.push_back(vertices[i]);
+      cache_.inside.push_back(vertices[i]);
     } else {
-      result.outside.push_back(vertices[i]);
+      cache_.outside.push_back(vertices[i]);
     }
   }
-  return result;
 }
 
 }  // namespace renderer::kernel
