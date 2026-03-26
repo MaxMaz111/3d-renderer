@@ -13,8 +13,9 @@ find_package(TBB REQUIRED)
 add_subdirectory(third-party/eigen3)
 add_subdirectory(third-party/assimp)
 add_subdirectory(third-party/spdlog)
+add_subdirectory(third-party/json)
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/*.cpp)
+file(GLOB_RECURSE SOURCES src/*.cpp)
 
 add_library(renderer ${SOURCES})
 
@@ -44,6 +45,7 @@ target_link_libraries(renderer PUBLIC
         assimp::assimp
         TBB::tbb
         spdlog::spdlog
+        nlohmann_json::nlohmann_json
 )
 
 ######################################################

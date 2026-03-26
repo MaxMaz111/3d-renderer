@@ -1,7 +1,5 @@
 #pragma once
 
-#include <optional>
-
 #include "linalg.h"
 #include "triangle.h"
 
@@ -16,8 +14,8 @@ class Plane {
 
   Scalar DistanceToPoint(const Point3& point) const;
   Point3 ProjectPoint(const Point3& point) const;
-  std::optional<Vertex> LineIntersection(const Vertex& line_start,
-                                         const Vertex& line_end) const;
+  Vertex LineIntersection(const Vertex& line_start,
+                          const Vertex& line_end) const;
   bool IsOnTheSameSideAsNormal(const Point3& point) const;
 
  private:

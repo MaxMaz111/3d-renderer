@@ -123,18 +123,17 @@ std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
   std::vector<Triangle::Vertex> intersections;
   for (const auto& inside_vertex : inside) {
     for (const auto& outside_vertex : outside) {
-      auto intersection = plane.LineIntersection(inside_vertex, outside_vertex);
-      if (intersection.has_value()) {
-        intersections.push_back(*intersection);
-      }
+      intersections.push_back(
+          plane.LineIntersection(inside_vertex, outside_vertex));
     }
   }
   if (intersections.size() < 2) {
     return {};
   }
   if (inside.size() == 1) {
-    return {Triangle({std::move(inside[0]), std::move(intersections[0]),
-                      std::move(intersections[1])})};
+    Triangle result({std::move(inside[0]), std::move(intersections[0]),
+                     std::move(intersections[1])});
+    return {std::move(result)};
   }
   return {Triangle({std::move(inside[0]), std::move(inside[1]),
                     std::move(intersections[0])}),

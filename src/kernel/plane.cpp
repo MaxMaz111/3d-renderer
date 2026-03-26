@@ -16,17 +16,11 @@ Point3 Plane::ProjectPoint(const Point3& point) const {
   return point - (DistanceToPoint(point) * normal_);
 }
 
-std::optional<Triangle::Vertex> Plane::LineIntersection(
-    const Vertex& line_start, const Vertex& line_end) const {
+Triangle::Vertex Plane::LineIntersection(const Vertex& line_start,
+                                         const Vertex& line_end) const {
   Vector3 line_direction = line_end.point - line_start.point;
   Scalar denominator = normal_.dot(line_direction);
-  if (std::abs(denominator) <= kEpsilon) {
-    return std::nullopt;
-  }
   Scalar t = -(normal_.dot(line_start.point) + d_) / denominator;
-  if (t < -kEpsilon || t > 1.0 + kEpsilon) {
-    return std::nullopt;
-  }
   Vector3 interpolated_normal =
       (line_start.normal + t * (line_end.normal - line_start.normal))
           .normalized();

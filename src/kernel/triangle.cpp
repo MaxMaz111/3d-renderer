@@ -28,8 +28,6 @@ const Point3& Triangle::GetPoint(int index) const {
 
 void Triangle::RotateAndMove(const Matrix3& rotation_matrix,
                              const Point3& translation) {
-  assert(std::abs(rotation_matrix.determinant() - 1) < kEpsilon);
-  assert((rotation_matrix * rotation_matrix.transpose()).isIdentity(kEpsilon));
   for (auto& vertex : vertices_) {
     vertex.point = rotation_matrix * (vertex.point + translation);
     vertex.normal = (rotation_matrix * vertex.normal).normalized();
@@ -39,7 +37,6 @@ void Triangle::RotateAndMove(const Matrix3& rotation_matrix,
 void Triangle::Project(const Matrix4& projection_matrix) {
   for (auto& vertex : vertices_) {
     Point4 clip = projection_matrix * ToHomogeneous(vertex.point);
-    assert(std::abs(clip.w()) > kEpsilon);
     vertex.inv_w = 1 / clip.w();
     vertex.point = Point3(clip.x() * vertex.inv_w, clip.y() * vertex.inv_w,
                           clip.z() * vertex.inv_w);
@@ -70,27 +67,6 @@ QRgb Triangle::InterpolateColor(XAxis x, YAxis y,
     diffuse_intensity += light.CalculateIntensity(normal);
   }
   return Color::ScaleColor(base_color, diffuse_intensity);
-}
-
-Point2 Triangle::InterpolateTexCoord(XAxis x, YAxis y) const {
-  auto weights = PerspectiveCorrectBarycentric(x, y);
-  assert(weights.has_value());
-
-  const auto [alpha, beta, gamma] = *weights;
-
-  return alpha * vertices_[0].tex_coord + beta * vertices_[1].tex_coord +
-         gamma * vertices_[2].tex_coord;
-}
-
-Vector3 Triangle::InterpolateNormal(XAxis x, YAxis y) const {
-  auto weights = PerspectiveCorrectBarycentric(x, y);
-  assert(weights.has_value());
-
-  const auto [alpha, beta, gamma] = *weights;
-
-  return (alpha * vertices_[0].normal + beta * vertices_[1].normal +
-          gamma * vertices_[2].normal)
-      .normalized();
 }
 
 Scalar Triangle::GetMinX() const {
@@ -160,6 +136,27 @@ std::optional<std::array<Scalar, 3>> Triangle::PerspectiveCorrectBarycentric(
 
   return std::array<Scalar, 3>{alpha * w0 / denom, beta * w1 / denom,
                                gamma * w2 / denom};
+}
+
+Point2 Triangle::InterpolateTexCoord(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  assert(weights.has_value());
+
+  const auto [alpha, beta, gamma] = *weights;
+
+  return alpha * vertices_[0].tex_coord + beta * vertices_[1].tex_coord +
+         gamma * vertices_[2].tex_coord;
+}
+
+Vector3 Triangle::InterpolateNormal(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  assert(weights.has_value());
+
+  const auto [alpha, beta, gamma] = *weights;
+
+  return (alpha * vertices_[0].normal + beta * vertices_[1].normal +
+          gamma * vertices_[2].normal)
+      .normalized();
 }
 
 Point3 Triangle::FromHomogeneous(const Point4& point) const {
