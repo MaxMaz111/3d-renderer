@@ -22,8 +22,8 @@ class RenderFixture : public benchmark::Fixture {
     scene = std::make_unique<Scene>(
         SceneLoader::ReadFromJson(paths_.at(state.range(0))));
     renderer =
-        std::make_unique<Renderer>(Width{renderer::kernel::kDefaultWidth},
-                                   Height{renderer::kernel::kDefaultHeight});
+        std::make_unique<Renderer>(Width{1920},
+                                   Height{1080});
   }
 
   void TearDown(const benchmark::State&) override {
