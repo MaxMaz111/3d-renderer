@@ -67,7 +67,7 @@ std::vector<Mesh> Renderer::Clip(std::vector<Mesh>&& meshes,
 
 std::vector<Mesh> Renderer::Project(std::vector<Mesh>&& meshes,
                                     const Camera& camera) const {
-  Matrix4 mat = camera.ProjectionMatrix();
+  const Matrix4& mat = camera.ProjectionMatrix();
   for (auto& mesh : meshes) {
     for (auto& triangle : mesh.triangles) {
       triangle.Project(mat);

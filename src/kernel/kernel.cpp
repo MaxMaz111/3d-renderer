@@ -19,7 +19,7 @@ void Kernel::Subscribe(Observer* observer) {
 
 void Kernel::SetScreenDimensions(Width width, Height height) {
   renderer_.ResetTo(width, height);
-  scene_.Camera().SetAspectRatio(AspectRatio(width, height));
+  scene_.Camera().SetDimensions(width, height);
 }
 
 void Kernel::RotateLeft() {

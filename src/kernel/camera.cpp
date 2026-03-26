@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "util/constants.h"
+#include "util/size.h"
 
 namespace renderer::kernel {
 
@@ -16,13 +17,15 @@ Camera::Camera()
       near_(kDefaultNear),
       far_(kDefaultFar),
       fov_y_(kDefaultFovY),
-      aspect_ratio_(AspectRatio(Width{kDefaultWidth}, Height{kDefaultHeight})),
+      width_(kDefaultWidth),
+      height_(kDefaultHeight),
       projection_matrix_(BuildProjectionMatrix()),
       planes_(BuildPlanesForClipping()) {}
 
-void Camera::SetAspectRatio(Scalar aspect_ratio) {
+void Camera::SetDimensions(Width width, Height height) {
   assert(aspect_ratio > kEpsilon);
-  aspect_ratio_ = aspect_ratio;
+  width_ = width;
+  height_ = height;
   planes_ = BuildPlanesForClipping();
   projection_matrix_ = BuildProjectionMatrix();
 }
@@ -120,15 +123,26 @@ Camera::RenderingMode Camera::CurrentRenderingMode() const {
 
 Matrix4 Camera::BuildProjectionMatrix() const {
   assert((far_ - near_) > kEpsilon);
+  Scalar aspect_ratio = AspectRatio(Width{width_}, Height{height_});
   Scalar t = near_ * std::tan(fov_y_ * 0.5);
   Scalar b = -t;
-  Scalar r = -t * aspect_ratio_;
+  Scalar r = -t * aspect_ratio;
   Scalar l = -r;
-  return Matrix4{{{2 * near_ / (r - l), 0, (r + l) / (r - l), 0},
-                  {0, 2 * near_ / (t - b), (t + b) / (t - b), 0},
-                  {0, 0, -(far_ + near_) / (far_ - near_),
-                   -2 * far_ * near_ / (far_ - near_)},
-                  {0, 0, -1, 0}}};
+
+  Matrix4 projection{{{2 * near_ / (r - l), 0, (r + l) / (r - l), 0},
+                      {0, 2 * near_ / (t - b), (t + b) / (t - b), 0},
+                      {0, 0, -(far_ + near_) / (far_ - near_),
+                       -2 * far_ * near_ / (far_ - near_)},
+                      {0, 0, -1, 0}}};
+
+  Scalar w = width_;
+  Scalar h = height_;
+  Matrix4 raster{{{w / 2, 0, 0, w / 2},
+                  {0, -h / 2, 0, h / 2},
+                  {0, 0, 0.5, 0.5},
+                  {0, 0, 0, 1}}};
+
+  return raster * projection;
 }
 
 std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping()
@@ -138,7 +152,8 @@ std::array<Plane, Camera::kNumberOfPlanes> Camera::BuildPlanesForClipping()
   Plane far_plane(Vector3{0, 0, 1}, far_);
 
   Scalar half_height = near_ * std::tan(fov_y_ * 0.5f);
-  Scalar half_width = half_height * aspect_ratio_;
+  Scalar aspect_ratio = AspectRatio(Width{width_}, Height{height_});
+  Scalar half_width = half_height * aspect_ratio;
 
   Plane left_plane(Vector3{-near_, 0, -half_width}, 0);
   Plane right_plane(Vector3{near_, 0, -half_width}, 0);

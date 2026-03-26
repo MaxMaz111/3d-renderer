@@ -27,7 +27,6 @@ const Frame& Rasterizer::Rasterize(
 
 void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera,
                            const std::vector<DirectionalLight>& lights) {
-  mesh = ConvertToRasterSpace(std::move(mesh));
   for (const Triangle& triangle : mesh.triangles) {
     Rasterize(triangle, camera, lights, mesh.diffuse_texture);
   }
@@ -77,19 +76,6 @@ void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
     default:
       break;
   }
-}
-
-Mesh Rasterizer::ConvertToRasterSpace(Mesh&& mesh) const {
-  for (auto& triangle : mesh.triangles) {
-    for (int i = 0; i < 3; ++i) {
-      Vector3& v = triangle.GetPoint(i);
-
-      v.x() = (v.x() + 1) * 0.5 * frame_.Width();
-      v.y() = (1 - (v.y() + 1) * 0.5) * frame_.Height();
-      v.z() = (v.z() + 1) * 0.5;
-    }
-  }
-  return mesh;
 }
 
 }  // namespace renderer::kernel

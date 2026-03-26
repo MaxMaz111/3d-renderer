@@ -28,7 +28,7 @@ class Camera {
 
   Camera();
 
-  void SetAspectRatio(Scalar aspect_ratio);
+  void SetDimensions(Width width, Height height);
   void SetNear(Scalar near);
   void SetFar(Scalar far);
   void RotateLeft();
@@ -58,7 +58,8 @@ class Camera {
   Scalar near_;
   Scalar far_;
   Scalar fov_y_;
-  Scalar aspect_ratio_;
+  int width_;
+  int height_;
 
   Matrix4 projection_matrix_;
   std::array<Plane, kNumberOfPlanes> planes_;

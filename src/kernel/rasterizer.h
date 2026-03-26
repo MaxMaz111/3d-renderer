@@ -27,7 +27,6 @@ class Rasterizer {
                      const Camera& camera,
                      const std::vector<DirectionalLight>& lights,
                      const Texture& diffuse_texture);
-  Mesh ConvertToRasterSpace(Mesh&& mesh) const;
 
   ZBuffer z_buffer_;
   Frame frame_;
