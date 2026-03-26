@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <limits>
 
 #include "color.h"
 #include "directional_light.h"
@@ -43,10 +44,10 @@ void Triangle::Project(const Matrix4& projection_matrix) {
   }
 }
 
-std::optional<Scalar> Triangle::InterpolateZ(XAxis x, YAxis y) const {
+Scalar Triangle::InterpolateZ(XAxis x, YAxis y) const {
   auto weights = Barycentric(x, y);
   if (!weights.has_value()) {
-    return std::nullopt;
+    return std::numeric_limits<Scalar>::infinity();
   }
 
   const auto [alpha, beta, gamma] = *weights;

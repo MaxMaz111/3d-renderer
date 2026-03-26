@@ -1,17 +1,19 @@
 #include "z_buffer.h"
 
+#include <limits>
+
 namespace renderer::kernel {
 
 ZBuffer::ZBuffer(Width width, Height height)
     : width_(width), data_(width_ * height, 1) {}
 
 void ZBuffer::Clear() {
-  std::ranges::fill(data_, 1);
+  std::ranges::fill(data_, std::numeric_limits<Scalar>::infinity());
 }
 
 void ZBuffer::ResetTo(Width width, Height height) {
   width_ = width;
-  data_.assign(width_ * height, 1);
+  data_.assign(width_ * height, std::numeric_limits<Scalar>::infinity());
 }
 
 Scalar& ZBuffer::Get(Width width, Height height) {

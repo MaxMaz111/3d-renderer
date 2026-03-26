@@ -31,7 +31,7 @@ class Triangle {
   const Point3& GetPoint(int index) const;
   void RotateAndMove(const Matrix3& rotation_matrix, const Point3& translation);
   void Project(const Matrix4& projection_matrix);
-  std::optional<Scalar> InterpolateZ(XAxis x, YAxis y) const;
+  Scalar InterpolateZ(XAxis x, YAxis y) const;
   QRgb InterpolateColor(XAxis x, YAxis y,
                         const std::vector<DirectionalLight>& lights,
                         const Texture& texture) const;

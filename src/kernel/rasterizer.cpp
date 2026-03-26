@@ -1,5 +1,9 @@
 #include "rasterizer.h"
 
+#include <limits>
+
+#include "kernel/color.h"
+
 namespace renderer::kernel {
 
 Rasterizer::Rasterizer(Width width, Height height)
@@ -35,46 +39,36 @@ void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera,
 void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
                            const std::vector<DirectionalLight>& lights,
                            const Texture& diffuse_texture) {
-  int min_x = std::floor(triangle.GetMinX());
-  int max_x = std::ceil(triangle.GetMaxX());
-  int min_y = std::floor(triangle.GetMinY());
-  int max_y = std::ceil(triangle.GetMaxY());
-  for (int j = std::max(0, min_y); j <= std::min(max_y, frame_.Height() - 1);
-       ++j) {
-    for (int i = std::max(0, min_x); i <= std::min(max_x, frame_.Width() - 1);
-         ++i) {
-      UpdateZBuffer(Width{i}, Height{j}, triangle, camera, lights,
-                    diffuse_texture);
-    }
-  }
-}
-
-void Rasterizer::UpdateZBuffer(Width i, Height j, const Triangle& triangle,
-                               const Camera& camera,
-                               const std::vector<DirectionalLight>& lights,
-                               const Texture& diffuse_texture) {
-  Scalar x = i + 0.5, y = j + 0.5;
-  auto z = triangle.InterpolateZ(XAxis{x}, YAxis{y});
-  if (!z.has_value()) {
-    return;
-  }
-  auto color =
-      triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights, diffuse_texture);
-  switch (camera.CurrentRenderingMode()) {
-    case Camera::RenderingMode::AllSolid: {
-      Scalar& val = z_buffer_.Get(i, j);
-      if (val > *z) {
-        val = *z;
-        frame_.SetColor(i, j, color);
+  const int min_x = std::floor(triangle.GetMinX());
+  const int max_x = std::ceil(triangle.GetMaxX());
+  const int min_y = std::floor(triangle.GetMinY());
+  const int max_y = std::ceil(triangle.GetMaxY());
+  for (int j = min_y; j <= max_y; ++j) {
+    QRgb* scanline = frame_.ScanLine(Height{j});
+    for (int i = min_x; i <= max_x; ++i) {
+      auto z = triangle.InterpolateZ(XAxis{i}, YAxis{j});
+      if (z == std::numeric_limits<Scalar>::infinity()) {
+        continue;
       }
-      break;
+      switch (camera.CurrentRenderingMode()) {
+        case Camera::RenderingMode::AllSolid: {
+          Scalar& z_buffer_value = z_buffer_.Get(Width{i}, Height{j});
+          if (z < z_buffer_value) {
+            scanline[i] = triangle.InterpolateColor(XAxis{i}, YAxis{j}, lights,
+                                                    diffuse_texture);
+            z_buffer_value = z;
+          }
+          break;
+        }
+        case Camera::RenderingMode::AllTransparent: {
+          Color::Blend(&scanline[i],
+                       triangle.InterpolateColor(XAxis{i}, YAxis{j}, lights,
+                                                 diffuse_texture),
+                       kBlendFactor);
+          break;
+        }
+      }
     }
-    case Camera::RenderingMode::AllTransparent: {
-      frame_.BlendColor(i, j, color);
-      break;
-    }
-    default:
-      break;
   }
 }
 

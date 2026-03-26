@@ -9,6 +9,8 @@
 namespace renderer::kernel {
 
 class Rasterizer {
+  static constexpr Scalar kBlendFactor = 0.2f;
+
  public:
   Rasterizer(Width width, Height height);
 
@@ -23,10 +25,7 @@ class Rasterizer {
   void Rasterize(const Triangle& triangle, const Camera& camera,
                  const std::vector<DirectionalLight>& lights,
                  const Texture& diffuse_texture);
-  void UpdateZBuffer(Width i, Height j, const Triangle& triangle,
-                     const Camera& camera,
-                     const std::vector<DirectionalLight>& lights,
-                     const Texture& diffuse_texture);
+  void UpdateZBuffer(Width x, Height y);
 
   ZBuffer z_buffer_;
   Frame frame_;

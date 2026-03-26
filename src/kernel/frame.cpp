@@ -57,6 +57,11 @@ const QImage& Frame::Image() const {
   return image_;
 }
 
+QRgb* Frame::ScanLine(HeightT y) {
+  assert(0 <= y && y < Height());
+  return reinterpret_cast<QRgb*>(image_.scanLine(y));
+}
+
 bool Frame::IsBounded(WidthT x, HeightT y) const {
   return 0 <= x && x < Width() && 0 <= y && y < Height();
 }
