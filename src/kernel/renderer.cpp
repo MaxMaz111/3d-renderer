@@ -89,24 +89,21 @@ std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,
   std::vector<Triangle> result;
   result.reserve(triangles.size() * 3);
 
-  std::vector<Triangle> current_buffer;
-  std::vector<Triangle> next_buffer;
-
-  for (const Triangle& triangle : triangles) {
-    current_buffer.clear();
-    current_buffer.push_back(triangle);
+  for (auto& triangle : triangles) {
+    current_buffer_cache.clear();
+    current_buffer_cache.push_back(std::move(triangle));
     for (const Plane& plane : planes) {
-      if (current_buffer.empty()) {
+      if (current_buffer_cache.empty()) {
         break;
       }
-      next_buffer.clear();
-      for (const Triangle& current_triangle : current_buffer) {
+      next_buffer_cache.clear();
+      for (const Triangle& current_triangle : current_buffer_cache) {
         ClipTriangleByPlane(current_triangle, plane);
-        std::ranges::move(clip_cache_, std::back_inserter(next_buffer));
+        std::ranges::move(clip_cache_, std::back_inserter(next_buffer_cache));
       }
-      current_buffer.swap(next_buffer);
+      current_buffer_cache.swap(next_buffer_cache);
     }
-    std::ranges::move(current_buffer, std::back_inserter(result));
+    std::ranges::move(current_buffer_cache, std::back_inserter(result));
   }
   return result;
 }

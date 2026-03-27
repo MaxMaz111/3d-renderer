@@ -42,6 +42,8 @@ class Renderer {
 
   Rasterizer rasterizer_;
 
+  inline static std::vector<Triangle> current_buffer_cache;
+  inline static std::vector<Triangle> next_buffer_cache;
   Split split_cache_;
   std::vector<Triangle> clip_cache_;
   std::vector<Triangle::Vertex> intersection_cache_;
