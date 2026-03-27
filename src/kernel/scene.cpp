@@ -1,4 +1,5 @@
 #include "scene.h"
+
 #include "util/constants.h"
 #include "util/size.h"
 

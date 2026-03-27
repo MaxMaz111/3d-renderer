@@ -17,6 +17,7 @@ class Rasterizer {
     int min_y;
     int max_y;
   };
+
  public:
   Rasterizer(Width width, Height height);
 
