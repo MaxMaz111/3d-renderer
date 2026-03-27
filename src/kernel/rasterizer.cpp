@@ -29,6 +29,19 @@ const Frame& Rasterizer::Rasterize(
   return frame_;
 }
 
+Rasterizer::BBox Rasterizer::GetBoundingBox(const Triangle& triangle) {
+  BBox bbox;
+  bbox.min_x = std::floor(triangle.GetMinX());
+  bbox.min_x = std::max(bbox.min_x, 0);
+  bbox.max_x = std::ceil(triangle.GetMaxX());
+  bbox.max_x = std::min(bbox.max_x, frame_.Width() - 1);
+  bbox.min_y = std::floor(triangle.GetMinY());
+  bbox.min_y = std::max(bbox.min_y, 0);
+  bbox.max_y = std::ceil(triangle.GetMaxY());
+  bbox.max_y = std::min(bbox.max_y, frame_.Height() - 1);
+  return bbox;
+}
+
 void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera,
                            const std::vector<DirectionalLight>& lights) {
   for (const Triangle& triangle : mesh.triangles) {
@@ -39,13 +52,10 @@ void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera,
 void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
                            const std::vector<DirectionalLight>& lights,
                            const Texture& diffuse_texture) {
-  const int min_x = std::floor(triangle.GetMinX());
-  const int max_x = std::ceil(triangle.GetMaxX());
-  const int min_y = std::floor(triangle.GetMinY());
-  const int max_y = std::ceil(triangle.GetMaxY());
-  for (int j = min_y; j <= max_y; ++j) {
+  BBox bbox = GetBoundingBox(triangle);
+  for (int j = bbox.min_y; j <= bbox.max_y; ++j) {
     QRgb* scanline = frame_.ScanLine(Height{j});
-    for (int i = min_x; i <= max_x; ++i) {
+    for (int i = bbox.min_x; i <= bbox.max_x; ++i) {
       auto z = triangle.InterpolateZ(XAxis{i}, YAxis{j});
       if (z == std::numeric_limits<Scalar>::infinity()) {
         continue;

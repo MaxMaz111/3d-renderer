@@ -26,7 +26,7 @@ class Camera {
  public:
   enum class RenderingMode { AllSolid, AllTransparent };
 
-  Camera();
+  Camera(WidthT width, HeightT height);
 
   void SetDimensions(Width width, Height height);
   void SetNear(Scalar near);

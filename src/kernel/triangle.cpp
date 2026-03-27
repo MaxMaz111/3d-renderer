@@ -12,6 +12,9 @@
 
 namespace renderer::kernel {
 
+Triangle::Triangle(Vertex&& v0, Vertex&& v1, Vertex&& v2)
+    : vertices_{std::move(v0), std::move(v1), std::move(v2)} {}
+
 Triangle::Triangle(const std::array<Vertex, 3>& vertices)
     : vertices_(vertices) {}
 

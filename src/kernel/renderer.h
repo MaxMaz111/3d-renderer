@@ -37,13 +37,14 @@ class Renderer {
                          const std::vector<DirectionalLight>& lights);
   std::vector<Triangle> ClipTriangles(std::vector<Triangle>&& triangles,
                                       const Camera& camera);
-  std::vector<Triangle> ClipTriangleByPlane(const Triangle& triangle,
-                                            const Plane& plane);
+  void ClipTriangleByPlane(const Triangle& triangle, const Plane& plane);
   void SplitVertices(const Triangle& triangle, const Plane& plane);
 
   Rasterizer rasterizer_;
 
-  Split cache_;
+  Split split_cache_;
+  std::vector<Triangle> clip_cache_;
+  std::vector<Triangle::Vertex> intersection_cache_;
 };
 
 }  // namespace renderer::kernel

@@ -1,4 +1,6 @@
 #include "scene.h"
+#include "util/constants.h"
+#include "util/size.h"
 
 #include "camera.h"
 #include "directional_light.h"
@@ -10,7 +12,7 @@ Scene::Scene(std::vector<Mesh>&& meshes)
 
 Scene::Scene(std::vector<Mesh>&& meshes,
              std::vector<DirectionalLight>&& directional_lights)
-    : camera_{},
+    : camera_{Width{kDefaultWidth}, Height{kDefaultHeight}},
       meshes_{std::move(meshes)},
       directional_lights_{std::move(directional_lights)} {}
 

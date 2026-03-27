@@ -1,17 +1,19 @@
 #include <gtest/gtest.h>
 
 #include "kernel/camera.h"
+#include "util/size.h"
 
 namespace {
 
 struct TestableCamera : renderer::kernel::Camera {
   using Camera::PlanesForClipping;
+  using Camera::Camera;
 };
 
 }  // namespace
 
 TEST(Kernel, TestNearFar) {
-  TestableCamera c;
+  TestableCamera c(renderer::Width{800}, renderer::Height{600});
   const auto& planes = c.PlanesForClipping();
 
   std::vector<renderer::kernel::Point3> inside_points = {
@@ -31,7 +33,7 @@ TEST(Kernel, TestNearFar) {
 }
 
 TEST(Kernel, TestInsideOutsideSimple) {
-  TestableCamera c;
+  TestableCamera c(renderer::Width{800}, renderer::Height{600});
   const auto& planes = c.PlanesForClipping();
 
   std::vector<renderer::kernel::Point3> inside_points = {
@@ -69,7 +71,7 @@ TEST(Kernel, TestInsideOutsideSimple) {
 }
 
 TEST(Kernel, TestInsideOutsideAdvanced) {
-  TestableCamera c;
+  TestableCamera c(renderer::Width{800}, renderer::Height{600});
   const auto& planes = c.PlanesForClipping();
 
   std::vector<renderer::kernel::Point3> inside_points = {

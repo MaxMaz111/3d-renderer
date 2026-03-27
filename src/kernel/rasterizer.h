@@ -11,6 +11,12 @@ namespace renderer::kernel {
 class Rasterizer {
   static constexpr Scalar kBlendFactor = 0.2f;
 
+  struct BBox {
+    int min_x;
+    int max_x;
+    int min_y;
+    int max_y;
+  };
  public:
   Rasterizer(Width width, Height height);
 
@@ -20,6 +26,7 @@ class Rasterizer {
                          const std::vector<DirectionalLight>& lights);
 
  private:
+  BBox GetBoundingBox(const Triangle& triangle);
   void Rasterize(Mesh&& mesh, const Camera& camera,
                  const std::vector<DirectionalLight>& lights);
   void Rasterize(const Triangle& triangle, const Camera& camera,

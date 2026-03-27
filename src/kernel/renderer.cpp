@@ -101,8 +101,8 @@ std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,
       }
       next_buffer.clear();
       for (const Triangle& current_triangle : current_buffer) {
-        std::ranges::move(ClipTriangleByPlane(current_triangle, plane),
-                          std::back_inserter(next_buffer));
+        ClipTriangleByPlane(current_triangle, plane);
+        std::ranges::move(clip_cache_, std::back_inserter(next_buffer));
       }
       current_buffer.swap(next_buffer);
     }
@@ -111,41 +111,47 @@ std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,
   return result;
 }
 
-std::vector<Triangle> Renderer::ClipTriangleByPlane(const Triangle& triangle,
-                                                    const Plane& plane) {
-  cache_.inside.reserve(3);
-  cache_.outside.reserve(3);
-  cache_.inside.clear();
-  cache_.outside.clear();
+void Renderer::ClipTriangleByPlane(const Triangle& triangle,
+                                   const Plane& plane) {
+  split_cache_.inside.reserve(3);
+  split_cache_.outside.reserve(3);
+  split_cache_.inside.clear();
+  split_cache_.outside.clear();
+  clip_cache_.reserve(2);
+  clip_cache_.clear();
   SplitVertices(triangle, plane);
-  auto& inside = cache_.inside;
-  auto& outside = cache_.outside;
+  auto& inside = split_cache_.inside;
+  auto& outside = split_cache_.outside;
 
   if (inside.size() == 3) {
-    return {std::move(triangle)};
+    clip_cache_.push_back(std::move(triangle));
+    return;
   }
   if (inside.size() == 0) {
-    return {};
+    return;
   }
-  std::vector<Triangle::Vertex> intersections;
+  intersection_cache_.reserve(2);
+  intersection_cache_.clear();
   for (const auto& inside_vertex : inside) {
     for (const auto& outside_vertex : outside) {
-      intersections.push_back(
+      intersection_cache_.push_back(
           plane.LineIntersection(inside_vertex, outside_vertex));
     }
   }
-  if (intersections.size() < 2) {
-    return {};
+  if (intersection_cache_.size() < 2) {
+    return;
   }
   if (inside.size() == 1) {
-    Triangle result({std::move(inside[0]), std::move(intersections[0]),
-                     std::move(intersections[1])});
-    return {std::move(result)};
+    clip_cache_.emplace_back(std::move(inside[0]),
+                             std::move(intersection_cache_[0]),
+                             std::move(intersection_cache_[1]));
+    return;
   }
-  return {Triangle({std::move(inside[0]), std::move(inside[1]),
-                    std::move(intersections[0])}),
-          Triangle({std::move(inside[1]), std::move(intersections[0]),
-                    std::move(intersections[1])})};
+  clip_cache_.emplace_back(std::move(inside[0]), std::move(inside[1]),
+                           std::move(intersection_cache_[0]));
+  clip_cache_.emplace_back(std::move(inside[1]),
+                           std::move(intersection_cache_[0]),
+                           std::move(intersection_cache_[1]));
 }
 
 void Renderer::SplitVertices(const Triangle& triangle, const Plane& plane) {
@@ -153,9 +159,9 @@ void Renderer::SplitVertices(const Triangle& triangle, const Plane& plane) {
 
   for (int i = 0; i < 3; ++i) {
     if (plane.IsOnTheSameSideAsNormal(vertices[i].point)) {
-      cache_.inside.push_back(vertices[i]);
+      split_cache_.inside.push_back(vertices[i]);
     } else {
-      cache_.outside.push_back(vertices[i]);
+      split_cache_.outside.push_back(vertices[i]);
     }
   }
 }

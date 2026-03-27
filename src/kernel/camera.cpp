@@ -11,14 +11,14 @@ const Vector3 Camera::kDefaultPosition{4, 0, 0};
 const Matrix3 Camera::kDefaultRotation =
     Matrix3{AngleAxis(std::numbers::pi_v<Scalar> / 2, Vector3::UnitY())};
 
-Camera::Camera()
+Camera::Camera(Width width, Height height)
     : position_(kDefaultPosition),
       rotation_matrix_(kDefaultRotation),
       near_(kDefaultNear),
       far_(kDefaultFar),
       fov_y_(kDefaultFovY),
-      width_(kDefaultWidth),
-      height_(kDefaultHeight),
+      width_(width),
+      height_(height),
       projection_matrix_(BuildProjectionMatrix()),
       planes_(BuildPlanesForClipping()) {}
 

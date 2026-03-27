@@ -24,6 +24,7 @@ class Triangle {
     Scalar inv_w = 1;
   };
 
+  Triangle(Vertex&& v0, Vertex&& v1, Vertex&& v2);
   Triangle(const std::array<Vertex, 3>& vertices);
 
   const std::array<Vertex, 3>& Vertices() const;
