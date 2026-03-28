@@ -17,7 +17,7 @@ class ObjReader {
 
  private:
   static Mesh ProcessMesh(const aiScene* scene, const aiMesh* mesh);
-  static Triangle::Vertex ExtractVertex(const aiMesh* mesh, uint32_t index);
+  static Vertex ExtractVertex(const aiMesh* mesh, uint32_t index);
   static void ProcessMaterials(Mesh& current, const aiScene* scene,
                                const aiMesh* mesh);
   static Texture LoadTextureFromMaterial(const aiMaterial* material,

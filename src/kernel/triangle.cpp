@@ -18,7 +18,7 @@ Triangle::Triangle(Vertex&& v0, Vertex&& v1, Vertex&& v2)
 Triangle::Triangle(const std::array<Vertex, 3>& vertices)
     : vertices_(vertices) {}
 
-const std::array<Triangle::Vertex, 3>& Triangle::Vertices() const {
+const std::array<Vertex, 3>& Triangle::Vertices() const {
   return vertices_;
 }
 
@@ -91,6 +91,17 @@ Scalar Triangle::GetMinY() const {
 Scalar Triangle::GetMaxY() const {
   return std::max(
       {vertices_[0].point.y(), vertices_[1].point.y(), vertices_[2].point.y()});
+}
+
+bool Triangle::IsInside(const std::array<Plane, 6>& planes) const {
+  for (const Plane& plane : planes) {
+    if (!plane.IsOnTheSameSideAsNormal(vertices_[0].point) ||
+        !plane.IsOnTheSameSideAsNormal(vertices_[1].point) ||
+        !plane.IsOnTheSameSideAsNormal(vertices_[2].point)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 std::optional<std::array<Scalar, 3>> Triangle::Barycentric(XAxis x,

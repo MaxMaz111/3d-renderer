@@ -1,13 +1,11 @@
 #pragma once
 
 #include "linalg.h"
-#include "triangle.h"
+#include "vertex.h"
 
 namespace renderer::kernel {
 
 class Plane {
-  using Vertex = Triangle::Vertex;
-
  public:
   Plane(const Vector3& normal, const Point3& point);
   Plane(const Vector3& normal, Scalar distance);

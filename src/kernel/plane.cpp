@@ -16,8 +16,8 @@ Point3 Plane::ProjectPoint(const Point3& point) const {
   return point - (DistanceToPoint(point) * normal_);
 }
 
-Triangle::Vertex Plane::LineIntersection(const Vertex& line_start,
-                                         const Vertex& line_end) const {
+Vertex Plane::LineIntersection(const Vertex& line_start,
+                               const Vertex& line_end) const {
   Vector3 line_direction = line_end.point - line_start.point;
   Scalar denominator = normal_.dot(line_direction);
   Scalar t = -(normal_.dot(line_start.point) + d_) / denominator;

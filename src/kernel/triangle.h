@@ -8,7 +8,9 @@
 
 #include "directional_light.h"
 #include "linalg.h"
+#include "plane.h"
 #include "texture.h"
+#include "vertex.h"
 
 namespace renderer::kernel {
 
@@ -17,13 +19,6 @@ using YAxis = util::Alias<Scalar, struct y_tag>;
 
 class Triangle {
  public:
-  struct Vertex {
-    Point3 point;
-    Vector3 normal;
-    Point2 tex_coord;
-    Scalar inv_w = 1;
-  };
-
   Triangle(Vertex&& v0, Vertex&& v1, Vertex&& v2);
   Triangle(const std::array<Vertex, 3>& vertices);
 
@@ -40,6 +35,7 @@ class Triangle {
   Scalar GetMaxX() const;
   Scalar GetMinY() const;
   Scalar GetMaxY() const;
+  bool IsInside(const std::array<Plane, 6>& planes) const;
 
  private:
   std::optional<std::array<Scalar, 3>> Barycentric(XAxis x, YAxis y) const;

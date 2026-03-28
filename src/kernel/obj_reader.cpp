@@ -49,7 +49,7 @@ Mesh ObjReader::ProcessMesh(const aiScene* scene, const aiMesh* mesh) {
 
   current.triangles.reserve(mesh->mNumFaces);
   for (size_t i = 0; i < mesh->mNumFaces; ++i) {
-    std::array<Triangle::Vertex, 3> vertices;
+    std::array<Vertex, 3> vertices;
     const aiFace& face = mesh->mFaces[i];
     for (size_t v = 0; v < 3; ++v) {
       vertices[v] = ExtractVertex(mesh, face.mIndices[v]);
@@ -59,7 +59,7 @@ Mesh ObjReader::ProcessMesh(const aiScene* scene, const aiMesh* mesh) {
   return current;
 }
 
-Triangle::Vertex ObjReader::ExtractVertex(const aiMesh* mesh, uint32_t index) {
+Vertex ObjReader::ExtractVertex(const aiMesh* mesh, uint32_t index) {
   const aiVector3D& vertex = mesh->mVertices[index];
   const aiVector3D& normal = mesh->mNormals[index];
 
@@ -73,7 +73,7 @@ Triangle::Vertex ObjReader::ExtractVertex(const aiMesh* mesh, uint32_t index) {
     tex_coord = Point2{tex.x, tex.y};
   }
 
-  return Triangle::Vertex{point, normal_vec, tex_coord};
+  return Vertex{point, normal_vec, tex_coord};
 }
 
 void ObjReader::ProcessMaterials(Mesh& current, const aiScene* scene,

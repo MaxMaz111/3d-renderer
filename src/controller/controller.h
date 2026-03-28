@@ -59,6 +59,7 @@ class State {
 
   KeyRange HandlePressEvent(int key);
   KeyRange HandleReleaseEvent(int key);
+  KeyRange GetCurrentKeys() const;
 
  private:
   static Key ConvertQtKey(int key);

@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <spdlog/spdlog.h>
 #include <tbb/blocked_range.h>
+#include <tbb/enumerable_thread_specific.h>
 #include <tbb/parallel_for.h>
-#include <tbb/parallel_reduce.h>
 #include <vector>
 
 #include "util/time_anchor.h"
@@ -42,7 +42,7 @@ std::vector<DirectionalLight> Renderer::RotateAndMove(
     std::vector<DirectionalLight>&& lights, const Camera& camera) const {
   Matrix3 mat = camera.RotationMatrix().transpose();
   Point3 translation = -camera.Position();
-  tbb::parallel_for(tbb::blocked_range<size_t>(0, lights.size()),
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, lights.size(), 4096),
                     [&](const tbb::blocked_range<size_t>& range) {
                       for (size_t i = range.begin(); i < range.end(); ++i) {
                         lights[i].RotateAndMove(mat, translation);
@@ -56,21 +56,30 @@ std::vector<Mesh> Renderer::RotateAndMove(std::vector<Mesh>&& meshes,
   Matrix3 mat = camera.RotationMatrix().transpose();
   Point3 translation = -camera.Position();
   for (auto& mesh : meshes) {
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, mesh.triangles.size()),
-                      [&](const tbb::blocked_range<size_t>& range) {
-                        for (size_t i = range.begin(); i < range.end(); ++i) {
-                          mesh.triangles[i].RotateAndMove(mat, translation);
-                        }
-                      });
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, mesh.triangles.size(), 4096),
+        [&](const tbb::blocked_range<size_t>& range) {
+          for (size_t i = range.begin(); i < range.end(); ++i) {
+            mesh.triangles[i].RotateAndMove(mat, translation);
+          }
+        });
   }
   return meshes;
 }
 
 std::vector<Mesh> Renderer::Clip(std::vector<Mesh>&& meshes,
                                  const Camera& camera) {
-  for (auto& mesh : meshes) {
-    mesh.triangles = ClipTriangles(std::move(mesh.triangles), camera);
-  }
+  util::TimeAnchor anchor("Clipping time",
+                          [](const std::string& name, double time) {
+                            spdlog::info("{}: {:.2f} ms", name, time);
+                          });
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, meshes.size()),
+                    [&](const tbb::blocked_range<size_t>& range) {
+                      for (size_t i = range.begin(); i < range.end(); ++i) {
+                        meshes[i].triangles =
+                            ClipTriangles(std::move(meshes[i].triangles), camera);
+                      }
+                    });
   return meshes;
 }
 
@@ -93,44 +102,52 @@ const Frame& Renderer::Rasterize(std::vector<Mesh>&& meshes,
 
 std::vector<Triangle> Renderer::ClipTriangles(std::vector<Triangle>&& triangles,
                                               const Camera& camera) {
+
   const auto& planes = camera.PlanesForClipping();
 
-  return tbb::parallel_reduce(
-      tbb::blocked_range<size_t>(0, triangles.size()), std::vector<Triangle>{},
-      [&planes, &triangles, this](const tbb::blocked_range<size_t>& range,
-          std::vector<Triangle> local) {
-        std::vector<Triangle> current_buffer;
-        std::vector<Triangle> next_buffer;
-        local.reserve(local.size() + (range.end() - range.begin()));
+  tbb::enumerable_thread_specific<std::vector<Triangle>> tls_output;
+  tbb::parallel_for(tbb::blocked_range<size_t>(0, triangles.size(), 4096),
+                    [&](const tbb::blocked_range<size_t>& range) {
+                      auto& output = tls_output.local();
+                      std::vector<Triangle> current;
+                      std::vector<Triangle> next;
+                      current.reserve(2);
+                      next.reserve(2);
+                      for (size_t i = range.begin(); i < range.end(); ++i) {
+                        if (triangles[i].IsInside(planes)) {
+                          output.push_back(std::move(triangles[i]));
+                          continue;
+                        }
+                        current.clear();
+                        current.push_back(std::move(triangles[i]));
+                        for (const Plane& plane : planes) {
+                          if (current.empty()) {
+                            break;
+                          }
+                          next.clear();
+                          for (const Triangle& tri : current) {
+                            ClipTriangleByPlane(tri, plane);
+                            std::ranges::move(cache.clipped_triangles,
+                                              std::back_inserter(next));
+                          }
+                          current.swap(next);
+                        }
+                        std::ranges::move(current, std::back_inserter(output));
+                      }
+                    });
 
-        for (size_t i = range.begin(); i < range.end(); ++i) {
-          current_buffer.clear();
-          current_buffer.push_back(std::move(triangles[i]));
+  std::vector<Triangle> result;
+  size_t total_triangles = 0;
+  for (auto& local : tls_output) {
+    total_triangles += local.size();
+  }
+  result.reserve(total_triangles);
 
-          for (const Plane& plane : planes) {
-            if (current_buffer.empty()) {
-              break;
-            }
-            next_buffer.clear();
-
-            for (const Triangle& tri : current_buffer) {
-              ClipTriangleByPlane(tri, plane);
-              std::ranges::move(cache.clipped_triangles,
-                                std::back_inserter(next_buffer));
-              cache.clipped_triangles.clear();
-            }
-
-            current_buffer.swap(next_buffer);
-          }
-
-          std::ranges::move(current_buffer, std::back_inserter(local));
-        }
-        return local;
-      },
-      [](std::vector<Triangle>&& a, std::vector<Triangle>&& b) {
-        std::ranges::move(b, std::back_inserter(a));
-        return a;
-      });
+  for (auto& local : tls_output) {
+    result.insert(result.end(), std::make_move_iterator(local.begin()),
+                  std::make_move_iterator(local.end()));
+  }
+  return result;
 }
 
 void Renderer::ClipTriangleByPlane(const Triangle& triangle,

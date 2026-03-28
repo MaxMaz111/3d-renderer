@@ -12,8 +12,6 @@
 namespace renderer::kernel {
 
 class Renderer {
-  using Vertex = Triangle::Vertex;
-
   struct Split {
     std::vector<Vertex> inside;
     std::vector<Vertex> outside;

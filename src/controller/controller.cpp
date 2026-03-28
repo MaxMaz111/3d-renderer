@@ -50,6 +50,10 @@ State::KeyRange State::HandleReleaseEvent(int key) {
   return KeyRange(key_mask_);
 }
 
+State::KeyRange State::GetCurrentKeys() const {
+  return KeyRange(key_mask_);
+}
+
 State::Key State::ConvertQtKey(int key) {
   switch (key) {
     case Qt::Key_W:
@@ -117,6 +121,7 @@ void Controller::KeyReleaseEventHandler(const QKeyEvent* ev) {
 void Controller::ResizeEventHandler(const QResizeEvent* ev) const {
   kernel_ptr_->SetScreenDimensions(Width{ev->size().width()},
                                    Height{ev->size().height()});
+  NotifyKernel(keys_.GetCurrentKeys());
   kernel_ptr_->NotifyView();
 }
 

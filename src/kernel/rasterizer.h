@@ -12,10 +12,10 @@ class Rasterizer {
   static constexpr Scalar kBlendFactor = 0.2f;
 
   struct BBox {
-    int min_x;
-    int max_x;
-    int min_y;
-    int max_y;
+    int16_t min_x;
+    int16_t max_x;
+    int16_t min_y;
+    int16_t max_y;
   };
 
  public:
