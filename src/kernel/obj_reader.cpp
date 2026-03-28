@@ -73,7 +73,7 @@ Vertex ObjReader::ExtractVertex(const aiMesh* mesh, uint32_t index) {
     tex_coord = Point2{tex.x, tex.y};
   }
 
-  return Vertex{point, normal_vec, tex_coord};
+  return Vertex{point, normal_vec, tex_coord, point};
 }
 
 void ObjReader::ProcessMaterials(Mesh& current, const aiScene* scene,

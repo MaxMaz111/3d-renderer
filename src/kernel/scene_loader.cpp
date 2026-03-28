@@ -25,6 +25,11 @@ Scene SceneLoader::ReadFromJson(const std::filesystem::path& filepath) {
       "Loaded scene {} with {} meshes from {} model entries and {} lights",
       filepath.string(), result.size(), config.models.size(),
       config.lights.size());
+  spdlog::info("Total triangles in the scene: {}",
+               std::accumulate(result.begin(), result.end(), 0,
+                               [](int sum, const Mesh& mesh) {
+                                 return sum + mesh.triangles.size();
+                               }));
 
   return Scene(std::move(result), std::move(config.lights));
 }

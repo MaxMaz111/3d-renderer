@@ -1,11 +1,10 @@
 #include "rasterizer.h"
 
 #include <limits>
-
-#include "kernel/color.h"
-#include "util/time_anchor.h"
 #include <spdlog/spdlog.h>
 #include <tbb/parallel_for.h>
+
+#include "color.h"
 
 namespace renderer::kernel {
 
@@ -26,9 +25,6 @@ void Rasterizer::ResetTo(Width width, Height height) {
 const Frame& Rasterizer::Rasterize(
     std::vector<Mesh>&& meshes, const Camera& camera,
     const std::vector<DirectionalLight>& lights) {
-  util::TimeAnchor anchor("Rasterization time", [](const std::string& name, double time) {
-    spdlog::info("{}: {:.2f} ms", name, time);
-  });
   for (auto& mesh : meshes) {
     Rasterize(std::move(mesh), camera, lights);
   }

@@ -76,8 +76,8 @@ std::vector<Mesh> Renderer::Clip(std::vector<Mesh>&& meshes,
   tbb::parallel_for(tbb::blocked_range<size_t>(0, meshes.size()),
                     [&](const tbb::blocked_range<size_t>& range) {
                       for (size_t i = range.begin(); i < range.end(); ++i) {
-                        meshes[i].triangles =
-                            ClipTriangles(std::move(meshes[i].triangles), camera);
+                        meshes[i].triangles = ClipTriangles(
+                            std::move(meshes[i].triangles), camera);
                       }
                     });
   return meshes;
@@ -87,9 +87,13 @@ std::vector<Mesh> Renderer::Project(std::vector<Mesh>&& meshes,
                                     const Camera& camera) const {
   const Matrix4& mat = camera.ProjectionMatrix();
   for (auto& mesh : meshes) {
-    for (auto& triangle : mesh.triangles) {
-      triangle.Project(mat);
-    }
+    tbb::parallel_for(
+        tbb::blocked_range<size_t>(0, mesh.triangles.size(), 4096),
+        [&](const tbb::blocked_range<size_t>& range) {
+          for (size_t i = range.begin(); i < range.end(); ++i) {
+            mesh.triangles[i].Project(mat);
+          }
+        });
   }
   return meshes;
 }

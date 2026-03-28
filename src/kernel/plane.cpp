@@ -21,14 +21,17 @@ Vertex Plane::LineIntersection(const Vertex& line_start,
   Vector3 line_direction = line_end.point - line_start.point;
   Scalar denominator = normal_.dot(line_direction);
   Scalar t = -(normal_.dot(line_start.point) + d_) / denominator;
+  Vector3 interpolated_point = line_start.point + t * line_direction;
   Vector3 interpolated_normal =
       (line_start.normal + t * (line_end.normal - line_start.normal))
           .normalized();
   Point2 interpolated_tex_coord =
       line_start.tex_coord + t * (line_end.tex_coord - line_start.tex_coord);
-  Vertex vertex{.point = line_start.point + t * line_direction,
+  Point3 interpolated_world_point = line_start.world_point + t * (line_end.world_point - line_start.world_point);
+  Vertex vertex{.point = interpolated_point,
                 .normal = interpolated_normal,
-                .tex_coord = interpolated_tex_coord};
+                .tex_coord = interpolated_tex_coord,
+              .world_point = interpolated_world_point};
   return vertex;
 }
 
