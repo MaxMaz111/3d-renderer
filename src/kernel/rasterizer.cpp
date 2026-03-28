@@ -56,7 +56,9 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
   for (int j = bbox.min_y; j <= bbox.max_y; ++j) {
     QRgb* scanline = frame_.ScanLine(Height{j});
     for (int i = bbox.min_x; i <= bbox.max_x; ++i) {
-      auto z = triangle.InterpolateZ(XAxis{i}, YAxis{j});
+      Scalar x = i + 0.5;
+      Scalar y = j + 0.5;
+      auto z = triangle.InterpolateZ(XAxis{x}, YAxis{y});
       if (z == std::numeric_limits<Scalar>::infinity()) {
         continue;
       }
@@ -64,7 +66,7 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
         case Camera::RenderingMode::AllSolid: {
           Scalar& z_buffer_value = z_buffer_.Get(Width{i}, Height{j});
           if (z < z_buffer_value) {
-            scanline[i] = triangle.InterpolateColor(XAxis{i}, YAxis{j}, lights,
+            scanline[i] = triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights,
                                                     diffuse_texture);
             z_buffer_value = z;
           }
@@ -72,7 +74,7 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
         }
         case Camera::RenderingMode::AllTransparent: {
           Color::Blend(&scanline[i],
-                       triangle.InterpolateColor(XAxis{i}, YAxis{j}, lights,
+                       triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights,
                                                  diffuse_texture),
                        kBlendFactor);
           break;
