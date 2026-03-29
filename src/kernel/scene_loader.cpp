@@ -2,6 +2,8 @@
 
 #include <spdlog/spdlog.h>
 
+#include "kernel/mesh.h"
+
 #include "obj_reader.h"
 #include "scene_config.h"
 
@@ -31,7 +33,7 @@ Scene SceneLoader::ReadFromJson(const std::filesystem::path& filepath) {
                                  return sum + mesh.triangles.size();
                                }));
 
-  return Scene(std::move(result), std::move(config.lights));
+  return Scene(std::move(result), std::move(config.lights), {});
 }
 
 std::vector<Mesh> SceneLoader::NormalizeMeshes(std::vector<Mesh>&& meshes) {
@@ -44,8 +46,9 @@ std::vector<Mesh> SceneLoader::NormalizeMeshes(std::vector<Mesh>&& meshes) {
       Vector3::Constant(-std::numeric_limits<Scalar>::infinity());
   for (const auto& mesh : meshes) {
     for (const auto& tri : mesh.triangles) {
-      for (int i = 0; i < 3; ++i) {
-        const auto& p = tri.GetPoint(i);
+      const auto& vertices = tri.Vertices();
+      for (const auto& v : vertices) {
+        const auto& p = v.point;
         bbox_min = bbox_min.cwiseMin(p);
         bbox_max = bbox_max.cwiseMax(p);
       }
@@ -62,11 +65,17 @@ std::vector<Mesh> SceneLoader::NormalizeMeshes(std::vector<Mesh>&& meshes) {
 
   Scalar scale = 1 / max_extent;
   for (auto& mesh : meshes) {
+    Mesh new_mesh;
+    new_mesh.diffuse_texture = mesh.diffuse_texture;
     for (auto& tri : mesh.triangles) {
-      for (int i = 0; i < 3; ++i) {
-        tri.GetPoint(i) = (tri.GetPoint(i) - center) * scale;
+      auto vertices = tri.Vertices();
+      for (auto& v : vertices) {
+        v.point = (v.point - center) * scale;
+        v.world_point = (v.world_point - center) * scale;
       }
+      new_mesh.triangles.emplace_back(std::move(vertices));
     }
+    mesh = std::move(new_mesh);
   }
   return std::move(meshes);
 }
@@ -74,11 +83,17 @@ std::vector<Mesh> SceneLoader::NormalizeMeshes(std::vector<Mesh>&& meshes) {
 std::vector<Mesh> SceneLoader::TranslateMeshes(std::vector<Mesh>&& meshes,
                                                const Vector3& translation) {
   for (auto& mesh : meshes) {
+    Mesh new_mesh;
+    new_mesh.diffuse_texture = mesh.diffuse_texture;
     for (auto& triangle : mesh.triangles) {
-      for (int i = 0; i < 3; ++i) {
-        triangle.GetPoint(i) += translation;
+      auto vertices = triangle.Vertices();
+      for (auto& v : vertices) {
+        v.point += translation;
+        v.world_point += translation;
       }
+      new_mesh.triangles.emplace_back(std::move(vertices));
     }
+    mesh = std::move(new_mesh);
   }
   return std::move(meshes);
 }

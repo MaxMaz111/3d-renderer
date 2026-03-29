@@ -4,13 +4,11 @@
 
 namespace renderer::kernel {
 
-DirectionalLight::DirectionalLight() : direction_{Vector3(0, 0, -1)} {}
-
 DirectionalLight::DirectionalLight(const Vector3& direction)
     : direction_(direction.normalized()) {}
 
 Scalar DirectionalLight::CalculateIntensity(const Vector3& normal) const {
-  Scalar dot_product = direction_.dot(normal.normalized());
+  Scalar dot_product = -direction_.dot(normal.normalized());
   Scalar intensity = ScaleIntensity(dot_product);
   return std::clamp(intensity, kMinIntensity, kMaxIntensity);
 }

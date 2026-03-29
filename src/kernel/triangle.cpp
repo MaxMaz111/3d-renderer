@@ -6,9 +6,12 @@
 #include <cmath>
 #include <limits>
 
+#include "kernel/z_buffer.h"
+
 #include "color.h"
 #include "directional_light.h"
 #include "linalg.h"
+#include "shadow_map_light.h"
 
 namespace renderer::kernel {
 
@@ -20,14 +23,6 @@ Triangle::Triangle(const std::array<Vertex, 3>& vertices)
 
 const std::array<Vertex, 3>& Triangle::Vertices() const {
   return vertices_;
-}
-
-Point3& Triangle::GetPoint(int index) {
-  return vertices_[index].point;
-}
-
-const Point3& Triangle::GetPoint(int index) const {
-  return vertices_[index].point;
 }
 
 void Triangle::RotateAndMove(const Matrix3& rotation_matrix,
@@ -60,16 +55,23 @@ Scalar Triangle::InterpolateZ(XAxis x, YAxis y) const {
   return alpha * p0.z() + beta * p1.z() + gamma * p2.z();
 }
 
-QRgb Triangle::InterpolateColor(XAxis x, YAxis y,
-                                const std::vector<DirectionalLight>& lights,
-                                const Texture& diffuse_texture) const {
+QRgb Triangle::InterpolateColor(
+    XAxis x, YAxis y, const std::vector<DirectionalLight>& lights,
+    const std::vector<ShadowMapLight>& shadow_lights,
+    const Texture& diffuse_texture) const {
   auto normal = InterpolateNormal(x, y);
   auto tex_coord = InterpolateTexCoord(x, y);
   auto base_color = diffuse_texture.Sample(tex_coord);
-  Scalar diffuse_intensity = 0;
+  Scalar ambient = 0;
+  Scalar diffuse_intensity = ambient;
   for (const auto& light : lights) {
     diffuse_intensity += light.CalculateIntensity(normal);
   }
+  Point3 world_point = InterpolateWorldPoint(x, y);
+  for (const auto& shadow : shadow_lights) {
+    diffuse_intensity += shadow.CalculateIntensity(normal, world_point);
+  }
+  diffuse_intensity = std::clamp(diffuse_intensity, 0.0f, 1.0f);
   return Color::ScaleColor(base_color, diffuse_intensity);
 }
 
@@ -91,6 +93,20 @@ Scalar Triangle::GetMinY() const {
 Scalar Triangle::GetMaxY() const {
   return std::max(
       {vertices_[0].point.y(), vertices_[1].point.y(), vertices_[2].point.y()});
+}
+
+Triangle::BBox Triangle::GetBoundingBox(const ZBuffer& z_buffer) const {
+  BBox bbox;
+  bbox.min_x = std::floor(GetMinX());
+  bbox.min_x = std::max(bbox.min_x, static_cast<int16_t>(0));
+  bbox.max_x = std::ceil(GetMaxX());
+  bbox.max_x = std::min(bbox.max_x, static_cast<int16_t>(z_buffer.Width() - 1));
+  bbox.min_y = std::floor(GetMinY());
+  bbox.min_y = std::max(bbox.min_y, static_cast<int16_t>(0));
+  bbox.max_y = std::ceil(GetMaxY());
+  bbox.max_y =
+      std::min(bbox.max_y, static_cast<int16_t>(z_buffer.Height() - 1));
+  return bbox;
 }
 
 bool Triangle::IsInside(const std::array<Plane, 6>& planes) const {
@@ -172,6 +188,15 @@ Vector3 Triangle::InterpolateNormal(XAxis x, YAxis y) const {
   return (alpha * vertices_[0].normal + beta * vertices_[1].normal +
           gamma * vertices_[2].normal)
       .normalized();
+}
+
+Point3 Triangle::InterpolateWorldPoint(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  assert(weights.has_value());
+
+  const auto [alpha, beta, gamma] = *weights;
+  return alpha * vertices_[0].world_point + beta * vertices_[1].world_point +
+         gamma * vertices_[2].world_point;
 }
 
 Point3 Triangle::FromHomogeneous(const Point4& point) const {

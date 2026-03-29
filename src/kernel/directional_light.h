@@ -6,7 +6,6 @@ namespace renderer::kernel {
 
 class DirectionalLight {
  public:
-  DirectionalLight();
   DirectionalLight(const Vector3& direction);
 
   Scalar CalculateIntensity(const Vector3& normal) const;

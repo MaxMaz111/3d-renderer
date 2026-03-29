@@ -1,7 +1,6 @@
 #include "rasterizer.h"
 
 #include <limits>
-#include <spdlog/spdlog.h>
 #include <tbb/parallel_for.h>
 
 #include "color.h"
@@ -24,37 +23,27 @@ void Rasterizer::ResetTo(Width width, Height height) {
 
 const Frame& Rasterizer::Rasterize(
     std::vector<Mesh>&& meshes, const Camera& camera,
-    const std::vector<DirectionalLight>& lights) {
+    const std::vector<DirectionalLight>& lights,
+    const std::vector<ShadowMapLight>& shadow_lights) {
   for (auto& mesh : meshes) {
-    Rasterize(std::move(mesh), camera, lights);
+    Rasterize(std::move(mesh), camera, lights, shadow_lights);
   }
   return frame_;
 }
 
-Rasterizer::BBox Rasterizer::GetBoundingBox(const Triangle& triangle) {
-  BBox bbox;
-  bbox.min_x = std::floor(triangle.GetMinX());
-  bbox.min_x = std::max(bbox.min_x, static_cast<int16_t>(0));
-  bbox.max_x = std::ceil(triangle.GetMaxX());
-  bbox.max_x = std::min(bbox.max_x, static_cast<int16_t>(frame_.Width() - 1));
-  bbox.min_y = std::floor(triangle.GetMinY());
-  bbox.min_y = std::max(bbox.min_y, static_cast<int16_t>(0));
-  bbox.max_y = std::ceil(triangle.GetMaxY());
-  bbox.max_y = std::min(bbox.max_y, static_cast<int16_t>(frame_.Height() - 1));
-  return bbox;
-}
-
 void Rasterizer::Rasterize(Mesh&& mesh, const Camera& camera,
-                           const std::vector<DirectionalLight>& lights) {
+                           const std::vector<DirectionalLight>& lights,
+                           const std::vector<ShadowMapLight>& shadow_lights) {
   for (const Triangle& triangle : mesh.triangles) {
-    Rasterize(triangle, camera, lights, mesh.diffuse_texture);
+    Rasterize(triangle, camera, lights, shadow_lights, mesh.diffuse_texture);
   }
 }
 
 void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
                            const std::vector<DirectionalLight>& lights,
+                           const std::vector<ShadowMapLight>& shadow_lights,
                            const Texture& diffuse_texture) {
-  BBox bbox = GetBoundingBox(triangle);
+  BBox bbox = triangle.GetBoundingBox(z_buffer_);
   for (int16_t j = bbox.min_y; j <= bbox.max_y; ++j) {
     QRgb* scanline = frame_.ScanLine(Height{j});
     for (int16_t i = bbox.min_x; i <= bbox.max_x; ++i) {
@@ -68,17 +57,18 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
         case Camera::RenderingMode::AllSolid: {
           Scalar& z_buffer_value = z_buffer_.Get(Width{i}, Height{j});
           if (z < z_buffer_value) {
-            scanline[i] = triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights,
-                                                    diffuse_texture);
+            scanline[i] = triangle.InterpolateColor(
+                XAxis{x}, YAxis{y}, lights, shadow_lights, diffuse_texture);
             z_buffer_value = z;
           }
           break;
         }
         case Camera::RenderingMode::AllTransparent: {
-          Color::Blend(&scanline[i],
-                       triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights,
-                                                 diffuse_texture),
-                       kBlendFactor);
+          Color::Blend(
+              &scanline[i],
+              triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights,
+                                        shadow_lights, diffuse_texture),
+              kBlendFactor);
           break;
         }
       }

@@ -66,6 +66,10 @@ void Kernel::SwapRenderingMode() {
   scene_.Camera().SwapRenderingMode();
 }
 
+void Kernel::AddShadowLight() {
+  scene_.AddShadowLight();
+}
+
 void Kernel::NotifyView() {
   observable_.Notify();
 }

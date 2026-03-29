@@ -9,14 +9,8 @@
 namespace renderer::kernel {
 
 class Rasterizer {
+  using BBox = Triangle::BBox;
   static constexpr Scalar kBlendFactor = 0.2f;
-
-  struct BBox {
-    int16_t min_x;
-    int16_t max_x;
-    int16_t min_y;
-    int16_t max_y;
-  };
 
  public:
   Rasterizer(Width width, Height height);
@@ -24,14 +18,16 @@ class Rasterizer {
   void Clear();
   void ResetTo(Width width, Height height);
   const Frame& Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
-                         const std::vector<DirectionalLight>& lights);
+                         const std::vector<DirectionalLight>& lights,
+                         const std::vector<ShadowMapLight>& shadow_lights);
 
  private:
-  BBox GetBoundingBox(const Triangle& triangle);
   void Rasterize(Mesh&& mesh, const Camera& camera,
-                 const std::vector<DirectionalLight>& lights);
+                 const std::vector<DirectionalLight>& lights,
+                 const std::vector<ShadowMapLight>& shadow_lights);
   void Rasterize(const Triangle& triangle, const Camera& camera,
                  const std::vector<DirectionalLight>& lights,
+                 const std::vector<ShadowMapLight>& shadow_lights,
                  const Texture& diffuse_texture);
   void UpdateZBuffer(Width x, Height y);
 

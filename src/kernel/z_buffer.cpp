@@ -4,27 +4,35 @@
 
 namespace renderer::kernel {
 
-ZBuffer::ZBuffer(Width width, Height height)
+ZBuffer::ZBuffer(WidthT width, HeightT height)
     : width_(width), data_(width_ * height, 1) {}
 
 void ZBuffer::Clear() {
   std::ranges::fill(data_, std::numeric_limits<Scalar>::infinity());
 }
 
-void ZBuffer::ResetTo(Width width, Height height) {
+void ZBuffer::ResetTo(WidthT width, HeightT height) {
   width_ = width;
   data_.assign(width_ * height, std::numeric_limits<Scalar>::infinity());
 }
 
-Scalar& ZBuffer::Get(Width width, Height height) {
+Scalar& ZBuffer::Get(WidthT width, HeightT height) {
   return data_[GetIndex(width, height)];
 }
 
-const Scalar& ZBuffer::Get(Width width, Height height) const {
+const Scalar& ZBuffer::Get(WidthT width, HeightT height) const {
   return data_[GetIndex(width, height)];
 }
 
-int ZBuffer::GetIndex(Width width, Height height) const {
+int ZBuffer::Width() const {
+  return width_;
+}
+
+int ZBuffer::Height() const {
+  return data_.size() / width_;
+}
+
+int ZBuffer::GetIndex(WidthT width, HeightT height) const {
   return width + height * width_;
 }
 

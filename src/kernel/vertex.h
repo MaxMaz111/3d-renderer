@@ -9,7 +9,7 @@ struct Vertex {
   Vector3 normal;
   Point2 tex_coord;
   Point3 world_point;
-  Scalar inv_w = 1;
+  Scalar inv_w{};
 };
 
 }  // namespace renderer::kernel

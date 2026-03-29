@@ -7,6 +7,9 @@
 namespace renderer::kernel {
 
 class ZBuffer {
+  using WidthT = Width;
+  using HeightT = Height;
+
  public:
   ZBuffer() = default;
   ZBuffer(Width width, Height height);
@@ -15,9 +18,11 @@ class ZBuffer {
   void ResetTo(Width width, Height height);
   Scalar& Get(Width width, Height height);
   const Scalar& Get(Width width, Height height) const;
+  int Width() const;
+  int Height() const;
 
  private:
-  int GetIndex(Width width, Height height) const;
+  int GetIndex(WidthT width, HeightT height) const;
 
   int width_;
   std::vector<Scalar> data_;
