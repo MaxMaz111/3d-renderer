@@ -30,7 +30,7 @@ class ViewPoint {
   const Point3& Position() const;
   void SetDimensions(Width width, Height height);
   const std::array<Plane, kNumberOfPlanes>& PlanesForClipping() const;
-  std::vector<Mesh> RotateAndMove(std::vector<Mesh>&& meshes) const;
+  std::vector<Mesh> MoveToLocal(std::vector<Mesh>&& meshes) const;
   std::vector<Mesh> Project(std::vector<Mesh>&& meshes) const;
 
  protected:

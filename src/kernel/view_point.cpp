@@ -53,7 +53,9 @@ ViewPoint::PlanesForClipping() const {
   return planes_;
 }
 
-std::vector<Mesh> ViewPoint::RotateAndMove(std::vector<Mesh>&& meshes) const {
+std::vector<Mesh> ViewPoint::MoveToLocal(std::vector<Mesh>&& meshes) const {
+  const Matrix3 mat = rotation_matrix_.transpose();
+  const Point3 translation = -position_;
   tbb::parallel_for(
       tbb::blocked_range<size_t>(0, meshes.size()),
       [&](const tbb::blocked_range<size_t>& range) {
@@ -63,8 +65,7 @@ std::vector<Mesh> ViewPoint::RotateAndMove(std::vector<Mesh>&& meshes) const {
                                          kParallelGranularity),
               [&](const tbb::blocked_range<size_t>& range) {
                 for (size_t j = range.begin(); j < range.end(); ++j) {
-                  meshes[i].triangles[j].RotateAndMove(
-                      rotation_matrix_.transpose(), -position_);
+                  meshes[i].triangles[j].RotateAndMove(mat, translation);
                 }
               });
         }

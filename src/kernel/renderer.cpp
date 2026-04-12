@@ -39,18 +39,18 @@ const Frame& Renderer::Render(const Scene& scene) {
   auto meshes = scene.Meshes();
   auto lights = scene.DirectionalLights();
   auto shadow_lights = scene.ShadowMapLights();
-  shadow_lights = RotateAndMove(std::move(shadow_lights), camera);
-  lights = RotateAndMove(std::move(lights), camera);
-  meshes = camera.RotateAndMove(std::move(meshes));
+  shadow_lights = MoveToLocal(std::move(shadow_lights), camera);
+  lights = MoveToLocal(std::move(lights), camera);
+  meshes = camera.MoveToLocal(std::move(meshes));
   meshes = Clipper::Clip(std::move(meshes), camera.PlanesForClipping());
   meshes = camera.Project(std::move(meshes));
   return Rasterize(std::move(meshes), camera, lights, shadow_lights);
 }
 
-std::vector<DirectionalLight> Renderer::RotateAndMove(
+std::vector<DirectionalLight> Renderer::MoveToLocal(
     std::vector<DirectionalLight>&& lights, const Camera& camera) const {
-  Matrix3 mat = camera.RotationMatrix().transpose();
-  Point3 translation = -camera.Position();
+  const Matrix3 mat = camera.RotationMatrix().transpose();
+  const Point3 translation = -camera.Position();
   tbb::parallel_for(tbb::blocked_range<size_t>(0, lights.size(), 4096),
                     [&](const tbb::blocked_range<size_t>& range) {
                       for (size_t i = range.begin(); i < range.end(); ++i) {
@@ -60,10 +60,10 @@ std::vector<DirectionalLight> Renderer::RotateAndMove(
   return lights;
 }
 
-std::vector<ShadowMapLight> Renderer::RotateAndMove(
+std::vector<ShadowMapLight> Renderer::MoveToLocal(
     std::vector<ShadowMapLight>&& lights, const Camera& camera) const {
-  Matrix3 mat = camera.RotationMatrix().transpose();
-  Point3 translation = -camera.Position();
+  const Matrix3 mat = camera.RotationMatrix().transpose();
+  const Point3 translation = -camera.Position();
   tbb::parallel_for(tbb::blocked_range<size_t>(0, lights.size(), 4096),
                     [&](const tbb::blocked_range<size_t>& range) {
                       for (size_t i = range.begin(); i < range.end(); ++i) {

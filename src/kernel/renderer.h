@@ -26,10 +26,10 @@ class Renderer {
   const Frame& Render(const Scene& scene);
 
  private:
-  std::vector<DirectionalLight> RotateAndMove(
+  std::vector<DirectionalLight> MoveToLocal(
       std::vector<DirectionalLight>&& lights, const Camera& camera) const;
-  std::vector<ShadowMapLight> RotateAndMove(
-      std::vector<ShadowMapLight>&& lights, const Camera& camera) const;
+  std::vector<ShadowMapLight> MoveToLocal(std::vector<ShadowMapLight>&& lights,
+                                          const Camera& camera) const;
   const Frame& Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
                          const std::vector<DirectionalLight>& lights,
                          const std::vector<ShadowMapLight>& shadow_lights);

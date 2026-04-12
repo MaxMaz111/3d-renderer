@@ -14,7 +14,7 @@ ShadowMapLight::ShadowMapLight(const Point3& position, const Matrix3& rotation)
       light_(rotation_matrix_ * Vector3{0, 0, -1}) {}
 
 void ShadowMapLight::UpdateZBuffer(std::vector<Mesh>&& meshes) {
-  meshes = ViewPoint::RotateAndMove(std::move(meshes));
+  meshes = ViewPoint::MoveToLocal(std::move(meshes));
   meshes = Clipper::Clip(std::move(meshes), planes_);
   meshes = ViewPoint::Project(std::move(meshes));
   for (auto& mesh : meshes) {
