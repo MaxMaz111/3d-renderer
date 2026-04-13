@@ -24,6 +24,7 @@ class TimeAnchor {
 
   double Elapsed() const;
   void Reset();
+  void Complete();
 
  private:
   TimePoint start_time_;

@@ -7,6 +7,8 @@
 #include <limits>
 #include <tbb/parallel_for.h>
 
+#include "util/constants.h"
+
 #include "directional_light.h"
 #include "linalg.h"
 #include "shadow_map_light.h"
@@ -64,14 +66,13 @@ LightSample Triangle::InterpolateColor(
     const Texture& diffuse_texture) const {
   auto weights = PerspectiveCorrectBarycentric(x, y);
   if (!weights.has_value()) {
-    return {qRgb(0, 0, 0), 0};
+    return {kBlackColor, 0};
   }
 
   auto normal = InterpolateNormal(*weights);
   auto tex_coord = InterpolateTexCoord(*weights);
   auto base_color = diffuse_texture.Sample(tex_coord);
-  Scalar ambient = 0;
-  Scalar diffuse_intensity = ambient;
+  Scalar diffuse_intensity = kDefaultAmbient;
   for (const auto& light : lights) {
     diffuse_intensity += light.CalculateIntensity(normal);
   }

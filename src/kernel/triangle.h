@@ -20,6 +20,8 @@ using XAxis = util::Alias<Scalar, struct x_tag>;
 using YAxis = util::Alias<Scalar, struct y_tag>;
 
 class Triangle {
+  static constexpr Scalar kDefaultAmbient = 0.1;
+
  public:
   struct BBox {
     int min_x;

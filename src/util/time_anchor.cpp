@@ -40,4 +40,11 @@ void TimeAnchor::Reset() {
   start_time_ = Clock::now();
 }
 
+void TimeAnchor::Complete() {
+  if (on_destroy_) {
+    on_destroy_(name_, Elapsed());
+    on_destroy_ = nullptr;
+  }
+}
+
 }  // namespace renderer::util

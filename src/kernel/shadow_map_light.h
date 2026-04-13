@@ -11,11 +11,12 @@
 namespace renderer::kernel {
 
 class ShadowMapLight : public ViewPoint {
-  static constexpr int kDimension = 4096;
+  static constexpr int kKernel = 5;
+  static constexpr int kDimension = 2048;
   static constexpr Scalar kMinIntensity = 0;
   static constexpr Scalar kMaxIntensity = 1;
   static constexpr Scalar kDefaultShadowBackoff = 50;
-  static constexpr Scalar kDefaultBias = 0.05;
+  static constexpr Scalar kDefaultBias = 0.005;
   static constexpr Scalar kDefaultTooFarThreshold = 0.1;
 
   using BBox = Triangle::BBox;
@@ -29,9 +30,12 @@ class ShadowMapLight : public ViewPoint {
                             const Point3& world_point) const;
 
  private:
+  Scalar SampleShadow(Width x, Height y, Scalar depth) const;
+  Scalar ComputeShadowPCF(const Point3& p) const;
   Scalar CalculateFading(XAxis x, YAxis y) const;
   Point3 TransformToLightSpace(const Point3& world_point) const;
   Point4 ToHomogeneous(const Point3& point) const;
+  bool IsBounded(Width x, Height y) const;
 
   DirectionalLight light_;
   ZBuffer z_buffer_{Width{kDimension}, Height{kDimension}};

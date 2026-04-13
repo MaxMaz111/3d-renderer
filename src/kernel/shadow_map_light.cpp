@@ -46,31 +46,64 @@ void ShadowMapLight::RotateAndMove(const Matrix3& rotation_matrix,
 
 Scalar ShadowMapLight::CalculateIntensity(const Vector3& normal,
                                           const Point3& world_point) const {
-  Point3 light_space_point = TransformToLightSpace(world_point);
+  const Point3 light_p = TransformToLightSpace(world_point);
+  if (!std::isfinite(light_p.x()) || !std::isfinite(light_p.y()) ||
+      !std::isfinite(light_p.z())) {
+    return 0;
+  }
 
-  int x = std::floor(light_space_point.x());
-  int y = std::floor(light_space_point.y());
-  if (x < 0 || y < 0 || x >= kDimension || y >= kDimension) {
+  int x = std::floor(light_p.x());
+  int y = std::floor(light_p.y());
+  if (!IsBounded(Width{x}, Height{y})) {
     return 0;
   }
-  const Scalar stored_z = z_buffer_.Get(Width{x}, Height{y});
+  const Scalar shadow = ComputeShadowPCF(light_p);
 
-  Scalar d = light_space_point.z() - stored_z;
-  if (d > kDefaultBias) {
-    return 0;
+  return light_.CalculateIntensity(normal) * shadow *
+         CalculateFading(XAxis{x}, YAxis{y});
+}
+
+Scalar ShadowMapLight::SampleShadow(Width x, Height y, Scalar depth) const {
+  const Scalar stored_z = z_buffer_.Get(x, y);
+
+  Scalar t = (depth - stored_z) / kDefaultBias;
+  t = std::clamp(t, kMinIntensity, kMaxIntensity);
+
+  return 1 - t;
+}
+
+Scalar ShadowMapLight::ComputeShadowPCF(const Point3& p) const {
+  Scalar shadow = kMinIntensity;
+  int count = 0;
+
+  int base_x = std::floor(p.x());
+  int base_y = std::floor(p.y());
+
+  for (int dx = -kKernel; dx <= kKernel; ++dx) {
+    for (int dy = -kKernel; dy <= kKernel; ++dy) {
+      const int sample_x = base_x + dx;
+      const int sample_y = base_y + dy;
+      if (!IsBounded(Width{sample_x}, Height{sample_y})) {
+        continue;
+      }
+
+      shadow += SampleShadow(Width{sample_x}, Height{sample_y}, p.z());
+      ++count;
+    }
   }
-  Scalar factor = std::min(kMaxIntensity, std::exp(-d * kDefaultShadowBackoff));
-  if (factor < kDefaultTooFarThreshold) {
-    return 0;
+
+  if (count == 0) {
+    return kMaxIntensity;
   }
-  return light_.CalculateIntensity(normal) *
-         CalculateFading(XAxis{x}, YAxis{y}) * factor;
+
+  return shadow / count;
 }
 
 Scalar ShadowMapLight::CalculateFading(XAxis x, YAxis y) const {
   Scalar x_norm = x / kDimension * 2 - 1;
   Scalar y_norm = y / kDimension * 2 - 1;
-  return 1 - std::clamp(std::sqrt(x_norm * x_norm + y_norm * y_norm), 0.f, 1.f);
+  return 1 - std::clamp(std::sqrt(x_norm * x_norm + y_norm * y_norm),
+                        kMinIntensity, kMaxIntensity);
 }
 
 Point3 ShadowMapLight::TransformToLightSpace(const Point3& world_point) const {
@@ -87,6 +120,10 @@ Point3 ShadowMapLight::TransformToLightSpace(const Point3& world_point) const {
 
 Point4 ShadowMapLight::ToHomogeneous(const Point3& point) const {
   return Point4(point.x(), point.y(), point.z(), 1);
+}
+
+bool ShadowMapLight::IsBounded(Width x, Height y) const {
+  return x >= 0 && y >= 0 && x < kDimension && y < kDimension;
 }
 
 }  // namespace renderer::kernel

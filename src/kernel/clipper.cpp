@@ -7,29 +7,30 @@ void Clipper::ClipTriangleByPlane(const Triangle& triangle,
   SplitVertices(triangle, plane);
   auto& inside = cache.split.inside;
   auto& outside = cache.split.outside;
+  const size_t inside_count = cache.split.inside_count;
+  const size_t outside_count = cache.split.outside_count;
   auto& result = cache.clipped_triangles;
   result.clear();
   result.reserve(2);
 
-  if (inside.size() == 3) {
-    result.push_back(std::move(triangle));
+  if (inside_count == 3) {
+    result.push_back(triangle);
     return;
   }
-  if (inside.size() == 0) {
+  if (inside_count == 0) {
     return;
   }
-  cache.intersection_vertices.clear();
-  cache.intersection_vertices.reserve(2);
-  for (const auto& inside_vertex : inside) {
-    for (const auto& outside_vertex : outside) {
-      cache.intersection_vertices.push_back(
-          plane.LineIntersection(inside_vertex, outside_vertex));
+  size_t intersection_count = 0;
+  for (size_t i = 0; i < inside_count; ++i) {
+    for (size_t j = 0; j < outside_count; ++j) {
+      cache.intersection_vertices[intersection_count++] =
+          plane.LineIntersection(inside[i], outside[j]);
     }
   }
-  if (cache.intersection_vertices.size() < 2) {
+  if (intersection_count < 2) {
     return;
   }
-  if (inside.size() == 1) {
+  if (inside_count == 1) {
     result.emplace_back(std::move(inside[0]),
                         std::move(cache.intersection_vertices[0]),
                         std::move(cache.intersection_vertices[1]));
@@ -43,17 +44,15 @@ void Clipper::ClipTriangleByPlane(const Triangle& triangle,
 }
 
 void Clipper::SplitVertices(const Triangle& triangle, const Plane& plane) {
-  cache.split.inside.reserve(3);
-  cache.split.outside.reserve(3);
-  cache.split.inside.clear();
-  cache.split.outside.clear();
+  cache.split.inside_count = 0;
+  cache.split.outside_count = 0;
   const auto& vertices = triangle.Vertices();
 
   for (int i = 0; i < 3; ++i) {
     if (plane.IsOnTheSameSideAsNormal(vertices[i].point)) {
-      cache.split.inside.push_back(vertices[i]);
+      cache.split.inside[cache.split.inside_count++] = vertices[i];
     } else {
-      cache.split.outside.push_back(vertices[i]);
+      cache.split.outside[cache.split.outside_count++] = vertices[i];
     }
   }
 }

@@ -1,7 +1,11 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
+#include <iterator>
 #include <tbb/enumerable_thread_specific.h>
 #include <tbb/parallel_for.h>
+#include <vector>
 
 #include "mesh.h"
 #include "plane.h"
@@ -13,11 +17,13 @@ class Clipper {
 
  public:
   struct Split {
-    std::vector<Vertex> inside;
-    std::vector<Vertex> outside;
+    std::array<Vertex, 3> inside;
+    std::array<Vertex, 3> outside;
+    size_t inside_count;
+    size_t outside_count;
   };
 
-  template <std::size_t N>
+  template <size_t N>
   static std::vector<Mesh> Clip(std::vector<Mesh>&& meshes,
                                 const std::array<Plane, N>& planes) {
     tbb::parallel_for(tbb::blocked_range<size_t>(0, meshes.size()),
@@ -33,11 +39,11 @@ class Clipper {
  private:
   struct Cache {
     std::vector<Triangle> clipped_triangles;
-    std::vector<Vertex> intersection_vertices;
+    std::array<Vertex, 2> intersection_vertices;
     Split split;
   };
 
-  template <std::size_t N>
+  template <size_t N>
   static std::vector<Triangle> ClipTriangles(
       std::vector<Triangle>&& triangles, const std::array<Plane, N>& planes) {
     tbb::enumerable_thread_specific<std::vector<Triangle>> tls_output;
@@ -63,8 +69,10 @@ class Clipper {
               next.clear();
               for (const Triangle& tri : current) {
                 ClipTriangleByPlane(tri, plane);
-                std::ranges::move(cache.clipped_triangles,
-                                  std::back_inserter(next));
+                next.insert(
+                    next.end(),
+                    std::make_move_iterator(cache.clipped_triangles.begin()),
+                    std::make_move_iterator(cache.clipped_triangles.end()));
               }
               current.swap(next);
             }

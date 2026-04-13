@@ -1,9 +1,11 @@
 #include "rasterizer.h"
 
 #include <limits>
+#include <spdlog/spdlog.h>
 #include <tbb/parallel_for.h>
 
 #include "util/size.h"
+#include "util/time_anchor.h"
 
 #include "light_sample.h"
 
@@ -11,7 +13,8 @@ namespace renderer::kernel {
 
 Rasterizer::Rasterizer(Width width, Height height)
     : z_buffer_(Width{width}, Height{height}),
-      frame_(Width{width}, Height{height}) {}
+      frame_(Width{width}, Height{height}),
+      tile_mutex_manager_(width, height) {}
 
 void Rasterizer::Clear() {
   z_buffer_.Clear();
@@ -21,6 +24,7 @@ void Rasterizer::Clear() {
 void Rasterizer::ResetTo(Width width, Height height) {
   z_buffer_.ResetTo(width, height);
   frame_.ResetTo(width, height);
+  tile_mutex_manager_.ResetTo(width, height);
 }
 
 void Rasterizer::ToggleHDR() {
@@ -31,6 +35,10 @@ const Frame& Rasterizer::Rasterize(
     std::vector<Mesh>&& meshes, const Camera& camera,
     const std::vector<DirectionalLight>& lights,
     const std::vector<ShadowMapLight>& shadow_lights) {
+  util::TimeAnchor anchor("Rasterization time",
+                          [](const std::string& name, double time) {
+                            spdlog::info("{}: {:.2f} ms", name, time);
+                          });
   tbb::parallel_for(tbb::blocked_range<size_t>(0, meshes.size()),
                     [&](const tbb::blocked_range<size_t>& range) {
                       for (size_t i = range.begin(); i < range.end(); ++i) {
@@ -61,20 +69,24 @@ void Rasterizer::Rasterize(const Triangle& triangle, const Camera& camera,
                            const Texture& diffuse_texture) {
   BBox bbox =
       triangle.GetBoundingBox(Width{frame_.Width()}, Height{frame_.Height()});
-  for (int j = bbox.min_y; j <= bbox.max_y; ++j) {
-    for (int i = bbox.min_x; i <= bbox.max_x; ++i) {
-      switch (camera.CurrentRenderingMode()) {
-        case Camera::RenderingMode::AllSolid: {
+  switch (camera.CurrentRenderingMode()) {
+    case Camera::RenderingMode::AllSolid: {
+      for (int j = bbox.min_y; j <= bbox.max_y; ++j) {
+        for (int i = bbox.min_x; i <= bbox.max_x; ++i) {
           UpdateAllSolid(Width{i}, Height{j}, triangle, lights, shadow_lights,
                          diffuse_texture);
-          break;
-        }
-        case Camera::RenderingMode::AllTransparent: {
-          UpdateAllTransparent(Width{i}, Height{j}, triangle, lights,
-                               shadow_lights, diffuse_texture);
-          break;
         }
       }
+      break;
+    }
+    case Camera::RenderingMode::AllTransparent: {
+      for (int j = bbox.min_y; j <= bbox.max_y; ++j) {
+        for (int i = bbox.min_x; i <= bbox.max_x; ++i) {
+          UpdateAllTransparent(Width{i}, Height{j}, triangle, lights,
+                               shadow_lights, diffuse_texture);
+        }
+      }
+      break;
     }
   }
 }
@@ -90,6 +102,8 @@ void Rasterizer::UpdateAllSolid(
   if (z == std::numeric_limits<Scalar>::infinity()) {
     return;
   }
+
+  tbb::spin_mutex::scoped_lock lock(tile_mutex_manager_.GetMutexFor(i, j));
   Scalar& z_buffer_value = z_buffer_.Get(Width{i}, Height{j});
   if (z < z_buffer_value) {
     auto sample = triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights,
@@ -112,6 +126,8 @@ void Rasterizer::UpdateAllTransparent(
   }
   auto sample = triangle.InterpolateColor(XAxis{x}, YAxis{y}, lights,
                                           shadow_lights, diffuse_texture);
+
+  tbb::spin_mutex::scoped_lock lock(tile_mutex_manager_.GetMutexFor(i, j));
   frame_.AddColor(Width{i}, Height{j}, sample);
 }
 

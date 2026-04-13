@@ -4,6 +4,7 @@
 #include "directional_light.h"
 #include "frame.h"
 #include "mesh.h"
+#include "tile_mutex_manager.h"
 #include "z_buffer.h"
 
 namespace renderer::kernel {
@@ -42,6 +43,7 @@ class Rasterizer {
 
   ZBuffer z_buffer_;
   Frame frame_;
+  TileMutexManager tile_mutex_manager_;
 };
 
 }  // namespace renderer::kernel
