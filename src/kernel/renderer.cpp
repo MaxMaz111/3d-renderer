@@ -51,12 +51,13 @@ std::vector<DirectionalLight> Renderer::MoveToLocal(
     std::vector<DirectionalLight>&& lights, const Camera& camera) const {
   const Matrix3 mat = camera.RotationMatrix().transpose();
   const Point3 translation = -camera.Position();
-  tbb::parallel_for(tbb::blocked_range<size_t>(0, lights.size(), 4096),
-                    [&](const tbb::blocked_range<size_t>& range) {
-                      for (size_t i = range.begin(); i < range.end(); ++i) {
-                        lights[i].RotateAndMove(mat, translation);
-                      }
-                    });
+  tbb::parallel_for(
+      tbb::blocked_range<size_t>(0, lights.size(), kParallelGranularity),
+      [&](const tbb::blocked_range<size_t>& range) {
+        for (size_t i = range.begin(); i < range.end(); ++i) {
+          lights[i].RotateAndMove(mat, translation);
+        }
+      });
   return lights;
 }
 
@@ -64,12 +65,13 @@ std::vector<ShadowMapLight> Renderer::MoveToLocal(
     std::vector<ShadowMapLight>&& lights, const Camera& camera) const {
   const Matrix3 mat = camera.RotationMatrix().transpose();
   const Point3 translation = -camera.Position();
-  tbb::parallel_for(tbb::blocked_range<size_t>(0, lights.size(), 4096),
-                    [&](const tbb::blocked_range<size_t>& range) {
-                      for (size_t i = range.begin(); i < range.end(); ++i) {
-                        lights[i].RotateAndMove(mat, translation);
-                      }
-                    });
+  tbb::parallel_for(
+      tbb::blocked_range<size_t>(0, lights.size(), kParallelGranularity),
+      [&](const tbb::blocked_range<size_t>& range) {
+        for (size_t i = range.begin(); i < range.end(); ++i) {
+          lights[i].RotateAndMove(mat, translation);
+        }
+      });
   return lights;
 }
 

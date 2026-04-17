@@ -10,8 +10,7 @@
 namespace renderer::kernel {
 
 Frame::Frame(WidthT width, HeightT height)
-    : base_colors_(width * height, kBlackColor),
-      intensities_(width * height, 0),
+    : pixel_data_(width * height),
       image_cache_(width, height, QImage::Format_RGB32) {
   assert(width >= 0);
   assert(height >= 0);
@@ -28,8 +27,7 @@ int Frame::Height() const {
 
 void Frame::Clear() {
   image_cache_.fill(kBlackColor);
-  std::ranges::fill(base_colors_, kBlackColor);
-  std::ranges::fill(intensities_, 0);
+  std::ranges::fill(pixel_data_, PixelEntry{});
 }
 
 void Frame::ResetTo(WidthT width, HeightT height) {
@@ -37,8 +35,7 @@ void Frame::ResetTo(WidthT width, HeightT height) {
   assert(height >= 0);
   if (NeedResize(width, height)) {
     image_cache_ = QImage(width, height, QImage::Format_RGB32);
-    base_colors_.assign(width * height, kBlackColor);
-    intensities_.assign(width * height, 0);
+    pixel_data_.assign(width * height, PixelEntry{});
   }
   Clear();
 }
@@ -46,20 +43,26 @@ void Frame::ResetTo(WidthT width, HeightT height) {
 void Frame::SetColor(WidthT x, HeightT y, LightSample color) {
   assert(IsBounded(x, y));
   const int idx = Index(x, y);
-  base_colors_[idx] = color.color;
-  intensities_[idx] = color.intensity;
+  auto& pixel = pixel_data_[idx];
+  pixel.red = Color::ExtractRed(color.color);
+  pixel.green = Color::ExtractGreen(color.color);
+  pixel.blue = Color::ExtractBlue(color.color);
+  pixel.intensity = color.intensity;
+  pixel.colors_blended_cnt = 1;
 }
 
 void Frame::AddColor(WidthT x, HeightT y, LightSample color) {
   assert(IsBounded(x, y));
   const int idx = Index(x, y);
-  Color::AddColor(&base_colors_[idx],
-                  Color::ScaleColor(color.color, color.intensity));
-  intensities_[idx] += color.intensity * kBlendFactor;
+  auto& pixel = pixel_data_[idx];
+  pixel.red += Color::ExtractRed(color.color);
+  pixel.green += Color::ExtractGreen(color.color);
+  pixel.blue += Color::ExtractBlue(color.color);
+  pixel.intensity = 1;
+  pixel.colors_blended_cnt += 1;
 }
 
 const QImage& Frame::Image() const {
-
   switch (hdr_mode_) {
     case HDRMode::Disabled:
       HandleDefaultImage();
@@ -83,25 +86,54 @@ void Frame::HandleDefaultImage() const {
   for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x) {
       const int idx = Index(WidthT{x}, HeightT{y});
-      const auto& color =
-          Color::ScaleColor(base_colors_[idx], intensities_[idx]);
-      image_cache_.setPixel(x, y, color);
+      const auto& pixel = pixel_data_[idx];
+      if (pixel.colors_blended_cnt == 0) {
+        image_cache_.setPixel(x, y, kBlackColor);
+        continue;
+      }
+      const Scalar blend_count = pixel.colors_blended_cnt;
+      const int mean_red = pixel.red / blend_count;
+      const int mean_green = pixel.green / blend_count;
+      const int mean_blue = pixel.blue / blend_count;
+      image_cache_.setPixel(
+          x, y,
+          Color::ScaleColor(
+              Color::Get(Red{mean_red}, Green{mean_green}, Blue{mean_blue}),
+              pixel.intensity));
     }
   }
 }
 
 void Frame::HandleHDRImage() const {
-  auto max_intensity = *std::ranges::max_element(intensities_);
-  if (max_intensity == 0) {
-    max_intensity = 1;
+  if (pixel_data_.empty()) {
+    return;
+  }
+
+  const auto max_it =
+      std::ranges::max_element(pixel_data_, {}, &PixelEntry::intensity);
+  Scalar max_intensity = max_it->intensity;
+
+  if (max_intensity <= kEpsilon) {
+    max_intensity = kMaxIntensity;
   }
 
   for (int y = 0; y < Height(); ++y) {
     for (int x = 0; x < Width(); ++x) {
       const int idx = Index(WidthT{x}, HeightT{y});
-      const auto& color = Color::ScaleColor(base_colors_[idx],
-                                            intensities_[idx] / max_intensity);
-      image_cache_.setPixel(x, y, color);
+      const auto& pixel = pixel_data_[idx];
+      if (pixel.colors_blended_cnt == 0) {
+        image_cache_.setPixel(x, y, kBlackColor);
+        continue;
+      }
+      const Scalar blend_count = pixel.colors_blended_cnt;
+      const int mean_red = pixel.red / blend_count;
+      const int mean_green = pixel.green / blend_count;
+      const int mean_blue = pixel.blue / blend_count;
+      image_cache_.setPixel(
+          x, y,
+          Color::ScaleColor(
+              Color::Get(Red{mean_red}, Green{mean_green}, Blue{mean_blue}),
+              pixel.intensity / max_intensity));
     }
   }
 }

@@ -1,5 +1,6 @@
 #include "scene_loader.h"
 
+#include <numeric>
 #include <spdlog/spdlog.h>
 
 #include "kernel/mesh.h"
@@ -28,8 +29,8 @@ Scene SceneLoader::ReadFromJson(const std::filesystem::path& filepath) {
       filepath.string(), result.size(), config.models.size(),
       config.lights.size());
   spdlog::info("Total triangles in the scene: {}",
-               std::accumulate(result.begin(), result.end(), 0,
-                               [](int sum, const Mesh& mesh) {
+               std::accumulate(result.begin(), result.end(), size_t{0},
+                               [](size_t sum, const Mesh& mesh) {
                                  return sum + mesh.triangles.size();
                                }));
 
@@ -55,7 +56,7 @@ std::vector<Mesh> SceneLoader::NormalizeMeshes(std::vector<Mesh>&& meshes) {
     }
   }
 
-  Vector3 center = (bbox_min + bbox_max) / 2;
+  Vector3 center = (bbox_min + bbox_max) / Scalar{2};
   Vector3 extents = bbox_max - bbox_min;
   Scalar max_extent = extents.maxCoeff();
   if (max_extent < kEpsilon) {
@@ -63,7 +64,7 @@ std::vector<Mesh> SceneLoader::NormalizeMeshes(std::vector<Mesh>&& meshes) {
     return {};
   }
 
-  Scalar scale = 1 / max_extent;
+  Scalar scale = Scalar{1} / max_extent;
   for (auto& mesh : meshes) {
     Mesh new_mesh;
     new_mesh.diffuse_texture = mesh.diffuse_texture;
@@ -77,7 +78,7 @@ std::vector<Mesh> SceneLoader::NormalizeMeshes(std::vector<Mesh>&& meshes) {
     }
     mesh = std::move(new_mesh);
   }
-  return std::move(meshes);
+  return meshes;
 }
 
 std::vector<Mesh> SceneLoader::TranslateMeshes(std::vector<Mesh>&& meshes,
@@ -95,7 +96,7 @@ std::vector<Mesh> SceneLoader::TranslateMeshes(std::vector<Mesh>&& meshes,
     }
     mesh = std::move(new_mesh);
   }
-  return std::move(meshes);
+  return meshes;
 }
 
 }  // namespace renderer::kernel

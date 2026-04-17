@@ -22,6 +22,9 @@ class Color {
   static QRgb ScaleColor(QRgb color, Scalar intensity);
   static void AddColor(QRgb* base, QRgb new_color);
   static void Blend(QRgb* base, QRgb new_color, Scalar blend_factor);
+  static int ExtractRed(QRgb color);
+  static int ExtractGreen(QRgb color);
+  static int ExtractBlue(QRgb color);
 
  private:
   static constexpr int kMinComponent = 0;
@@ -31,9 +34,6 @@ class Color {
 
   static int ClampComponent(int value);
   static Scalar ClampComponentScalar(Scalar value);
-  static int ExtractRed(QRgb color);
-  static int ExtractGreen(QRgb color);
-  static int ExtractBlue(QRgb color);
 };
 
 }  // namespace renderer::kernel

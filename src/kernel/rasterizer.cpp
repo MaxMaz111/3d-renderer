@@ -96,8 +96,8 @@ void Rasterizer::UpdateAllSolid(
     const std::vector<DirectionalLight>& lights,
     const std::vector<ShadowMapLight>& shadow_lights,
     const Texture& diffuse_texture) {
-  Scalar x = i + 0.5;
-  Scalar y = j + 0.5;
+  Scalar x = i + kSubpixelCenterOffset;
+  Scalar y = j + kSubpixelCenterOffset;
   auto z = triangle.InterpolateZ(XAxis{x}, YAxis{y});
   if (z == std::numeric_limits<Scalar>::infinity()) {
     return;
@@ -118,8 +118,8 @@ void Rasterizer::UpdateAllTransparent(
     const std::vector<DirectionalLight>& lights,
     const std::vector<ShadowMapLight>& shadow_lights,
     const Texture& diffuse_texture) {
-  Scalar x = i + 0.5;
-  Scalar y = j + 0.5;
+  Scalar x = i + kSubpixelCenterOffset;
+  Scalar y = j + kSubpixelCenterOffset;
   auto z = triangle.InterpolateZ(XAxis{x}, YAxis{y});
   if (z == std::numeric_limits<Scalar>::infinity()) {
     return;

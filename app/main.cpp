@@ -16,6 +16,6 @@ int main(int argc, char* argv[]) {
     return runtime.exec();
   } catch (...) {
     renderer::util::React();
-    return 0;
+    return 1;
   }
 }

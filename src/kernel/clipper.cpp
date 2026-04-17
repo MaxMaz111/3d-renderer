@@ -11,9 +11,9 @@ void Clipper::ClipTriangleByPlane(const Triangle& triangle,
   const size_t outside_count = cache.split.outside_count;
   auto& result = cache.clipped_triangles;
   result.clear();
-  result.reserve(2);
+  result.reserve(kClippedTriangleCountHint);
 
-  if (inside_count == 3) {
+  if (inside_count == kTriangleVertexCount) {
     result.push_back(triangle);
     return;
   }
@@ -27,7 +27,7 @@ void Clipper::ClipTriangleByPlane(const Triangle& triangle,
           plane.LineIntersection(inside[i], outside[j]);
     }
   }
-  if (intersection_count < 2) {
+  if (intersection_count < kMinIntersectionVertices) {
     return;
   }
   if (inside_count == 1) {
@@ -48,7 +48,7 @@ void Clipper::SplitVertices(const Triangle& triangle, const Plane& plane) {
   cache.split.outside_count = 0;
   const auto& vertices = triangle.Vertices();
 
-  for (int i = 0; i < 3; ++i) {
+  for (size_t i = 0; i < kTriangleVertexCount; ++i) {
     if (plane.IsOnTheSameSideAsNormal(vertices[i].point)) {
       cache.split.inside[cache.split.inside_count++] = vertices[i];
     } else {

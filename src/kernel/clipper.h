@@ -13,12 +13,15 @@
 namespace renderer::kernel {
 
 class Clipper {
+  static constexpr size_t kTriangleVertexCount = 3;
+  static constexpr size_t kClippedTriangleCountHint = 2;
+  static constexpr size_t kMinIntersectionVertices = 2;
   static constexpr int kGrainSize = 4096;
 
  public:
   struct Split {
-    std::array<Vertex, 3> inside;
-    std::array<Vertex, 3> outside;
+    std::array<Vertex, kTriangleVertexCount> inside;
+    std::array<Vertex, kTriangleVertexCount> outside;
     size_t inside_count;
     size_t outside_count;
   };
@@ -39,7 +42,7 @@ class Clipper {
  private:
   struct Cache {
     std::vector<Triangle> clipped_triangles;
-    std::array<Vertex, 2> intersection_vertices;
+    std::array<Vertex, kClippedTriangleCountHint> intersection_vertices;
     Split split;
   };
 
@@ -53,8 +56,8 @@ class Clipper {
           auto& output = tls_output.local();
           std::vector<Triangle> current;
           std::vector<Triangle> next;
-          current.reserve(2);
-          next.reserve(2);
+          current.reserve(kClippedTriangleCountHint);
+          next.reserve(kClippedTriangleCountHint);
           for (size_t i = range.begin(); i < range.end(); ++i) {
             if (triangles[i].IsInside(planes)) {
               output.push_back(std::move(triangles[i]));

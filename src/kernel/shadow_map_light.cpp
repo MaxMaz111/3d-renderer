@@ -23,8 +23,8 @@ void ShadowMapLight::UpdateZBuffer(std::vector<Mesh>&& meshes) {
                                           Height{z_buffer_.Height()});
       for (int j = bbox.min_y; j <= bbox.max_y; ++j) {
         for (int i = bbox.min_x; i <= bbox.max_x; ++i) {
-          Scalar x = i + 0.5f;
-          Scalar y = j + 0.5f;
+          Scalar x = i + kSubpixelCenterOffset;
+          Scalar y = j + kSubpixelCenterOffset;
           auto z = triangle.InterpolateZ(XAxis{x}, YAxis{y});
           if (z == std::numeric_limits<Scalar>::infinity()) {
             continue;
@@ -49,13 +49,13 @@ Scalar ShadowMapLight::CalculateIntensity(const Vector3& normal,
   const Point3 light_p = TransformToLightSpace(world_point);
   if (!std::isfinite(light_p.x()) || !std::isfinite(light_p.y()) ||
       !std::isfinite(light_p.z())) {
-    return 0;
+    return kMinIntensity;
   }
 
   int x = std::floor(light_p.x());
   int y = std::floor(light_p.y());
   if (!IsBounded(Width{x}, Height{y})) {
-    return 0;
+    return kMinIntensity;
   }
   const Scalar shadow = ComputeShadowPCF(light_p);
 
@@ -69,7 +69,7 @@ Scalar ShadowMapLight::SampleShadow(Width x, Height y, Scalar depth) const {
   Scalar t = (depth - stored_z) / kDefaultBias;
   t = std::clamp(t, kMinIntensity, kMaxIntensity);
 
-  return 1 - t;
+  return kMaxIntensity - t;
 }
 
 Scalar ShadowMapLight::ComputeShadowPCF(const Point3& p) const {
@@ -100,10 +100,11 @@ Scalar ShadowMapLight::ComputeShadowPCF(const Point3& p) const {
 }
 
 Scalar ShadowMapLight::CalculateFading(XAxis x, YAxis y) const {
-  Scalar x_norm = x / kDimension * 2 - 1;
-  Scalar y_norm = y / kDimension * 2 - 1;
-  return 1 - std::clamp(std::sqrt(x_norm * x_norm + y_norm * y_norm),
-                        kMinIntensity, kMaxIntensity);
+  Scalar x_norm = x / kDimension * kScreenToNdcScale - kMaxIntensity;
+  Scalar y_norm = y / kDimension * kScreenToNdcScale - kMaxIntensity;
+  return kMaxIntensity -
+         std::clamp(std::sqrt(x_norm * x_norm + y_norm * y_norm), kMinIntensity,
+                    kMaxIntensity);
 }
 
 Point3 ShadowMapLight::TransformToLightSpace(const Point3& world_point) const {
@@ -119,7 +120,7 @@ Point3 ShadowMapLight::TransformToLightSpace(const Point3& world_point) const {
 }
 
 Point4 ShadowMapLight::ToHomogeneous(const Point3& point) const {
-  return Point4(point.x(), point.y(), point.z(), 1);
+  return Point4(point.x(), point.y(), point.z(), kMaxIntensity);
 }
 
 bool ShadowMapLight::IsBounded(Width x, Height y) const {

@@ -134,20 +134,18 @@ std::optional<std::array<Scalar, 3>> Triangle::Barycentric(XAxis x,
   const Point3& p1 = vertices_[1].point;
   const Point3& p2 = vertices_[2].point;
 
-  Scalar full_area = 0.5f * ((p1.x() - p0.x()) * (p2.y() - p0.y()) -
-                             (p2.x() - p0.x()) * (p1.y() - p0.y()));
-  if (std::abs(full_area) < kEpsilon) {
+  Scalar full_area_twice = (p1.x() - p0.x()) * (p2.y() - p0.y()) -
+                           (p2.x() - p0.x()) * (p1.y() - p0.y());
+  if (std::abs(full_area_twice) < kEpsilon) {
     return std::nullopt;
   }
 
-  Scalar alpha = 0.5f *
-                 ((p1.x() - x) * (p2.y() - y) - (p2.x() - x) * (p1.y() - y)) /
-                 full_area;
+  Scalar alpha = ((p1.x() - x) * (p2.y() - y) - (p2.x() - x) * (p1.y() - y)) /
+                 full_area_twice;
   Scalar beta =
-      0.5f *
       ((x - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (y - p0.y())) /
-      full_area;
-  Scalar gamma = 1.0f - alpha - beta;
+      full_area_twice;
+  Scalar gamma = Scalar{1} - alpha - beta;
 
   if (alpha < -kEpsilon || beta < -kEpsilon || gamma < -kEpsilon) {
     return std::nullopt;
@@ -224,13 +222,13 @@ Point3 Triangle::InterpolateWorldPoint(
 }
 
 Point3 Triangle::FromHomogeneous(const Point4& point) const {
-  assert(abs(point.w()) > kEpsilon);
+  assert(std::abs(point.w()) > kEpsilon);
   return Point3(point.x() / point.w(), point.y() / point.w(),
                 point.z() / point.w());
 }
 
 Point4 Triangle::ToHomogeneous(const Point3& point) const {
-  return Point4(point.x(), point.y(), point.z(), 1);
+  return Point4(point.x(), point.y(), point.z(), Scalar{1});
 }
 
 }  // namespace renderer::kernel

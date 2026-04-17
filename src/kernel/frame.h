@@ -2,6 +2,7 @@
 
 #include <QColor>
 #include <QImage>
+#include <vector>
 
 #include "util/size.h"
 
@@ -15,10 +16,18 @@ class Frame {
   using HeightT = ::renderer::Height;
 
   enum class HDRMode { Enabled, Disabled };
+  static constexpr Scalar kMinIntensity = 0;
+  static constexpr Scalar kMaxIntensity = 1;
+
+  struct PixelEntry {
+    int red = 0;
+    int green = 0;
+    int blue = 0;
+    Scalar intensity = kMinIntensity;
+    int colors_blended_cnt = 0;
+  };
 
  public:
-  static constexpr Scalar kBlendFactor = 0.2f;
-
   Frame(WidthT width, HeightT height);
 
   int Width() const;
@@ -38,8 +47,7 @@ class Frame {
   int Index(WidthT x, HeightT y) const;
 
   HDRMode hdr_mode_ = HDRMode::Disabled;
-  std::vector<QRgb> base_colors_;
-  std::vector<Scalar> intensities_;
+  std::vector<PixelEntry> pixel_data_;
 
   mutable QImage image_cache_;
 };

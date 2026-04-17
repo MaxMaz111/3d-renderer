@@ -32,14 +32,6 @@ void Color::Blend(QRgb* base, QRgb new_color, Scalar blend_factor) {
   *base = qRgb(r, g, b);
 }
 
-int Color::ClampComponent(int value) {
-  return std::clamp(value, kMinComponent, kMaxComponent);
-}
-
-Scalar Color::ClampComponentScalar(Scalar value) {
-  return std::clamp(value, kMinComponentScalar, kMaxComponentScalar);
-}
-
 int Color::ExtractRed(QRgb color) {
   return qRed(color);
 }
@@ -50,6 +42,14 @@ int Color::ExtractGreen(QRgb color) {
 
 int Color::ExtractBlue(QRgb color) {
   return qBlue(color);
+}
+
+int Color::ClampComponent(int value) {
+  return std::clamp(value, kMinComponent, kMaxComponent);
+}
+
+Scalar Color::ClampComponentScalar(Scalar value) {
+  return std::clamp(value, kMinComponentScalar, kMaxComponentScalar);
 }
 
 }  // namespace renderer::kernel

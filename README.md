@@ -8,7 +8,7 @@ https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
 
 ## Requirements
 
-- C++23 compiler
+- C++23 compiler (Clang/GCC/MSVC with C++23 support)
 - CMake 3.16+
 - Qt6(`Widgets`, `Core`, `Gui`)
 - TBB
@@ -22,7 +22,7 @@ https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
 brew install qt tbb
 ```
 
-If CMake cannot find Qt, configure with the Qt CMake path:
+If CMake cannot find Qt:
 
 ```bash
 cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
@@ -35,14 +35,13 @@ sudo apt update
 sudo apt install -y qt6-base-dev libtbb-dev
 ```
 
-## Quick start
+## Build
+
+### Clone
 
 ```bash
 git clone --recurse-submodules git@github.com:MaxMaz111/3d-renderer.git
 cd 3d-renderer
-
-cmake -S . -B build
-cmake --build build -j
 ```
 
 If you already cloned without submodules:
@@ -51,32 +50,77 @@ If you already cloned without submodules:
 git submodule update --init --recursive
 ```
 
+### Configure and compile
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+```
+
+Debug build:
+
+```bash
+cmake -S . -B build-debug -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-debug -j
+```
+
 ## Run
 
-The app expects a scene JSON path as the first argument:
+The executable expects a scene JSON path as the first argument:
 
 ```bash
 ./build/renderer_app ./models/basic_scene.json
 ```
 
-## Scene JSON
+## Interactive controls
 
-`models` is an array of objects with:
-- `path` (string, required)
-- `is_normalized` (bool, optional, fallbacks to `false`) — normalizes model to a
-	unit bounding box centered at origin
-- `position` (`[x, y, z]`, optional, falls back to `[0, 0, 0]`)
+- `W` / `S`: move camera forward / backward
+- `A` / `D`: strafe camera left / right
+- `Left` / `Right`: yaw camera left / right
+- `Up` / `Down`: pitch camera up / down
+- `Q` / `E`: roll camera left / right
+- `B`: toggle rendering mode (`AllSolid` <-> `AllTransparent`)
+- `H`: toggle HDR normalization
+- `L`: add a shadow-map light at current camera pose
 
-`lights` is an array of objects with:
-- `direction` (`[x, y, z]`, optional, falls back to `[0, 0, -1]`)
+Window resize updates rendering resolution automatically.
 
-Parsing behavior:
-- Missing required fields or invalid value formats throw an exception.
-- Missing optional `position`, `is_normalized`, or light `direction` uses defaults.
+## Export mode (headless image output)
 
-Relative model paths are resolved from the JSON file directory.
+`renderer_export` renders one frame at `3840x2160` and writes `output.png` in
+the current working directory:
 
-## Example
+```bash
+./build/renderer_export ./models/basic_scene.json
+```
+
+## Scene JSON format
+
+Top-level keys:
+
+- `models` (required): array of model entries
+- `lights` (required): array of directional lights (can be empty)
+
+### Model entry
+
+- `path` (required, string): model file path
+- `is_normalized` (optional, bool, default `false`): normalize model to unit
+	bounding box centered at origin
+- `position` (optional, `[x, y, z]`, default `[0, 0, 0]`): world translation
+
+### Light entry
+
+- `direction` (optional, `[x, y, z]`, default `[0, 0, -1]`)
+
+Notes:
+
+- Relative model paths are resolved from the JSON file directory.
+- Missing required fields or invalid array/value formats trigger JSON parsing
+	errors.
+- If a model file cannot be loaded, a warning is logged and that model is
+	skipped.
+
+Example:
 
 ```json
 {
@@ -99,9 +143,56 @@ Relative model paths are resolved from the JSON file directory.
 }
 ```
 
-## Other targets
+## Tests
+
+Build tests with the normal CMake build, then run either:
 
 ```bash
 ./build/renderer_tests
+```
+
+or through CTest:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+## Benchmarks
+
+```bash
 ./build/renderer_benchmarks
 ```
+
+Google Benchmark CLI arguments are supported, for example:
+
+```bash
+./build/renderer_benchmarks --benchmark_min_time=1.0
+```
+
+## Development utilities
+
+Format all source files under `src/`:
+
+```bash
+python3 clang_format_all.py
+```
+
+## Project structure
+
+- `app/`: GUI application entry point
+- `export/`: offscreen render entry point
+- `src/kernel/`: rendering pipeline core
+- `src/controller/`: keyboard and resize event handling
+- `src/view/`: Qt view layer
+- `tests/`: GoogleTest test cases
+- `benchmarks/`: Google Benchmark workloads
+- `models/`: sample scenes and assets
+- `third-party/`: vendored dependencies/submodules
+
+## Troubleshooting
+
+- `Qt6 not found`: pass `-DCMAKE_PREFIX_PATH="$(brew --prefix qt)"` on macOS.
+- `Scene file not found`: verify the JSON path passed to the executable.
+- Empty render: confirm your scene has model entries and light entries.
+- Clone/build issues related to dependencies: run
+	`git submodule update --init --recursive`.

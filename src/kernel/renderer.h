@@ -13,10 +13,7 @@
 namespace renderer::kernel {
 
 class Renderer {
-  struct Split {
-    std::vector<Vertex> inside;
-    std::vector<Vertex> outside;
-  };
+  static constexpr int kParallelGranularity = 4096;
 
  public:
   Renderer(Width width, Height height);

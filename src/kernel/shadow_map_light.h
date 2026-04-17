@@ -11,13 +11,13 @@
 namespace renderer::kernel {
 
 class ShadowMapLight : public ViewPoint {
-  static constexpr int kKernel = 5;
+  static constexpr int kKernel = 1;
   static constexpr int kDimension = 2048;
   static constexpr Scalar kMinIntensity = 0;
   static constexpr Scalar kMaxIntensity = 1;
-  static constexpr Scalar kDefaultShadowBackoff = 50;
   static constexpr Scalar kDefaultBias = 0.005;
-  static constexpr Scalar kDefaultTooFarThreshold = 0.1;
+  static constexpr Scalar kSubpixelCenterOffset = 0.5;
+  static constexpr Scalar kScreenToNdcScale = 2;
 
   using BBox = Triangle::BBox;
 

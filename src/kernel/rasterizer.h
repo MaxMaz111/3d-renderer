@@ -11,7 +11,8 @@ namespace renderer::kernel {
 
 class Rasterizer {
   using BBox = Triangle::BBox;
-  static constexpr Scalar kBlendFactor = 0.2f;
+  static constexpr Scalar kBlendFactor = 0.2;
+  static constexpr Scalar kSubpixelCenterOffset = 0.5;
   static constexpr int kParallelGranularity = 4096;
 
  public:
