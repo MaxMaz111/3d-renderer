@@ -4,7 +4,7 @@ Qt6-based standalone C++ application for rendering 3D models using projective ge
 
 ## Demo
 
-https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
+https://github.com/user-attachments/assets/1647ee35-05c6-4acd-b15b-e64c344acfa3
 
 ## Requirements
 
