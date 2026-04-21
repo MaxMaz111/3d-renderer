@@ -2,61 +2,54 @@
 
 #include <algorithm>
 
-namespace renderer {
+namespace renderer::kernel {
 
-Color::Color() : r_(0), g_(0), b_(0) {}
-
-Color::Color(int red, int green, int blue)
-    : r_(Clamp(red)), g_(Clamp(green)), b_(Clamp(blue)) {}
-
-uint8_t Color::GetRed() const {
-  return r_;
+QRgb Color::Get(RedT r, GreenT g, BlueT b) {
+  return qRgb(r, g, b);
 }
 
-uint8_t Color::GetGreen() const {
-  return g_;
+QRgb Color::ScaleColor(QRgb color, Scalar intensity) {
+  int r = ClampComponent(ExtractRed(color) * intensity);
+  int g = ClampComponent(ExtractGreen(color) * intensity);
+  int b = ClampComponent(ExtractBlue(color) * intensity);
+  return qRgb(r, g, b);
 }
 
-uint8_t Color::GetBlue() const {
-  return b_;
+void Color::AddColor(QRgb* base, QRgb new_color) {
+  int r = ClampComponent(ExtractRed(*base) + ExtractRed(new_color));
+  int g = ClampComponent(ExtractGreen(*base) + ExtractGreen(new_color));
+  int b = ClampComponent(ExtractBlue(*base) + ExtractBlue(new_color));
+  *base = qRgb(r, g, b);
 }
 
-void Color::SetRed(int red) {
-  r_ = Clamp(red);
+void Color::Blend(QRgb* base, QRgb new_color, Scalar blend_factor) {
+  int r = ClampComponent(ExtractRed(*base) * (1 - blend_factor) +
+                         ExtractRed(new_color) * blend_factor);
+  int g = ClampComponent(ExtractGreen(*base) * (1 - blend_factor) +
+                         ExtractGreen(new_color) * blend_factor);
+  int b = ClampComponent(ExtractBlue(*base) * (1 - blend_factor) +
+                         ExtractBlue(new_color) * blend_factor);
+  *base = qRgb(r, g, b);
 }
 
-void Color::SetGreen(int green) {
-  g_ = Clamp(green);
+int Color::ExtractRed(QRgb color) {
+  return qRed(color);
 }
 
-void Color::SetBlue(int blue) {
-  b_ = Clamp(blue);
+int Color::ExtractGreen(QRgb color) {
+  return qGreen(color);
 }
 
-Color Color::Invert() const {
-  return Color(255 - r_, 255 - g_, 255 - b_);
+int Color::ExtractBlue(QRgb color) {
+  return qBlue(color);
 }
 
-void Color::Blend(const Color& other, Scalar factor) {
-  r_ += other.GetRed() * factor;
-  g_ += other.GetGreen() * factor;
-  b_ += other.GetBlue() * factor;
+int Color::ClampComponent(int value) {
+  return std::clamp(value, kMinComponent, kMaxComponent);
 }
 
-bool Color::operator==(const Color& other) const {
-  return r_ == other.r_ && g_ == other.g_ && b_ == other.b_;
+Scalar Color::ClampComponentScalar(Scalar value) {
+  return std::clamp(value, kMinComponentScalar, kMaxComponentScalar);
 }
 
-bool Color::operator!=(const Color& other) const {
-  return !(*this == other);
-}
-
-Color Color::GetRandomColor() {
-  return {rand() % 256, rand() % 256, rand() % 256};
-}
-
-uint8_t Color::Clamp(int value) {
-  return static_cast<uint8_t>(std::max(0, std::min(255, value)));
-}
-
-}  // namespace renderer
+}  // namespace renderer::kernel

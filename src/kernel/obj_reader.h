@@ -1,22 +1,30 @@
 #pragma once
 
+#include <assimp/material.h>
+#include <assimp/scene.h>
+#include <filesystem>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
-#include "triangle.h"
+#include "mesh.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class ObjReader {
  public:
-  static std::vector<Triangle> ReadFromFile(const std::string& filepath);
+  static std::vector<Mesh> ReadFromFile(const std::filesystem::path& filepath);
 
  private:
-  static Point3 ParseVertex(const std::string& line);
-  static Vector3 ParseNormal(const std::string& line);
-  static std::vector<Triangle> ParseFace(const std::string& line,
-                                         const std::vector<Point3>& vertices,
-                                         const std::vector<Vector3>& normals);
+  static Mesh ProcessMesh(const aiScene* scene, const aiMesh* mesh);
+  static Vertex ExtractVertex(const aiMesh* mesh, uint32_t index);
+  static void ProcessMaterials(Mesh& current, const aiScene* scene,
+                               const aiMesh* mesh);
+  static Texture LoadTextureFromMaterial(const aiMaterial* material,
+                                         aiTextureType texture_type);
+
+  static std::filesystem::path model_directory;
+  static std::unordered_map<std::string, Texture> texture_cache;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

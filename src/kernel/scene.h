@@ -2,41 +2,35 @@
 
 #include <vector>
 
-#include "../size.h"
-#include "camera.h"
-#include "triangle.h"
+#include "kernel/shadow_map_light.h"
 
-namespace renderer {
+#include "camera.h"
+#include "directional_light.h"
+#include "mesh.h"
+
+namespace renderer::kernel {
 
 class Scene {
+  using CameraT = ::renderer::kernel::Camera;
+  using RenderingMode = CameraT::RenderingMode;
+
  public:
-  Scene() = delete;
-  Scene(const std::vector<Triangle>& triangles);
-  Scene(const std::vector<Camera>& cameras,
-        const std::vector<Triangle>& triangles);
-  const std::vector<Triangle>& GetTriangles() const;
-  void SetScreenDimensions(Width width, Height height);
-  void RotateLeft();
-  void RotateRight();
-  void RotateUp();
-  void RotateDown();
-  void MoveLeft();
-  void MoveRight();
-  void MoveForward();
-  void MoveBackward();
-  void SwivelLeft();
-  void SwivelRight();
-  void SetCurrentCamera(int camera_index);
-  void SwapTransparency();
-  const Camera& GetCamera() const;
-  Camera& GetCamera();
-  bool Transapent() const;
+  Scene(std::vector<Mesh>&& meshes,
+        std::vector<DirectionalLight>&& directional_lights,
+        std::vector<ShadowMapLight>&& shadow_map_lights);
+  const std::vector<Mesh>& Meshes() const;
+  const std::vector<DirectionalLight>& DirectionalLights() const;
+  const std::vector<ShadowMapLight>& ShadowMapLights() const;
+  const CameraT& Camera() const;
+  CameraT& Camera();
+  RenderingMode CurrentRenderingMode() const;
+  void AddShadowLight();
 
  private:
-  std::vector<Camera> cameras_;
-  int cur_camera_index_;
-  std::vector<Triangle> triangles_;
-  bool transparent_ = false;
+  CameraT camera_;
+  std::vector<Mesh> meshes_;
+  std::vector<DirectionalLight> directional_lights_;
+  std::vector<ShadowMapLight> shadow_map_lights_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

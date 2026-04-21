@@ -1,81 +1,81 @@
 #include "kernel.h"
 
-#include "obj_reader.h"
+#include "util/constants.h"
 
-namespace renderer {
+#include "scene_loader.h"
 
-Kernel::Kernel(const std::string& filename)
-    : scene_(ObjReader::ReadFromFile(filename)),
-      observable_(renderer_.Render(scene_)) {}
+namespace renderer::kernel {
 
-void Kernel::Subscribe(Observer<Frame>* observer) {
+Kernel::Kernel(const std::filesystem::path& filename)
+    : renderer_(Width{kDefaultWidth}, Height{kDefaultHeight}),
+      scene_(SceneLoader::ReadFromJson(filename)),
+      observable_(
+          [this]() -> const Frame& { return renderer_.Render(scene_); }) {}
+
+void Kernel::Subscribe(Observer* observer) {
   assert(observer);
   observable_.Subscribe(observer);
 }
 
 void Kernel::SetScreenDimensions(Width width, Height height) {
-  scene_.SetScreenDimensions(width, height);
-  observable_.Set(renderer_.Render(scene_));
+  renderer_.ResetTo(width, height);
+  scene_.Camera().SetDimensions(width, height);
 }
 
 void Kernel::RotateLeft() {
-  scene_.RotateLeft();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().RotateLeft();
 }
 
 void Kernel::RotateRight() {
-  scene_.RotateRight();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().RotateRight();
 }
 
 void Kernel::RotateUp() {
-  scene_.RotateUp();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().RotateUp();
 }
 
 void Kernel::RotateDown() {
-  scene_.RotateDown();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().RotateDown();
 }
 
 void Kernel::MoveLeft() {
-  scene_.MoveLeft();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().MoveLeft();
 }
 
 void Kernel::MoveRight() {
-  scene_.MoveRight();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().MoveRight();
 }
 
 void Kernel::MoveForward() {
-  scene_.MoveForward();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().MoveForward();
 }
 
 void Kernel::MoveBackward() {
-  scene_.MoveBackward();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().MoveBackward();
 }
 
 void Kernel::SwivelLeft() {
-  scene_.SwivelLeft();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().SwivelLeft();
 }
 
 void Kernel::SwivelRight() {
-  scene_.SwivelRight();
-  observable_.Set(renderer_.Render(scene_));
+  scene_.Camera().SwivelRight();
 }
 
-void Kernel::SetCurrentCamera(int camera_index) {
-  scene_.SetCurrentCamera(camera_index);
-  observable_.Set(renderer_.Render(scene_));
+void Kernel::SwapRenderingMode() {
+  scene_.Camera().SwapRenderingMode();
 }
 
-void Kernel::SwapTransparency() {
-  scene_.SwapTransparency();
-  observable_.Set(renderer_.Render(scene_));
+void Kernel::AddShadowLight() {
+  scene_.AddShadowLight();
 }
 
-}  // namespace renderer
+void Kernel::ToggleHDR() {
+  renderer_.ToggleHDR();
+}
+
+void Kernel::NotifyView() {
+  observable_.Notify();
+}
+
+}  // namespace renderer::kernel

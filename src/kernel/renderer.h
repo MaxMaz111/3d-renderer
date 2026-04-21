@@ -1,27 +1,37 @@
 #pragma once
 
-#include <QPixmap>
+#include "kernel/camera.h"
+#include "kernel/shadow_map_light.h"
 
+#include "directional_light.h"
 #include "frame.h"
+#include "mesh.h"
+#include "rasterizer.h"
 #include "scene.h"
 #include "triangle.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
 class Renderer {
+  static constexpr int kParallelGranularity = 4096;
+
  public:
-  Frame Render(const Scene& scene);
+  Renderer(Width width, Height height);
+
+  void ResetTo(Width width, Height height);
+  void ToggleHDR();
+  const Frame& Render(const Scene& scene);
 
  private:
-  std::vector<Triangle> GetClippedTriangles(
-      const std::vector<Triangle>& triangles, const Camera& camera) const;
-  std::vector<Triangle> ClipTriangleByPlane(const Triangle& triangle,
-                                            const Plane& plane) const;
-  void RotateTriangles(std::vector<Triangle>& triangles, const Camera& camera);
-  void ProjectTriangles(std::vector<Triangle>& triangles, const Camera& camera);
-  static QColor ConvertColor(const Color& color);
+  std::vector<DirectionalLight> MoveToLocal(
+      std::vector<DirectionalLight>&& lights, const Camera& camera) const;
+  std::vector<ShadowMapLight> MoveToLocal(std::vector<ShadowMapLight>&& lights,
+                                          const Camera& camera) const;
+  const Frame& Rasterize(std::vector<Mesh>&& meshes, const Camera& camera,
+                         const std::vector<DirectionalLight>& lights,
+                         const std::vector<ShadowMapLight>& shadow_lights);
 
-  std::vector<std::vector<Scalar>> z_buffer_;
+  Rasterizer rasterizer_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::kernel

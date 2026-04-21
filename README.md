@@ -1,95 +1,198 @@
 # 3d-renderer
 
-This project uses CMake (version ≥ 3.16), Qt6 (Widgets, Core, Gui), and Eigen (version ≥ 3.3). Below are instructions for installing the required libraries on Linux and macOS, along with basic steps to build this project.
-
----
+Qt6-based standalone C++ application for rendering 3D models using projective geometry.
 
 ## Demo
 
-https://github.com/user-attachments/assets/1243ca00-b903-4074-9fe9-6a3a29e6daa7
+https://github.com/user-attachments/assets/1647ee35-05c6-4acd-b15b-e64c344acfa3
 
----
+## Requirements
 
-## 1. Prerequisites
+- C++23 compiler (Clang/GCC/MSVC with C++23 support)
+- CMake 3.16+
+- Qt6(`Widgets`, `Core`, `Gui`)
+- TBB
+- Git
 
-- C++20-compatible compiler (e.g., g++ ≥ 10, clang ≥ 10, or Apple Clang ≥ 12)
-- CMake ≥ 3.16
-- Qt6 (Widgets, Core, Gui)
-- Eigen3 ≥ 3.3
+## Install dependencies
 
-## 2. Installing Dependencies
+### macOS (Homebrew)
 
-### 2.1 Linux (Example: Ubuntu/Debian)
+```bash
+brew install qt tbb
+```
 
-1. Update your package list:
+If CMake cannot find Qt:
 
-   ```bash
-   sudo apt-get update
-   ```
+```bash
+cmake -S . -B build -DCMAKE_PREFIX_PATH="$(brew --prefix qt)"
+```
 
-2. Install CMake:
+### Ubuntu/Debian
 
-   ```bash
-   sudo apt-get install cmake
-   ```
+```bash
+sudo apt update
+sudo apt install -y qt6-base-dev libtbb-dev
+```
 
-   - If your distribution’s default CMake is older than 3.16, consider installing a newer version from a backport repository or building CMake from source.
+## Build
 
-3. Install Qt6:
+### Clone
 
-   - On some newer distributions, Qt6 packages may be available:
-     ```bash
-     sudo apt-get install qt6-base-dev
-     ```
-   - If Qt6 is not available in your default repositories, you may need to download it from the official Qt website or install a Qt 6 PPA (if available for your distro).
+```bash
+git clone --recurse-submodules git@github.com:MaxMaz111/3d-renderer.git
+cd 3d-renderer
+```
 
-4. Install Eigen3:
-   ```bash
-   sudo apt-get install libeigen3-dev
-   ```
+If you already cloned without submodules:
 
-### 2.2 macOS
+```bash
+git submodule update --init --recursive
+```
 
-1. Install Homebrew (if you haven’t already). See instructions at:
-   [https://brew.sh/](https://brew.sh/)
+### Configure and compile
 
-2. Install CMake:
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+```
 
-   ```bash
-   brew install cmake
-   ```
+Debug build:
 
-3. Install Qt (by default, Homebrew installs the latest Qt, which may be Qt6):
+```bash
+cmake -S . -B build-debug -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-debug -j
+```
 
-   ```bash
-   brew install qt
-   ```
+## Run
 
-   After installation, make sure Homebrew’s Qt bin directory is in your PATH or update your CMake configuration accordingly.
+The executable expects a scene JSON path as the first argument:
 
-4. Install Eigen3:
-   ```bash
-   brew install eigen
-   ```
+```bash
+./build/renderer_app ./models/basic_scene.json
+```
 
-## 3. Building the Project
+## Interactive controls
 
-Once all dependencies are installed:
+- `W` / `S`: move camera forward / backward
+- `A` / `D`: strafe camera left / right
+- `Left` / `Right`: yaw camera left / right
+- `Up` / `Down`: pitch camera up / down
+- `Q` / `E`: roll camera left / right
+- `B`: toggle rendering mode (`AllSolid` <-> `AllTransparent`)
+- `H`: toggle HDR normalization
+- `L`: add a shadow-map light at current camera pose
 
-1. Clone or download this repository:
+Window resize updates rendering resolution automatically.
 
-   ```bash
-   git clone git@github.com:MaxMaz111/3d-renderer.git
-   cd 3d-renderer
-   ```
+## Export mode (headless image output)
 
-2. Use CMake to build the project:
+`renderer_export` renders one frame at `3840x2160` and writes `output.png` in
+the current working directory:
 
-   ```bash
-   mkdir build && cd build
-   cmake ..
-   make renderer
-   ./renderer *your .obj file*
-   ```
+```bash
+./build/renderer_export ./models/basic_scene.json
+```
 
----
+## Scene JSON format
+
+Top-level keys:
+
+- `models` (required): array of model entries
+- `lights` (required): array of directional lights (can be empty)
+
+### Model entry
+
+- `path` (required, string): model file path
+- `is_normalized` (optional, bool, default `false`): normalize model to unit
+	bounding box centered at origin
+- `position` (optional, `[x, y, z]`, default `[0, 0, 0]`): world translation
+
+### Light entry
+
+- `direction` (optional, `[x, y, z]`, default `[0, 0, -1]`)
+
+Notes:
+
+- Relative model paths are resolved from the JSON file directory.
+- Missing required fields or invalid array/value formats trigger JSON parsing
+	errors.
+- If a model file cannot be loaded, a warning is logged and that model is
+	skipped.
+
+Example:
+
+```json
+{
+	"models": [
+		{
+			"path": "cube.obj",
+			"is_normalized": true,
+			"position": [0.0, 0.0, 0.0]
+		},
+		{
+			"path": "cow.obj",
+			"is_normalized": true,
+			"position": [2.5, 0.0, 0.0]
+		}
+	],
+	"lights": [
+		{ "direction": [0.0, -1.0, -1.0] },
+		{ "direction": [1.0, 0.0, -1.0] }
+	]
+}
+```
+
+## Tests
+
+Build tests with the normal CMake build, then run either:
+
+```bash
+./build/renderer_tests
+```
+
+or through CTest:
+
+```bash
+ctest --test-dir build --output-on-failure
+```
+
+## Benchmarks
+
+```bash
+./build/renderer_benchmarks
+```
+
+Google Benchmark CLI arguments are supported, for example:
+
+```bash
+./build/renderer_benchmarks --benchmark_min_time=1.0
+```
+
+## Development utilities
+
+Format all source files under `src/`:
+
+```bash
+python3 clang_format_all.py
+```
+
+## Project structure
+
+- `app/`: GUI application entry point
+- `export/`: offscreen render entry point
+- `src/kernel/`: rendering pipeline core
+- `src/controller/`: keyboard and resize event handling
+- `src/view/`: Qt view layer
+- `tests/`: GoogleTest test cases
+- `benchmarks/`: Google Benchmark workloads
+- `models/`: sample scenes and assets
+- `third-party/`: vendored dependencies/submodules
+
+## Troubleshooting
+
+- `Qt6 not found`: pass `-DCMAKE_PREFIX_PATH="$(brew --prefix qt)"` on macOS.
+- `Scene file not found`: verify the JSON path passed to the executable.
+- Empty render: confirm your scene has model entries and light entries.
+- Clone/build issues related to dependencies: run
+	`git submodule update --init --recursive`.

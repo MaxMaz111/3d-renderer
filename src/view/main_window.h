@@ -1,22 +1,27 @@
 #pragma once
 
-#include <QLabel>
 #include <QMainWindow>
 
-#include "../size.h"
+#include "util/constants.h"
+
 #include "view.h"
 
-namespace renderer {
+namespace renderer::view {
 
 class MainWindow {
+  using ViewT = ::renderer::view::View;
+  static constexpr auto kDefaultWidth = kernel::kDefaultWidth;
+  static constexpr auto kDefaultHeight = kernel::kDefaultHeight;
+
  public:
-  MainWindow(Width width, Height height);
+  MainWindow();
+
   void Show();
-  View* GetView();
+  ViewT* View();
 
  private:
   QMainWindow window_;
-  View view_;
+  ViewT view_;
 };
 
-}  // namespace renderer
+}  // namespace renderer::view

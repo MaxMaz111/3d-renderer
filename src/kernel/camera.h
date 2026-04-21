@@ -1,29 +1,26 @@
 #pragma once
 
-#include "../size.h"
+#include <numbers>
+
+#include "util/size.h"
+
 #include "linalg.h"
-#include "plane.h"
+#include "view_point.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
-class Camera {
-  static constexpr int kNumberOfPlanes = 6;
-  static constexpr Scalar kMoveSpeed = 0.1;
-  static constexpr Scalar kRotationSpeed = M_PI / 180;
+class Camera : public ViewPoint {
+  using WidthT = Width;
+  using HeightT = Height;
+
+  static constexpr Scalar kMoveSpeed = 0.03;
+  static constexpr Scalar kRotationSpeed = std::numbers::pi_v<Scalar> / 120;
 
  public:
-  Camera();
-  Camera(Scalar near, Scalar far, Width screen_width, Height screen_height);
-  void SetScreenDimensions(Width width, Height height);
-  void SetNear(Scalar near);
-  void SetFar(Scalar far);
-  const std::array<Plane, kNumberOfPlanes>& GetPlanesForClipping() const;
-  void BuildProjectionMatrix();
-  const Matrix4& GetProjectionMatrix() const;
-  Matrix3 GetRotationMatrix() const;
-  Point3 GetPosition() const;
-  Width GetWidth() const;
-  Height GetHeight() const;
+  enum class RenderingMode { AllSolid, AllTransparent };
+
+  Camera(WidthT width, HeightT height);
+
   void RotateLeft();
   void RotateRight();
   void RotateUp();
@@ -34,22 +31,11 @@ class Camera {
   void MoveBackward();
   void SwivelLeft();
   void SwivelRight();
+  void SwapRenderingMode();
+  RenderingMode CurrentRenderingMode() const;
 
  private:
-  std::array<Plane, kNumberOfPlanes> BuildPlanesForClipping();
-
-  Width screen_width_;
-  Height screen_height_;
-  Scalar near_;
-  Scalar far_;
-
-  Matrix3 rotation_matrix_;
-  Matrix4 projection_matrix_;
-  Point3 position_;
-
-  std::array<Plane, kNumberOfPlanes> planes_;
+  RenderingMode mode_ = RenderingMode::AllSolid;
 };
 
-;
-
-}  // namespace renderer
+}  // namespace renderer::kernel

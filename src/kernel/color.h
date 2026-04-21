@@ -1,32 +1,39 @@
 #pragma once
 
-#include <cstdint>
+#include <QColor>
+
+#include "util/alias.h"
 
 #include "linalg.h"
 
-namespace renderer {
+namespace renderer::kernel {
+
+using Red = util::Alias<uint8_t, struct red_tag>;
+using Green = util::Alias<uint8_t, struct green_tag>;
+using Blue = util::Alias<uint8_t, struct blue_tag>;
 
 class Color {
+  using RedT = Red;
+  using GreenT = Green;
+  using BlueT = Blue;
+
  public:
-  Color();
-  Color(int red, int green, int blue);
-  uint8_t GetRed() const;
-  uint8_t GetGreen() const;
-  uint8_t GetBlue() const;
-  void SetRed(int red);
-  void SetGreen(int green);
-  void SetBlue(int blue);
-  Color Invert() const;
-  void Blend(const Color& other, Scalar factor = 0.2);
-  bool operator==(const Color& other) const;
-  bool operator!=(const Color& other) const;
-  static Color GetRandomColor();
+  static QRgb Get(Red r, Green g, Blue b);
+  static QRgb ScaleColor(QRgb color, Scalar intensity);
+  static void AddColor(QRgb* base, QRgb new_color);
+  static void Blend(QRgb* base, QRgb new_color, Scalar blend_factor);
+  static int ExtractRed(QRgb color);
+  static int ExtractGreen(QRgb color);
+  static int ExtractBlue(QRgb color);
 
  private:
-  static uint8_t Clamp(int value);
+  static constexpr int kMinComponent = 0;
+  static constexpr int kMaxComponent = 255;
+  static constexpr Scalar kMinComponentScalar = 0;
+  static constexpr Scalar kMaxComponentScalar = 1;
 
-  uint8_t r_;
-  uint8_t g_;
-  uint8_t b_;
+  static int ClampComponent(int value);
+  static Scalar ClampComponentScalar(Scalar value);
 };
-}  // namespace renderer
+
+}  // namespace renderer::kernel

@@ -1,111 +1,234 @@
 #include "triangle.h"
 
+#include <QColor>
 #include <algorithm>
-#include <iostream>
+#include <array>
+#include <cmath>
+#include <limits>
+#include <tbb/parallel_for.h>
 
+#include "util/constants.h"
+
+#include "directional_light.h"
 #include "linalg.h"
+#include "shadow_map_light.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
-Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-                   const Vector3& normal)
-    : points_({p0, p1, p2}), normal_(normal) {}
+Triangle::Triangle(Vertex&& v0, Vertex&& v1, Vertex&& v2)
+    : vertices_{std::move(v0), std::move(v1), std::move(v2)} {}
 
-Triangle::Triangle(const Point3& p0, const Point3& p1, const Point3& p2,
-                   const Vector3& normal, const Color& color)
-    : points_({p0, p1, p2}), normal_(normal), triangle_color_(color) {}
+Triangle::Triangle(const std::array<Vertex, 3>& vertices)
+    : vertices_(vertices) {}
 
-const std::array<Point3, 3>& Triangle::GetPoints() const {
-  return points_;
-}
-
-Point3 Triangle::GetPoint(size_t index) const {
-  return points_[index];
-}
-
-Vector3 Triangle::GetNormal() const {
-  return normal_;
+const std::array<Vertex, 3>& Triangle::Vertices() const {
+  return vertices_;
 }
 
 void Triangle::RotateAndMove(const Matrix3& rotation_matrix,
                              const Point3& translation) {
-  assert((rotation_matrix.determinant() - 1) < kEpsilon);
-  assert((rotation_matrix * rotation_matrix.transpose()).isIdentity(kEpsilon));
-  for (auto& point : points_) {
-    point = rotation_matrix * (point + translation);
+  for (auto& vertex : vertices_) {
+    vertex.point = rotation_matrix * (vertex.point + translation);
+    vertex.normal = (rotation_matrix * vertex.normal).normalized();
   }
 }
 
 void Triangle::Project(const Matrix4& projection_matrix) {
-  for (auto& point : points_) {
-    point = FromHomogeneous(projection_matrix * ToHomogeneous(point));
+  for (auto& vertex : vertices_) {
+    Point4 clip = projection_matrix * ToHomogeneous(vertex.point);
+    if (std::abs(clip.w()) < kEpsilon) {
+      vertex.inv_w = 0;
+      vertex.point = Point3(clip.x(), clip.y(), clip.z());
+      continue;
+    }
+    vertex.inv_w = 1 / clip.w();
+    vertex.point = Point3(clip.x() * vertex.inv_w, clip.y() * vertex.inv_w,
+                          clip.z() * vertex.inv_w);
   }
 }
 
-std::optional<Scalar> Triangle::GetZ(const Point3& point) const {
-  assert(point.z() == 0);
-  const Point3& p0 = points_[0];
-  const Point3& p1 = points_[1];
-  const Point3& p2 = points_[2];
-  Scalar full_area = 0.5 * ((p1.x() - p0.x()) * (p2.y() - p0.y()) -
-                            (p2.x() - p0.x()) * (p1.y() - p0.y()));
-  if (std::abs(full_area) < kEpsilon) {
-    return std::nullopt;
+Scalar Triangle::InterpolateZ(XAxis x, YAxis y) const {
+  auto weights = Barycentric(x, y);
+  if (!weights.has_value()) {
+    return std::numeric_limits<Scalar>::infinity();
   }
-  Scalar alpha = 0.5 *
-                 ((p1.x() - point.x()) * (p2.y() - point.y()) -
-                  (p2.x() - point.x()) * (p1.y() - point.y())) /
-                 full_area;
-  Scalar beta = 0.5 *
-                ((point.x() - p0.x()) * (p2.y() - p0.y()) -
-                 (p2.x() - p0.x()) * (point.y() - p0.y())) /
-                full_area;
-  Scalar gamma = 1.0 - alpha - beta;
-  if (alpha < -kEpsilon || beta < -kEpsilon || gamma < -kEpsilon) {
-    return std::nullopt;
+
+  const auto [alpha, beta, gamma] = *weights;
+  const Point3& p0 = vertices_[0].point;
+  const Point3& p1 = vertices_[1].point;
+  const Point3& p2 = vertices_[2].point;
+  return alpha * p0.z() + beta * p1.z() + gamma * p2.z();
+}
+
+LightSample Triangle::InterpolateColor(
+    XAxis x, YAxis y, const std::vector<DirectionalLight>& lights,
+    const std::vector<ShadowMapLight>& shadow_lights,
+    const Texture& diffuse_texture) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  if (!weights.has_value()) {
+    return {kBlackColor, 0};
   }
-  Scalar z = alpha * p0.z() + beta * p1.z() + gamma * p2.z();
-  return z;
-}
 
-const Color& Triangle::GetColor() const {
-  return triangle_color_;
-}
-
-void Triangle::SetColor(const Color& color) {
-  triangle_color_ = color;
-}
-
-void Triangle::Print() const {
-  std::cout << points_[0] << '\n';
-  std::cout << points_[1] << '\n';
-  std::cout << points_[2] << '\n';
+  auto normal = InterpolateNormal(*weights);
+  auto tex_coord = InterpolateTexCoord(*weights);
+  auto base_color = diffuse_texture.Sample(tex_coord);
+  Scalar diffuse_intensity = kDefaultAmbient;
+  for (const auto& light : lights) {
+    diffuse_intensity += light.CalculateIntensity(normal);
+  }
+  Point3 world_point = InterpolateWorldPoint(*weights);
+  for (const auto& shadow : shadow_lights) {
+    diffuse_intensity += shadow.CalculateIntensity(normal, world_point);
+  }
+  return {base_color, diffuse_intensity};
 }
 
 Scalar Triangle::GetMinX() const {
-  return std::min({points_[0].x(), points_[1].x(), points_[2].x()});
+  return std::min(
+      {vertices_[0].point.x(), vertices_[1].point.x(), vertices_[2].point.x()});
 }
 
 Scalar Triangle::GetMaxX() const {
-  return std::max({points_[0].x(), points_[1].x(), points_[2].x()});
+  return std::max(
+      {vertices_[0].point.x(), vertices_[1].point.x(), vertices_[2].point.x()});
 }
 
 Scalar Triangle::GetMinY() const {
-  return std::min({points_[0].y(), points_[1].y(), points_[2].y()});
+  return std::min(
+      {vertices_[0].point.y(), vertices_[1].point.y(), vertices_[2].point.y()});
 }
 
 Scalar Triangle::GetMaxY() const {
-  return std::max({points_[0].y(), points_[1].y(), points_[2].y()});
+  return std::max(
+      {vertices_[0].point.y(), vertices_[1].point.y(), vertices_[2].point.y()});
+}
+
+Triangle::BBox Triangle::GetBoundingBox(Width width, Height height) const {
+  int w = width, h = height;
+  BBox bbox;
+  bbox.min_x = std::floor(GetMinX());
+  bbox.min_x = std::max(bbox.min_x, 0);
+  bbox.max_x = std::ceil(GetMaxX());
+  bbox.max_x = std::min(bbox.max_x, w - 1);
+  bbox.min_y = std::floor(GetMinY());
+  bbox.min_y = std::max(bbox.min_y, 0);
+  bbox.max_y = std::ceil(GetMaxY());
+  bbox.max_y = std::min(bbox.max_y, h - 1);
+  return bbox;
+}
+
+bool Triangle::IsInside(const std::array<Plane, 6>& planes) const {
+  for (const Plane& plane : planes) {
+    if (!plane.IsOnTheSameSideAsNormal(vertices_[0].point) ||
+        !plane.IsOnTheSameSideAsNormal(vertices_[1].point) ||
+        !plane.IsOnTheSameSideAsNormal(vertices_[2].point)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::optional<std::array<Scalar, 3>> Triangle::Barycentric(XAxis x,
+                                                           YAxis y) const {
+  const Point3& p0 = vertices_[0].point;
+  const Point3& p1 = vertices_[1].point;
+  const Point3& p2 = vertices_[2].point;
+
+  Scalar full_area_twice = (p1.x() - p0.x()) * (p2.y() - p0.y()) -
+                           (p2.x() - p0.x()) * (p1.y() - p0.y());
+  if (std::abs(full_area_twice) < kEpsilon) {
+    return std::nullopt;
+  }
+
+  Scalar alpha = ((p1.x() - x) * (p2.y() - y) - (p2.x() - x) * (p1.y() - y)) /
+                 full_area_twice;
+  Scalar beta =
+      ((x - p0.x()) * (p2.y() - p0.y()) - (p2.x() - p0.x()) * (y - p0.y())) /
+      full_area_twice;
+  Scalar gamma = Scalar{1} - alpha - beta;
+
+  if (alpha < -kEpsilon || beta < -kEpsilon || gamma < -kEpsilon) {
+    return std::nullopt;
+  }
+
+  return std::array<Scalar, 3>{alpha, beta, gamma};
+}
+
+std::optional<std::array<Scalar, 3>> Triangle::PerspectiveCorrectBarycentric(
+    XAxis x, YAxis y) const {
+  auto bary = Barycentric(x, y);
+  if (!bary.has_value()) {
+    return std::nullopt;
+  }
+
+  const auto [alpha, beta, gamma] = *bary;
+  const Scalar w0 = vertices_[0].inv_w;
+  const Scalar w1 = vertices_[1].inv_w;
+  const Scalar w2 = vertices_[2].inv_w;
+  const Scalar denom = alpha * w0 + beta * w1 + gamma * w2;
+
+  if (std::abs(denom) < kEpsilon) {
+    return std::nullopt;
+  }
+
+  return std::array<Scalar, 3>{alpha * w0 / denom, beta * w1 / denom,
+                               gamma * w2 / denom};
+}
+
+Point2 Triangle::InterpolateTexCoord(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  if (!weights.has_value()) {
+    return Point2::Zero();
+  }
+  return InterpolateTexCoord(*weights);
+}
+
+Vector3 Triangle::InterpolateNormal(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  if (!weights.has_value()) {
+    return Vector3{0, 0, 1};
+  }
+  return InterpolateNormal(*weights);
+}
+
+Point3 Triangle::InterpolateWorldPoint(XAxis x, YAxis y) const {
+  auto weights = PerspectiveCorrectBarycentric(x, y);
+  if (!weights.has_value()) {
+    return Point3::Zero();
+  }
+  return InterpolateWorldPoint(*weights);
+}
+
+Point2 Triangle::InterpolateTexCoord(
+    const std::array<Scalar, 3>& weights) const {
+  const auto [alpha, beta, gamma] = weights;
+  return alpha * vertices_[0].tex_coord + beta * vertices_[1].tex_coord +
+         gamma * vertices_[2].tex_coord;
+}
+
+Vector3 Triangle::InterpolateNormal(
+    const std::array<Scalar, 3>& weights) const {
+  const auto [alpha, beta, gamma] = weights;
+  return (alpha * vertices_[0].normal + beta * vertices_[1].normal +
+          gamma * vertices_[2].normal)
+      .normalized();
+}
+
+Point3 Triangle::InterpolateWorldPoint(
+    const std::array<Scalar, 3>& weights) const {
+  const auto [alpha, beta, gamma] = weights;
+  return alpha * vertices_[0].world_point + beta * vertices_[1].world_point +
+         gamma * vertices_[2].world_point;
 }
 
 Point3 Triangle::FromHomogeneous(const Point4& point) const {
-  assert(abs(point.w()) > kEpsilon);
+  assert(std::abs(point.w()) > kEpsilon);
   return Point3(point.x() / point.w(), point.y() / point.w(),
                 point.z() / point.w());
 }
 
 Point4 Triangle::ToHomogeneous(const Point3& point) const {
-  return Point4(point.x(), point.y(), point.z(), 1);
+  return Point4(point.x(), point.y(), point.z(), Scalar{1});
 }
 
-}  // namespace renderer
+}  // namespace renderer::kernel

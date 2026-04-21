@@ -31,12 +31,25 @@
 *.out
 *.app
 
+# Images
+
+*.bmp
+*.jpg
+*.jpeg
+*.png
+
 # Build folders
 build
 asan_build
-build_debug
-build_release
+build-debug
+build-release
+build-rel-with-deb-info
+models
 .cache
+.idea/
 
 # MacOS cache
 .DS_Store
+
+# Visual Studio Code settings
+.vscode/

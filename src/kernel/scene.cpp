@@ -1,89 +1,50 @@
 #include "scene.h"
 
-#include <vector>
+#include "util/constants.h"
+#include "util/size.h"
 
-#include "triangle.h"
+#include "camera.h"
+#include "directional_light.h"
 
-namespace renderer {
+namespace renderer::kernel {
 
-Scene::Scene(const std::vector<Camera>& cameras,
-             const std::vector<Triangle>& triangles)
-    : cameras_(cameras), triangles_(triangles) {}
+Scene::Scene(std::vector<Mesh>&& meshes,
+             std::vector<DirectionalLight>&& directional_lights,
+             std::vector<ShadowMapLight>&& shadow_map_lights)
+    : camera_{Width{kDefaultWidth}, Height{kDefaultHeight}},
+      meshes_{std::move(meshes)},
+      directional_lights_{std::move(directional_lights)},
+      shadow_map_lights_{std::move(shadow_map_lights)} {}
 
-Scene::Scene(const std::vector<Triangle>& triangles)
-    : cameras_(4), cur_camera_index_(0), triangles_(triangles) {}
-
-const std::vector<Triangle>& Scene::GetTriangles() const {
-  return triangles_;
+const std::vector<Mesh>& Scene::Meshes() const {
+  return meshes_;
 }
 
-void Scene::SetScreenDimensions(Width width, Height height) {
-  for (auto& camera : cameras_) {
-    camera.SetScreenDimensions(width, height);
-  }
+const std::vector<DirectionalLight>& Scene::DirectionalLights() const {
+  return directional_lights_;
 }
 
-void Scene::RotateLeft() {
-  GetCamera().RotateLeft();
+const std::vector<ShadowMapLight>& Scene::ShadowMapLights() const {
+  return shadow_map_lights_;
 }
 
-void Scene::RotateRight() {
-  GetCamera().RotateRight();
+const Camera& Scene::Camera() const {
+  return camera_;
 }
 
-void Scene::RotateUp() {
-  GetCamera().RotateUp();
+Camera& Scene::Camera() {
+  return camera_;
 }
 
-void Scene::RotateDown() {
-  GetCamera().RotateDown();
+Camera::RenderingMode Scene::CurrentRenderingMode() const {
+  return Camera().CurrentRenderingMode();
 }
 
-void Scene::MoveLeft() {
-  GetCamera().MoveLeft();
+void Scene::AddShadowLight() {
+  shadow_map_lights_.emplace_back(Camera().Position(),
+                                  Camera().RotationMatrix());
+  auto meshes = Meshes();
+  shadow_map_lights_.back().UpdateZBuffer(std::move(meshes));
 }
 
-void Scene::MoveRight() {
-  GetCamera().MoveRight();
-}
-
-void Scene::MoveForward() {
-  GetCamera().MoveForward();
-}
-
-void Scene::MoveBackward() {
-  GetCamera().MoveBackward();
-}
-
-void Scene::SwivelLeft() {
-  GetCamera().SwivelLeft();
-}
-
-void Scene::SwivelRight() {
-  GetCamera().SwivelRight();
-}
-
-void Scene::SetCurrentCamera(int camera_index) {
-  assert(camera_index >= 0);
-  if (static_cast<size_t>(camera_index) < cameras_.size()) {
-    cur_camera_index_ = camera_index;
-  }
-}
-
-void Scene::SwapTransparency() {
-  transparent_ = !transparent_;
-}
-
-const Camera& Scene::GetCamera() const {
-  return cameras_.at(cur_camera_index_);
-}
-
-Camera& Scene::GetCamera() {
-  return cameras_.at(cur_camera_index_);
-}
-
-bool Scene::Transapent() const {
-  return transparent_;
-}
-
-}  // namespace renderer
+}  // namespace renderer::kernel
